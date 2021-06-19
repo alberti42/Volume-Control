@@ -7,21 +7,117 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		65996C5A267EA86A0080A9A5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996C59267EA86A0080A9A5 /* AppDelegate.m */; };
-		65996C5C267EA86B0080A9A5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 65996C5B267EA86B0080A9A5 /* Assets.xcassets */; };
-		65996C5F267EA86B0080A9A5 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 65996C5D267EA86B0080A9A5 /* MainMenu.xib */; };
-		65996C62267EA86B0080A9A5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996C61267EA86B0080A9A5 /* main.m */; };
+		65996CFD267EAB8B0080A9A5 /* appicon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 65996CFC267EAB8B0080A9A5 /* appicon.icns */; };
+		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
+		65996D07267EAC8E0080A9A5 /* SystemVolume.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 65996D06267EAC8E0080A9A5 /* SystemVolume.scpt */; };
+		65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0F267EAD240080A9A5 /* CoreAudio.framework */; };
+		65996D12267EAD310080A9A5 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D11267EAD310080A9A5 /* ScriptingBridge.framework */; };
+		65996D14267EAD390080A9A5 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D13267EAD390080A9A5 /* IOKit.framework */; };
+		65996D16267EAD410080A9A5 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D15267EAD410080A9A5 /* QuartzCore.framework */; };
+		65996D18267EAD470080A9A5 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D17267EAD470080A9A5 /* Cocoa.framework */; };
+		65996D19267EAD560080A9A5 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0D267EACFF0080A9A5 /* Sparkle.framework */; };
+		65996D1A267EAD560080A9A5 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0D267EACFF0080A9A5 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		65996DE4267EAE1F0080A9A5 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 65996DE3267EAE1F0080A9A5 /* Credits.rtf */; };
+		65996DE9267EAE6D0080A9A5 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 65996DE7267EAE650080A9A5 /* dsa_pub.pem */; };
+		65996DF7267EAEF30080A9A5 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 65996DF4267EAEF30080A9A5 /* Media.xcassets */; };
+		65996DF9267EAF260080A9A5 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 65996DF8267EAF260080A9A5 /* MainMenu.xib */; };
+		65996DFB267EAF330080A9A5 /* AccessibilityDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 65996DFA267EAF330080A9A5 /* AccessibilityDialog.xib */; };
+		65996E02267EB0DB0080A9A5 /* StatusItemView.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996DFF267EB0DB0080A9A5 /* StatusItemView.m */; };
+		65996E09267EB0FF0080A9A5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E08267EB0FF0080A9A5 /* main.m */; };
+		65996E18267EB14F0080A9A5 /* ISSoundAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E0F267EB14F0080A9A5 /* ISSoundAdditions.m */; };
+		65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E13267EB14F0080A9A5 /* AppDelegate.m */; };
+		65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E16267EB14F0080A9A5 /* SystemVolume.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		65996D1B267EAD560080A9A5 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				65996D1A267EAD560080A9A5 /* Sparkle.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		65996C55267EA86A0080A9A5 /* VolumeControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VolumeControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		65996C58267EA86A0080A9A5 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		65996C59267EA86A0080A9A5 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		65996C5B267EA86B0080A9A5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		65996C5E267EA86B0080A9A5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		65996C60267EA86B0080A9A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		65996C61267EA86B0080A9A5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		65996C63267EA86B0080A9A5 /* VolumeControl.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VolumeControl.entitlements; sourceTree = "<group>"; };
+		65996CDD267EAB3C0080A9A5 /* iTunes-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "iTunes-icon.icns"; sourceTree = "<group>"; };
+		65996CDE267EAB3C0080A9A5 /* spotify-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "spotify-icon.icns"; sourceTree = "<group>"; };
+		65996CDF267EAB660080A9A5 /* keyboard.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = keyboard.png; sourceTree = "<group>"; };
+		65996CE0267EAB660080A9A5 /* introButtons-next.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-next.png"; sourceTree = "<group>"; };
+		65996CE1267EAB660080A9A5 /* statusbar-screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "statusbar-screenshot.png"; sourceTree = "<group>"; };
+		65996CE2267EAB660080A9A5 /* introButtons-next@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-next@2x.png"; sourceTree = "<group>"; };
+		65996CE3267EAB660080A9A5 /* keyboard.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = keyboard.psd; sourceTree = "<group>"; };
+		65996CE4267EAB660080A9A5 /* introButtons-close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-close.png"; sourceTree = "<group>"; };
+		65996CE5267EAB660080A9A5 /* introButtons-prev-HL@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-prev-HL@2x.png"; sourceTree = "<group>"; };
+		65996CE6267EAB660080A9A5 /* introButtons-close-HL@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-close-HL@2x.png"; sourceTree = "<group>"; };
+		65996CE7267EAB660080A9A5 /* iTunes-screenshot.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = "iTunes-screenshot.psd"; sourceTree = "<group>"; };
+		65996CE8267EAB660080A9A5 /* iTunes-screenshot.ai */ = {isa = PBXFileReference; lastKnownFileType = text; path = "iTunes-screenshot.ai"; sourceTree = "<group>"; };
+		65996CE9267EAB660080A9A5 /* iTunes-arrow-2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunes-arrow-2.png"; sourceTree = "<group>"; };
+		65996CEA267EAB660080A9A5 /* introButtons-prev@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-prev@2x.png"; sourceTree = "<group>"; };
+		65996CEB267EAB660080A9A5 /* keyboard@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "keyboard@2x.png"; sourceTree = "<group>"; };
+		65996CEC267EAB660080A9A5 /* introButtons-next-HL.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-next-HL.png"; sourceTree = "<group>"; };
+		65996CED267EAB670080A9A5 /* introButtons-close-HL.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-close-HL.png"; sourceTree = "<group>"; };
+		65996CEE267EAB670080A9A5 /* iTunes-arrow-1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunes-arrow-1@2x.png"; sourceTree = "<group>"; };
+		65996CEF267EAB670080A9A5 /* iTunes-arrow-2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunes-arrow-2@2x.png"; sourceTree = "<group>"; };
+		65996CF0267EAB670080A9A5 /* iTunes-screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunes-screenshot.png"; sourceTree = "<group>"; };
+		65996CF1267EAB670080A9A5 /* introButtons-next-HL@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-next-HL@2x.png"; sourceTree = "<group>"; };
+		65996CF2267EAB670080A9A5 /* iTunes-arrow-1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunes-arrow-1.png"; sourceTree = "<group>"; };
+		65996CF3267EAB670080A9A5 /* introButtons-prev.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-prev.png"; sourceTree = "<group>"; };
+		65996CF4267EAB670080A9A5 /* introButtons-prev-HL.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-prev-HL.png"; sourceTree = "<group>"; };
+		65996CF5267EAB670080A9A5 /* introButtons-close@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-close@2x.png"; sourceTree = "<group>"; };
+		65996CF6267EAB670080A9A5 /* introButtons.ai */ = {isa = PBXFileReference; lastKnownFileType = text; path = introButtons.ai; sourceTree = "<group>"; };
+		65996CF7267EAB800080A9A5 /* icon_32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_32x32.png; sourceTree = "<group>"; };
+		65996CF8267EAB800080A9A5 /* icon_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_16x16@2x.png"; sourceTree = "<group>"; };
+		65996CF9267EAB800080A9A5 /* icon_128x128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_128x128.png; sourceTree = "<group>"; };
+		65996CFA267EAB800080A9A5 /* icon_16x16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_16x16.png; sourceTree = "<group>"; };
+		65996CFB267EAB800080A9A5 /* icon_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_32x32@2x.png"; sourceTree = "<group>"; };
+		65996CFC267EAB8B0080A9A5 /* appicon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = appicon.icns; sourceTree = "<group>"; };
+		65996CFE267EAB9E0080A9A5 /* AccessibilityDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccessibilityDialog.h; sourceTree = "<group>"; };
+		65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccessibilityDialog.m; sourceTree = "<group>"; };
+		65996D06267EAC8E0080A9A5 /* SystemVolume.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = SystemVolume.scpt; sourceTree = "<group>"; };
+		65996D0D267EACFF0080A9A5 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
+		65996D0F267EAD240080A9A5 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		65996D11267EAD310080A9A5 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = System/Library/Frameworks/ScriptingBridge.framework; sourceTree = SDKROOT; };
+		65996D13267EAD390080A9A5 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		65996D15267EAD410080A9A5 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		65996D17267EAD470080A9A5 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		65996DE1267EAE170080A9A5 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		65996DE3267EAE1F0080A9A5 /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
+		65996DE6267EAE650080A9A5 /* sign_update.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; name = sign_update.rb; path = "../../../../Documents/Programming/iTunes-Volume-Control/sign_update.rb"; sourceTree = "<group>"; };
+		65996DE7267EAE650080A9A5 /* dsa_pub.pem */ = {isa = PBXFileReference; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
+		65996DE8267EAE650080A9A5 /* generate_keys.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; name = generate_keys.rb; path = "../../../../Documents/Programming/iTunes-Volume-Control/generate_keys.rb"; sourceTree = "<group>"; };
+		65996DF2267EAEF20080A9A5 /* volume.ai */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = volume.ai; sourceTree = "<group>"; };
+		65996DF3267EAEF20080A9A5 /* statusbar-item.ai */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "statusbar-item.ai"; sourceTree = "<group>"; };
+		65996DF4267EAEF30080A9A5 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
+		65996DF8267EAF260080A9A5 /* MainMenu.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainMenu.xib; sourceTree = "<group>"; };
+		65996DFA267EAF330080A9A5 /* AccessibilityDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AccessibilityDialog.xib; sourceTree = "<group>"; };
+		65996DFE267EB0DB0080A9A5 /* StatusItemView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusItemView.h; sourceTree = "<group>"; };
+		65996DFF267EB0DB0080A9A5 /* StatusItemView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatusItemView.m; sourceTree = "<group>"; };
+		65996E00267EB0DB0080A9A5 /* VolumeWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VolumeWindow.m; sourceTree = "<group>"; };
+		65996E01267EB0DB0080A9A5 /* VolumeWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VolumeWindow.h; sourceTree = "<group>"; };
+		65996E04267EB0FE0080A9A5 /* iTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
+		65996E05267EB0FF0080A9A5 /* iTunes Volume Control-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "iTunes Volume Control-Prefix.pch"; sourceTree = "<group>"; };
+		65996E06267EB0FF0080A9A5 /* Music.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Music.h; sourceTree = "<group>"; };
+		65996E07267EB0FF0080A9A5 /* Spotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Spotify.h; sourceTree = "<group>"; };
+		65996E08267EB0FF0080A9A5 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		65996E0B267EB1300080A9A5 /* AppleRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppleRemote.h; sourceTree = "<group>"; };
+		65996E0C267EB1300080A9A5 /* CompatibilityFixes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompatibilityFixes.h; sourceTree = "<group>"; };
+		65996E0D267EB1300080A9A5 /* AppleRemote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppleRemote.m; sourceTree = "<group>"; };
+		65996E0F267EB14F0080A9A5 /* ISSoundAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISSoundAdditions.m; sourceTree = "<group>"; };
+		65996E10267EB14F0080A9A5 /* OSD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSD.h; sourceTree = "<group>"; };
+		65996E11267EB14F0080A9A5 /* IntroWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IntroWindowController.h; sourceTree = "<group>"; };
+		65996E12267EB14F0080A9A5 /* IntroWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IntroWindowController.m; sourceTree = "<group>"; };
+		65996E13267EB14F0080A9A5 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		65996E14267EB14F0080A9A5 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		65996E15267EB14F0080A9A5 /* SystemVolume.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemVolume.h; sourceTree = "<group>"; };
+		65996E16267EB14F0080A9A5 /* SystemVolume.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemVolume.m; sourceTree = "<group>"; };
+		65996E17267EB14F0080A9A5 /* ISSoundAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISSoundAdditions.h; sourceTree = "<group>"; };
+		65996E1C267EB3030080A9A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = VolumeControl/Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +125,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				65996D18267EAD470080A9A5 /* Cocoa.framework in Frameworks */,
+				65996D19267EAD560080A9A5 /* Sparkle.framework in Frameworks */,
+				65996D16267EAD410080A9A5 /* QuartzCore.framework in Frameworks */,
+				65996D14267EAD390080A9A5 /* IOKit.framework in Frameworks */,
+				65996D12267EAD310080A9A5 /* ScriptingBridge.framework in Frameworks */,
+				65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -38,7 +140,11 @@
 		65996C4C267EA86A0080A9A5 = {
 			isa = PBXGroup;
 			children = (
-				65996C57267EA86A0080A9A5 /* VolumeControl */,
+				65996CD7267EAAC40080A9A5 /* User interface */,
+				65996D03267EAC1F0080A9A5 /* Sources */,
+				65996D1C267EADAA0080A9A5 /* Resources */,
+				65996E1C267EB3030080A9A5 /* Info.plist */,
+				65996D0C267EACE30080A9A5 /* Frameworks */,
 				65996C56267EA86A0080A9A5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -51,18 +157,208 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		65996C57267EA86A0080A9A5 /* VolumeControl */ = {
+		65996CD7267EAAC40080A9A5 /* User interface */ = {
 			isa = PBXGroup;
 			children = (
-				65996C58267EA86A0080A9A5 /* AppDelegate.h */,
-				65996C59267EA86A0080A9A5 /* AppDelegate.m */,
-				65996C5B267EA86B0080A9A5 /* Assets.xcassets */,
-				65996C5D267EA86B0080A9A5 /* MainMenu.xib */,
-				65996C60267EA86B0080A9A5 /* Info.plist */,
-				65996C61267EA86B0080A9A5 /* main.m */,
-				65996C63267EA86B0080A9A5 /* VolumeControl.entitlements */,
+				65996CD8267EAAD30080A9A5 /* Accessability */,
+				65996CD9267EAADB0080A9A5 /* Images */,
+				65996D04267EAC710080A9A5 /* XIBs */,
 			);
-			path = VolumeControl;
+			path = "User interface";
+			sourceTree = "<group>";
+		};
+		65996CD8267EAAD30080A9A5 /* Accessability */ = {
+			isa = PBXGroup;
+			children = (
+				65996CFE267EAB9E0080A9A5 /* AccessibilityDialog.h */,
+				65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */,
+				65996DFA267EAF330080A9A5 /* AccessibilityDialog.xib */,
+			);
+			path = Accessability;
+			sourceTree = "<group>";
+		};
+		65996CD9267EAADB0080A9A5 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				65996CDA267EAAFB0080A9A5 /* program icons */,
+				65996CDB267EAB100080A9A5 /* Intro window */,
+				65996CDC267EAB280080A9A5 /* appicon */,
+				65996CFC267EAB8B0080A9A5 /* appicon.icns */,
+				65996DF4267EAEF30080A9A5 /* Media.xcassets */,
+				65996DF3267EAEF20080A9A5 /* statusbar-item.ai */,
+				65996DF2267EAEF20080A9A5 /* volume.ai */,
+			);
+			path = Images;
+			sourceTree = "<group>";
+		};
+		65996CDA267EAAFB0080A9A5 /* program icons */ = {
+			isa = PBXGroup;
+			children = (
+				65996CDD267EAB3C0080A9A5 /* iTunes-icon.icns */,
+				65996CDE267EAB3C0080A9A5 /* spotify-icon.icns */,
+			);
+			path = "program icons";
+			sourceTree = "<group>";
+		};
+		65996CDB267EAB100080A9A5 /* Intro window */ = {
+			isa = PBXGroup;
+			children = (
+				65996CED267EAB670080A9A5 /* introButtons-close-HL.png */,
+				65996CE6267EAB660080A9A5 /* introButtons-close-HL@2x.png */,
+				65996CE4267EAB660080A9A5 /* introButtons-close.png */,
+				65996CF5267EAB670080A9A5 /* introButtons-close@2x.png */,
+				65996CEC267EAB660080A9A5 /* introButtons-next-HL.png */,
+				65996CF1267EAB670080A9A5 /* introButtons-next-HL@2x.png */,
+				65996CE0267EAB660080A9A5 /* introButtons-next.png */,
+				65996CE2267EAB660080A9A5 /* introButtons-next@2x.png */,
+				65996CF4267EAB670080A9A5 /* introButtons-prev-HL.png */,
+				65996CE5267EAB660080A9A5 /* introButtons-prev-HL@2x.png */,
+				65996CF3267EAB670080A9A5 /* introButtons-prev.png */,
+				65996CEA267EAB660080A9A5 /* introButtons-prev@2x.png */,
+				65996CF6267EAB670080A9A5 /* introButtons.ai */,
+				65996CF2267EAB670080A9A5 /* iTunes-arrow-1.png */,
+				65996CEE267EAB670080A9A5 /* iTunes-arrow-1@2x.png */,
+				65996CE9267EAB660080A9A5 /* iTunes-arrow-2.png */,
+				65996CEF267EAB670080A9A5 /* iTunes-arrow-2@2x.png */,
+				65996CE8267EAB660080A9A5 /* iTunes-screenshot.ai */,
+				65996CF0267EAB670080A9A5 /* iTunes-screenshot.png */,
+				65996CE7267EAB660080A9A5 /* iTunes-screenshot.psd */,
+				65996CDF267EAB660080A9A5 /* keyboard.png */,
+				65996CE3267EAB660080A9A5 /* keyboard.psd */,
+				65996CEB267EAB660080A9A5 /* keyboard@2x.png */,
+				65996CE1267EAB660080A9A5 /* statusbar-screenshot.png */,
+			);
+			path = "Intro window";
+			sourceTree = "<group>";
+		};
+		65996CDC267EAB280080A9A5 /* appicon */ = {
+			isa = PBXGroup;
+			children = (
+				65996CFA267EAB800080A9A5 /* icon_16x16.png */,
+				65996CF8267EAB800080A9A5 /* icon_16x16@2x.png */,
+				65996CF7267EAB800080A9A5 /* icon_32x32.png */,
+				65996CFB267EAB800080A9A5 /* icon_32x32@2x.png */,
+				65996CF9267EAB800080A9A5 /* icon_128x128.png */,
+			);
+			path = appicon;
+			sourceTree = "<group>";
+		};
+		65996D03267EAC1F0080A9A5 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				65996D0B267EACCC0080A9A5 /* Supporting files */,
+				65996D0A267EACC40080A9A5 /* Views */,
+				65996D09267EACB50080A9A5 /* Controllers */,
+				65996D08267EACB00080A9A5 /* Models */,
+				65996D05267EAC800080A9A5 /* AppleScripts */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		65996D04267EAC710080A9A5 /* XIBs */ = {
+			isa = PBXGroup;
+			children = (
+				65996DF8267EAF260080A9A5 /* MainMenu.xib */,
+			);
+			path = XIBs;
+			sourceTree = "<group>";
+		};
+		65996D05267EAC800080A9A5 /* AppleScripts */ = {
+			isa = PBXGroup;
+			children = (
+				65996D06267EAC8E0080A9A5 /* SystemVolume.scpt */,
+			);
+			path = AppleScripts;
+			sourceTree = "<group>";
+		};
+		65996D08267EACB00080A9A5 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		65996D09267EACB50080A9A5 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				65996E14267EB14F0080A9A5 /* AppDelegate.h */,
+				65996E13267EB14F0080A9A5 /* AppDelegate.m */,
+				65996E11267EB14F0080A9A5 /* IntroWindowController.h */,
+				65996E12267EB14F0080A9A5 /* IntroWindowController.m */,
+				65996E17267EB14F0080A9A5 /* ISSoundAdditions.h */,
+				65996E0F267EB14F0080A9A5 /* ISSoundAdditions.m */,
+				65996E10267EB14F0080A9A5 /* OSD.h */,
+				65996E15267EB14F0080A9A5 /* SystemVolume.h */,
+				65996E16267EB14F0080A9A5 /* SystemVolume.m */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		65996D0A267EACC40080A9A5 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				65996DFE267EB0DB0080A9A5 /* StatusItemView.h */,
+				65996DFF267EB0DB0080A9A5 /* StatusItemView.m */,
+				65996E01267EB0DB0080A9A5 /* VolumeWindow.h */,
+				65996E00267EB0DB0080A9A5 /* VolumeWindow.m */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		65996D0B267EACCC0080A9A5 /* Supporting files */ = {
+			isa = PBXGroup;
+			children = (
+				65996E0A267EB11F0080A9A5 /* AppleRemote */,
+				65996E05267EB0FF0080A9A5 /* iTunes Volume Control-Prefix.pch */,
+				65996E04267EB0FE0080A9A5 /* iTunes.h */,
+				65996E08267EB0FF0080A9A5 /* main.m */,
+				65996E06267EB0FF0080A9A5 /* Music.h */,
+				65996E07267EB0FF0080A9A5 /* Spotify.h */,
+			);
+			path = "Supporting files";
+			sourceTree = "<group>";
+		};
+		65996D0C267EACE30080A9A5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				65996D17267EAD470080A9A5 /* Cocoa.framework */,
+				65996D15267EAD410080A9A5 /* QuartzCore.framework */,
+				65996D13267EAD390080A9A5 /* IOKit.framework */,
+				65996D11267EAD310080A9A5 /* ScriptingBridge.framework */,
+				65996D0F267EAD240080A9A5 /* CoreAudio.framework */,
+				65996D0D267EACFF0080A9A5 /* Sparkle.framework */,
+			);
+			path = Frameworks;
+			sourceTree = "<group>";
+		};
+		65996D1C267EADAA0080A9A5 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				65996DE5267EAE590080A9A5 /* Signing tools */,
+				65996DE1267EAE170080A9A5 /* README.md */,
+				65996DE3267EAE1F0080A9A5 /* Credits.rtf */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		65996DE5267EAE590080A9A5 /* Signing tools */ = {
+			isa = PBXGroup;
+			children = (
+				65996DE7267EAE650080A9A5 /* dsa_pub.pem */,
+				65996DE8267EAE650080A9A5 /* generate_keys.rb */,
+				65996DE6267EAE650080A9A5 /* sign_update.rb */,
+			);
+			path = "Signing tools";
+			sourceTree = "<group>";
+		};
+		65996E0A267EB11F0080A9A5 /* AppleRemote */ = {
+			isa = PBXGroup;
+			children = (
+				65996E0B267EB1300080A9A5 /* AppleRemote.h */,
+				65996E0D267EB1300080A9A5 /* AppleRemote.m */,
+				65996E0C267EB1300080A9A5 /* CompatibilityFixes.h */,
+			);
+			path = AppleRemote;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -75,6 +371,7 @@
 				65996C51267EA86A0080A9A5 /* Sources */,
 				65996C52267EA86A0080A9A5 /* Frameworks */,
 				65996C53267EA86A0080A9A5 /* Resources */,
+				65996D1B267EAD560080A9A5 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -121,8 +418,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				65996C5C267EA86B0080A9A5 /* Assets.xcassets in Resources */,
-				65996C5F267EA86B0080A9A5 /* MainMenu.xib in Resources */,
+				65996CFD267EAB8B0080A9A5 /* appicon.icns in Resources */,
+				65996DE9267EAE6D0080A9A5 /* dsa_pub.pem in Resources */,
+				65996DFB267EAF330080A9A5 /* AccessibilityDialog.xib in Resources */,
+				65996DE4267EAE1F0080A9A5 /* Credits.rtf in Resources */,
+				65996D07267EAC8E0080A9A5 /* SystemVolume.scpt in Resources */,
+				65996DF7267EAEF30080A9A5 /* Media.xcassets in Resources */,
+				65996DF9267EAF260080A9A5 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -133,23 +435,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				65996C62267EA86B0080A9A5 /* main.m in Sources */,
-				65996C5A267EA86A0080A9A5 /* AppDelegate.m in Sources */,
+				65996E02267EB0DB0080A9A5 /* StatusItemView.m in Sources */,
+				65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */,
+				65996E18267EB14F0080A9A5 /* ISSoundAdditions.m in Sources */,
+				65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */,
+				65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */,
+				65996E09267EB0FF0080A9A5 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		65996C5D267EA86B0080A9A5 /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				65996C5E267EA86B0080A9A5 /* Base */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		65996C64267EA86B0080A9A5 /* Debug */ = {
@@ -266,17 +561,22 @@
 		65996C67267EA86B0080A9A5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VolumeControl/VolumeControl.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9V3X7C8VCK;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				INFOPLIST_FILE = VolumeControl/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.Alberti42.VolumeControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -286,17 +586,22 @@
 		65996C68267EA86B0080A9A5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VolumeControl/VolumeControl.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9V3X7C8VCK;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				INFOPLIST_FILE = VolumeControl/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.Alberti42.VolumeControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
