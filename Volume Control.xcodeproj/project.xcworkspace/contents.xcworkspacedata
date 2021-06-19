@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:">
+      location = "self:/Users/andrea/Downloads/VolumeControl/Volume Control.xcodeproj">
    </FileRef>
 </Workspace>

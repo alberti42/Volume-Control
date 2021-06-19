@@ -24,7 +24,6 @@
 		65996DFB267EAF330080A9A5 /* AccessibilityDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 65996DFA267EAF330080A9A5 /* AccessibilityDialog.xib */; };
 		65996E02267EB0DB0080A9A5 /* StatusItemView.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996DFF267EB0DB0080A9A5 /* StatusItemView.m */; };
 		65996E09267EB0FF0080A9A5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E08267EB0FF0080A9A5 /* main.m */; };
-		65996E18267EB14F0080A9A5 /* ISSoundAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E0F267EB14F0080A9A5 /* ISSoundAdditions.m */; };
 		65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E13267EB14F0080A9A5 /* AppDelegate.m */; };
 		65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E16267EB14F0080A9A5 /* SystemVolume.m */; };
 /* End PBXBuildFile section */
@@ -44,7 +43,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		65996C55267EA86A0080A9A5 /* VolumeControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VolumeControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		65996C55267EA86A0080A9A5 /* Volume Control.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65996CDD267EAB3C0080A9A5 /* iTunes-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "iTunes-icon.icns"; sourceTree = "<group>"; };
 		65996CDE267EAB3C0080A9A5 /* spotify-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "spotify-icon.icns"; sourceTree = "<group>"; };
 		65996CDF267EAB660080A9A5 /* keyboard.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = keyboard.png; sourceTree = "<group>"; };
@@ -152,7 +151,7 @@
 		65996C56267EA86A0080A9A5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				65996C55267EA86A0080A9A5 /* VolumeControl.app */,
+				65996C55267EA86A0080A9A5 /* Volume Control.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -364,9 +363,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		65996C54267EA86A0080A9A5 /* VolumeControl */ = {
+		65996C54267EA86A0080A9A5 /* Volume Control */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 65996C66267EA86B0080A9A5 /* Build configuration list for PBXNativeTarget "VolumeControl" */;
+			buildConfigurationList = 65996C66267EA86B0080A9A5 /* Build configuration list for PBXNativeTarget "Volume Control" */;
 			buildPhases = (
 				65996C51267EA86A0080A9A5 /* Sources */,
 				65996C52267EA86A0080A9A5 /* Frameworks */,
@@ -377,9 +376,9 @@
 			);
 			dependencies = (
 			);
-			name = VolumeControl;
+			name = "Volume Control";
 			productName = VolumeControl;
-			productReference = 65996C55267EA86A0080A9A5 /* VolumeControl.app */;
+			productReference = 65996C55267EA86A0080A9A5 /* Volume Control.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -395,7 +394,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 65996C50267EA86A0080A9A5 /* Build configuration list for PBXProject "VolumeControl" */;
+			buildConfigurationList = 65996C50267EA86A0080A9A5 /* Build configuration list for PBXProject "Volume Control" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -408,7 +407,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				65996C54267EA86A0080A9A5 /* VolumeControl */,
+				65996C54267EA86A0080A9A5 /* Volume Control */,
 			);
 		};
 /* End PBXProject section */
@@ -437,7 +436,6 @@
 			files = (
 				65996E02267EB0DB0080A9A5 /* StatusItemView.m in Sources */,
 				65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */,
-				65996E18267EB14F0080A9A5 /* ISSoundAdditions.m in Sources */,
 				65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */,
 				65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */,
 				65996E09267EB0FF0080A9A5 /* main.m in Sources */,
@@ -611,7 +609,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		65996C50267EA86A0080A9A5 /* Build configuration list for PBXProject "VolumeControl" */ = {
+		65996C50267EA86A0080A9A5 /* Build configuration list for PBXProject "Volume Control" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				65996C64267EA86B0080A9A5 /* Debug */,
@@ -620,7 +618,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		65996C66267EA86B0080A9A5 /* Build configuration list for PBXNativeTarget "VolumeControl" */ = {
+		65996C66267EA86B0080A9A5 /* Build configuration list for PBXNativeTarget "Volume Control" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				65996C67267EA86B0080A9A5 /* Debug */,
