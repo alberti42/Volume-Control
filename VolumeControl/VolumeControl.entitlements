@@ -6,5 +6,7 @@
 	<true/>
 	<key>keychain-access-groups</key>
 	<array/>
+	<key>com.apple.security.automation.apple-events</key>
+	<true/>
 </dict>
 </plist>
