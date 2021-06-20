@@ -9,108 +9,108 @@
 @class MusicApplication, MusicItem, MusicAirPlayDevice, MusicArtwork, MusicEncoder, MusicEQPreset, MusicPlaylist, MusicAudioCDPlaylist, MusicLibraryPlaylist, MusicRadioTunerPlaylist, MusicSource, MusicSubscriptionPlaylist, MusicTrack, MusicAudioCDTrack, MusicFileTrack, MusicSharedTrack, MusicURLTrack, MusicUserPlaylist, MusicFolderPlaylist, MusicVisual, MusicWindow, MusicBrowserWindow, MusicEQWindow, MusicMiniplayerWindow, MusicPlaylistWindow, MusicVideoWindow;
 
 enum MusicEKnd {
-    MusicEKndTrackListing = 'kTrk' /* a basic listing of tracks within a playlist */,
-    MusicEKndAlbumListing = 'kAlb' /* a listing of a playlist grouped by album */,
-    MusicEKndCdInsert = 'kCDi' /* a printout of the playlist for jewel case inserts */
+	MusicEKndTrackListing = 'kTrk' /* a basic listing of tracks within a playlist */,
+	MusicEKndAlbumListing = 'kAlb' /* a listing of a playlist grouped by album */,
+	MusicEKndCdInsert = 'kCDi' /* a printout of the playlist for jewel case inserts */
 };
 typedef enum MusicEKnd MusicEKnd;
 
 enum MusicEnum {
-    MusicEnumStandard = 'lwst' /* Standard PostScript error handling */,
-    MusicEnumDetailed = 'lwdt' /* print a detailed report of PostScript errors */
+	MusicEnumStandard = 'lwst' /* Standard PostScript error handling */,
+	MusicEnumDetailed = 'lwdt' /* print a detailed report of PostScript errors */
 };
 typedef enum MusicEnum MusicEnum;
 
 enum MusicEPlS {
-    MusicEPlSStopped = 'kPSS',
-    MusicEPlSPlaying = 'kPSP',
-    MusicEPlSPaused = 'kPSp',
-    MusicEPlSFastForwarding = 'kPSF',
-    MusicEPlSRewinding = 'kPSR'
+	MusicEPlSStopped = 'kPSS',
+	MusicEPlSPlaying = 'kPSP',
+	MusicEPlSPaused = 'kPSp',
+	MusicEPlSFastForwarding = 'kPSF',
+	MusicEPlSRewinding = 'kPSR'
 };
 typedef enum MusicEPlS MusicEPlS;
 
 enum MusicERpt {
-    MusicERptOff = 'kRpO',
-    MusicERptOne = 'kRp1',
-    MusicERptAll = 'kAll'
+	MusicERptOff = 'kRpO',
+	MusicERptOne = 'kRp1',
+	MusicERptAll = 'kAll'
 };
 typedef enum MusicERpt MusicERpt;
 
 enum MusicEShM {
-    MusicEShMSongs = 'kShS',
-    MusicEShMAlbums = 'kShA',
-    MusicEShMGroupings = 'kShG'
+	MusicEShMSongs = 'kShS',
+	MusicEShMAlbums = 'kShA',
+	MusicEShMGroupings = 'kShG'
 };
 typedef enum MusicEShM MusicEShM;
 
 enum MusicESrc {
-    MusicESrcLibrary = 'kLib',
-    MusicESrcAudioCD = 'kACD',
-    MusicESrcMP3CD = 'kMCD',
-    MusicESrcRadioTuner = 'kTun',
-    MusicESrcSharedLibrary = 'kShd',
-    MusicESrcITunesStore = 'kITS',
-    MusicESrcUnknown = 'kUnk'
+	MusicESrcLibrary = 'kLib',
+	MusicESrcAudioCD = 'kACD',
+	MusicESrcMP3CD = 'kMCD',
+	MusicESrcRadioTuner = 'kTun',
+	MusicESrcSharedLibrary = 'kShd',
+	MusicESrcITunesStore = 'kITS',
+	MusicESrcUnknown = 'kUnk'
 };
 typedef enum MusicESrc MusicESrc;
 
 enum MusicESrA {
-    MusicESrAAlbums = 'kSrL' /* albums only */,
-    MusicESrAAll = 'kAll' /* all text fields */,
-    MusicESrAArtists = 'kSrR' /* artists only */,
-    MusicESrAComposers = 'kSrC' /* composers only */,
-    MusicESrADisplayed = 'kSrV' /* visible text fields */,
-    MusicESrANames = 'kSrS' /* track names only */
+	MusicESrAAlbums = 'kSrL' /* albums only */,
+	MusicESrAAll = 'kAll' /* all text fields */,
+	MusicESrAArtists = 'kSrR' /* artists only */,
+	MusicESrAComposers = 'kSrC' /* composers only */,
+	MusicESrADisplayed = 'kSrV' /* visible text fields */,
+	MusicESrANames = 'kSrS' /* track names only */
 };
 typedef enum MusicESrA MusicESrA;
 
 enum MusicESpK {
-    MusicESpKNone = 'kNon',
-    MusicESpKFolder = 'kSpF',
-    MusicESpKGenius = 'kSpG',
-    MusicESpKLibrary = 'kSpL',
-    MusicESpKMusic = 'kSpZ',
-    MusicESpKPurchasedMusic = 'kSpM'
+	MusicESpKNone = 'kNon',
+	MusicESpKFolder = 'kSpF',
+	MusicESpKGenius = 'kSpG',
+	MusicESpKLibrary = 'kSpL',
+	MusicESpKMusic = 'kSpZ',
+	MusicESpKPurchasedMusic = 'kSpM'
 };
 typedef enum MusicESpK MusicESpK;
 
 enum MusicEMdK {
-    MusicEMdKSong = 'kMdS' /* music track */,
-    MusicEMdKMusicVideo = 'kVdV' /* music video track */,
-    MusicEMdKUnknown = 'kUnk'
+	MusicEMdKSong = 'kMdS' /* music track */,
+	MusicEMdKMusicVideo = 'kVdV' /* music video track */,
+	MusicEMdKUnknown = 'kUnk'
 };
 typedef enum MusicEMdK MusicEMdK;
 
 enum MusicERtK {
-    MusicERtKUser = 'kRtU' /* user-specified rating */,
-    MusicERtKComputed = 'kRtC' /* computed rating */
+	MusicERtKUser = 'kRtU' /* user-specified rating */,
+	MusicERtKComputed = 'kRtC' /* computed rating */
 };
 typedef enum MusicERtK MusicERtK;
 
 enum MusicEAPD {
-    MusicEAPDComputer = 'kAPC',
-    MusicEAPDAirPortExpress = 'kAPX',
-    MusicEAPDAppleTV = 'kAPT',
-    MusicEAPDAirPlayDevice = 'kAPO',
-    MusicEAPDBluetoothDevice = 'kAPB',
-    MusicEAPDHomePod = 'kAPH',
-    MusicEAPDUnknown = 'kAPU'
+	MusicEAPDComputer = 'kAPC',
+	MusicEAPDAirPortExpress = 'kAPX',
+	MusicEAPDAppleTV = 'kAPT',
+	MusicEAPDAirPlayDevice = 'kAPO',
+	MusicEAPDBluetoothDevice = 'kAPB',
+	MusicEAPDHomePod = 'kAPH',
+	MusicEAPDUnknown = 'kAPU'
 };
 typedef enum MusicEAPD MusicEAPD;
 
 enum MusicEClS {
-    MusicEClSUnknown = 'kUnk',
-    MusicEClSPurchased = 'kPur',
-    MusicEClSMatched = 'kMat',
-    MusicEClSUploaded = 'kUpl',
-    MusicEClSIneligible = 'kRej',
-    MusicEClSRemoved = 'kRem',
-    MusicEClSError = 'kErr',
-    MusicEClSDuplicate = 'kDup',
-    MusicEClSSubscription = 'kSub',
-    MusicEClSNoLongerAvailable = 'kRev',
-    MusicEClSNotUploaded = 'kUpP'
+	MusicEClSUnknown = 'kUnk',
+	MusicEClSPurchased = 'kPur',
+	MusicEClSMatched = 'kMat',
+	MusicEClSUploaded = 'kUpl',
+	MusicEClSIneligible = 'kRej',
+	MusicEClSRemoved = 'kRem',
+	MusicEClSError = 'kErr',
+	MusicEClSDuplicate = 'kDup',
+	MusicEClSSubscription = 'kSub',
+	MusicEClSNoLongerAvailable = 'kRev',
+	MusicEClSNotUploaded = 'kUpP'
 };
 typedef enum MusicEClS MusicEClS;
 
@@ -306,7 +306,7 @@ typedef enum MusicEClS MusicEClS;
 
 @end
 
-// the master library playlist
+// the main library playlist
 @interface MusicLibraryPlaylist : MusicPlaylist
 
 - (SBElementArray<MusicFileTrack *> *) fileTracks;

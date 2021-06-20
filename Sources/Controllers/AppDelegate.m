@@ -1271,7 +1271,6 @@ static NSTimeInterval statusBarHideDelay=10;
 
 - (IBAction)aboutPanel:(id)sender
 {
-    NSLog(@"Hell");
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleVersion"];
     NSRange range=[version rangeOfString:@"." options:NSBackwardsSearch];
