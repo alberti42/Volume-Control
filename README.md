@@ -30,28 +30,45 @@ It is simple. There is no need of any installation.
 * Just download either this [zip file](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
 * Decompress it.
 * Drag the *Volume Control* app into your *Application* folder, or any other folder of your choice.
-* Run the *Volume Control* app and a "music note" symbol will appear in your status bar.
-* The first time you launch the app, you should authorize it through the *General* panel of *Security & Privacy* of the *System Preferences*.
-* If you experience problems with permissions, especially if you upgrade from an old version, go to *Accessibility* panel of *Privacy* of the *System Preferences* (see screenshot below), and try to remove the entry "Volume Control". Make sure to close the app before you remove any permissions, or else you might prevent controlling the keyboard until you reboot the machine. Once you open the app again, you will then be asked to authorize the application again.
+* Remove the extended attribute ``com.apple.quarantine`` from the downloaded application (see instructions below under *First download*; this is a necessary step since macOS Catalina).
+* Run the *Volume Control* app. You should see the symbol of a "music note" appearing in your status bar, as shown in the screenshot above.
+* The first time you launch the app, you should authorize it through the *General* panel of *Security & Privacy* of the *System Preferences*, as shown in the screenshot below. Follow instructions explained below under *Enabling control of Music and Spotify*.
 * Enjoy listening to your favorite music with better volume control.
 
-![Security and Privacy panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacy.png)
+First download
+--------------
+
+* If you downloaded for the first time the app, you might encounter the error shown below.
+	![Security and Privacy panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/firstDownload.png)
+* The error occurs because of the extended attribute ``com.apple.quarantine``, which is automatically applied by Apple on all applications downloaded from the internet, unless officially authorized by Apple itself.
+* To remove the quarantine extended attribute, type from terminal:
+
+	``sudo xattr -d com.apple.quarantine "/Applications/Volume Control.app"``
 	
-Enabling control of Music and Spotify
---------------------------------------
+	For more information, check [StackExchange](https://superuser.com/questions/526920/how-to-remove-quarantine-from-file-permissions-in-os-x).
+* You might have to authorize from *Security & Privacy* of the *System Preferences* the first launch of the application
 
-The System Integrity Protection of macOS requires you to grant *Volume Control* access to Music and Spotify. The first time the application attempts to control their volume, you will be asked with a dialog window to grant access.
+	![Security and Privacy panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacy.png)
 
-If the application is running, but it is not able to read nor control the volume of the music player, you should then check that you have correctly granted access. You can change this in the *Automator* panel of *Security & Privacy* of the *System Preferences* (see screenshot below).
+* If you want to avoid these steps, you can download the source file and compile the application by yourself with Apple Xcode.
 
+Permission to control Music's and Spotify's volume
+--------------------------------------------------
+
+The System Integrity Protection of macOS requires you to grant *Volume Control* access to Music and Spotify. The first time the application attempts to control their volume, you will be asked with a dialog window to grant access, as shown in the screenshot below.
 ![Security and Privacy Accessibility](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAccessibility.png)
+
+Troubleshooting
+---------------
+
+* If you experience problems with permissions, especially if you upgrade from an old version, go to the *Accessibility* panel of *Security & Privacy* of the *System Preferences* (see screenshot below), and remove the entry "Volume Control". Make sure to close the app before you remove any permissions, or else you might end up being unable to use the keyboard until you reboot the machine. Once you open the app again, you will then be asked to authorize the application again.
 
 ![Security and Privacy Automation](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAutomation.png)
 
 Requirements
 ------------
 
-Mac OS X Mojave or Catalina.
+Mac OS X Mojave, Catalina, or Big Sur.
 
 Credits
 -------
@@ -66,6 +83,9 @@ If you have any questions, you can contact me at a.alberti82@gmail.com. If you w
 
 Versions
 --------
+
+Note: you can download old versions by clicking on the links appearing down below.
+
 * [1.7.0](http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.7.0.zip): Changed name to Volume Control; compatibility with Big Sur; compiled for universal bundle for Apple M1 and Intel.
 * [1.6.8](http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.8.zip): Fixed a bug when switching appearance to dark mode; improved volume control with apple key modifier.
 * [1.6.7](http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.7.zip): Improved compatibility with Catalina and new Music app.
@@ -95,10 +115,3 @@ Versions
 * 1.2: Added options, load at login, use CMD modifier.
 * 1.1: Controlling iTunes volume using Apple Remote.
 * 1.0: Controlling iTunes volume using keyboard "volume up"/"volume down".
-
-Note: you can download old versions by clicking on the links which appear above here.
-
-Requirements
-------------
-
-The app has been tested with macOS Big Sur (11.4).
