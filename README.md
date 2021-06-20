@@ -62,8 +62,8 @@ Troubleshooting
 ---------------
 
 * If you experience problems with permissions, especially if you upgrade from an old version, go to the *Accessibility* panel of *Security & Privacy* of the *System Preferences* (see screenshot below), and remove the entry "Volume Control". Make sure to close the app before you remove any permissions, or else you might end up being unable to use the keyboard until you reboot the machine. Once you open the app again, you will then be asked to authorize the application again.
-
-![Security and Privacy Automation](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAutomation.png)
+* Verify that the app is authorized to control Music and Spotify, inspecting the panel *Automation* of *Security & Privacy* of the *System Preferences*. It could be helpful to disable and reenable the checkboxes for Music and Spotify shown in the screenshot below.
+	![Security and Privacy Automation](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAutomation.png)
 
 Requirements
 ------------
