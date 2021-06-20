@@ -12,7 +12,7 @@ Description
 * If you also press command key (⌘), you reverse the previous behavior. In this way you can still control the global volume even when Music or Spotify is plying.
 * If the option ``Use ⌘ modifier`` is selected, then the app responds in the opposite manner, meaning that volume keys control the global volume, unless the command key is simultaneously pressed, so the volume of Music and Spotify is adjusted.
 
-![alt tag](https://raw.github.com/alberti42/Volume-Control/master/Volume%20Control/Images/screenshot.png)
+![Screenshot of the application](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/screenshot.png)
 
 Why do you need this app?
 -------------------------
@@ -27,7 +27,7 @@ How to get it installed?
 
 It is simple. There is no need of any installation.
 
-* Just download either this [zip file](https://github.com/alberti42/Volume-Control/raw/master/Volume%20Control.zip).
+* Just download either this [zip file](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
 * Decompress it.
 * Drag the *Volume Control* app into your *Application* folder, or any other folder of your choice.
 * Run the *Volume Control* app and a "music note" symbol will appear in your status bar.
@@ -35,7 +35,7 @@ It is simple. There is no need of any installation.
 * If you experience problems with permissions, especially if you upgrade from an old version, go to *Accessibility* panel of *Privacy* of the *System Preferences* (see screenshot below), and try to remove the entry "Volume Control". Make sure to close the app before you remove any permissions, or else you might prevent controlling the keyboard until you reboot the machine. Once you open the app again, you will then be asked to authorize the application again.
 * Enjoy listening to your favorite music with better volume control.
 
-![alt tag](https://raw.github.com/alberti42/Volume-Control/master/Volume%20Control/Images/SecurityPrivacy.png)
+![Security and Privacy panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacy.png)
 	
 Enabling control of Music and Spotify
 --------------------------------------
@@ -44,7 +44,9 @@ The System Integrity Protection of macOS requires you to grant *Volume Control* 
 
 If the application is running, but it is not able to read nor control the volume of the music player, you should then check that you have correctly granted access. You can change this in the *Automator* panel of *Security & Privacy* of the *System Preferences* (see screenshot below).
 
-![alt tag](https://raw.github.com/alberti42/Volume-Control/master/Volume%20Control/Images/SecurityPrivacyDark.png)
+![Security and Privacy Accessibility](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAccessibility.png)
+
+![Security and Privacy Automation](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAutomation.png)
 
 Requirements
 ------------
