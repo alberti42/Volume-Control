@@ -10,7 +10,7 @@ Description
 * You can disable the heads-up display showing the volume status; this is useful when you are watching movies and you do not want to be distracted by the overlaid volume display.
 * Using volume keys, the volume of the currently playing application (either Music or Spotify) is adjusted. If neither Music nor Spotify is playing, then the global volume will be adjusted.
 * If you also press command key (⌘), you reverse the previous behavior. In this way you can still control the global volume even when Music or Spotify is plying.
-* If the option ``Use ⌘ modifier`` is selected, then the app responds in the opposite manner, meaning that volume keys control the global volume, unless the command key is simultaneously pressed, so the volume of Music and Spotify is adjusted.
+* If the option ``Use ⌘ modifier`` is selected, then the app responds in the opposite manner, meaning that volume keys control the global volume, unless the command key is simultaneously pressed, in which case the volume of Music and Spotify is adjusted.
 
 ![Screenshot of the application](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/screenshot.png)
 
@@ -18,8 +18,8 @@ Why do you need this app?
 -------------------------
 
 * The volume of Apple Music (previously iTunes) cannot be directly controlled from the keyboard. Volume keys only affect the global system volume.
-* You might desire to directly control Apple Music's volume, especially  when listening to musing on external speakers like AirPlay devices. The volume level of AirPlay devices depends on the volume controlled by Music, and not on the global volume.
-* Sometimes you might desire to hide the volume heads-up overlay from your screen, especially when watching movies. This app can be configured to hide it.
+* You might desire to directly control Apple Music's volume from your keyboard, especially when listening to music on external speakers like AirPlay devices. The volume level of AirPlay devices depends on the volume controlled by Music, and not on the global volume. Unfortunately, Apple does not provide a way to adjust Music's volume from the keyboard. 
+* You might desire to hide the volume heads-up overlay from your screen, especially when watching movies. This app can be configured to hide it.
 * You might want to customize the step size when adjusting the volume.
 
 How to get it installed?
