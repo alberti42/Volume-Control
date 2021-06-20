@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		65996CFD267EAB8B0080A9A5 /* appicon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 65996CFC267EAB8B0080A9A5 /* appicon.icns */; };
+		657C05C0267EB9CC00FE7E98 /* VolumeWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E00267EB0DB0080A9A5 /* VolumeWindow.m */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
 		65996D07267EAC8E0080A9A5 /* SystemVolume.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 65996D06267EAC8E0080A9A5 /* SystemVolume.scpt */; };
 		65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0F267EAD240080A9A5 /* CoreAudio.framework */; };
@@ -43,6 +43,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		657C05BF267EB91300FE7E98 /* Volume Control.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Volume Control.entitlements"; sourceTree = "<group>"; };
 		65996C55267EA86A0080A9A5 /* Volume Control.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65996CDD267EAB3C0080A9A5 /* iTunes-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "iTunes-icon.icns"; sourceTree = "<group>"; };
 		65996CDE267EAB3C0080A9A5 /* spotify-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "spotify-icon.icns"; sourceTree = "<group>"; };
@@ -75,7 +76,6 @@
 		65996CF9267EAB800080A9A5 /* icon_128x128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_128x128.png; sourceTree = "<group>"; };
 		65996CFA267EAB800080A9A5 /* icon_16x16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_16x16.png; sourceTree = "<group>"; };
 		65996CFB267EAB800080A9A5 /* icon_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_32x32@2x.png"; sourceTree = "<group>"; };
-		65996CFC267EAB8B0080A9A5 /* appicon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = appicon.icns; sourceTree = "<group>"; };
 		65996CFE267EAB9E0080A9A5 /* AccessibilityDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccessibilityDialog.h; sourceTree = "<group>"; };
 		65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccessibilityDialog.m; sourceTree = "<group>"; };
 		65996D06267EAC8E0080A9A5 /* SystemVolume.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = SystemVolume.scpt; sourceTree = "<group>"; };
@@ -143,6 +143,7 @@
 				65996D03267EAC1F0080A9A5 /* Sources */,
 				65996D1C267EADAA0080A9A5 /* Resources */,
 				65996E1C267EB3030080A9A5 /* Info.plist */,
+				657C05BF267EB91300FE7E98 /* Volume Control.entitlements */,
 				65996D0C267EACE30080A9A5 /* Frameworks */,
 				65996C56267EA86A0080A9A5 /* Products */,
 			);
@@ -182,7 +183,6 @@
 				65996CDA267EAAFB0080A9A5 /* program icons */,
 				65996CDB267EAB100080A9A5 /* Intro window */,
 				65996CDC267EAB280080A9A5 /* appicon */,
-				65996CFC267EAB8B0080A9A5 /* appicon.icns */,
 				65996DF4267EAEF30080A9A5 /* Media.xcassets */,
 				65996DF3267EAEF20080A9A5 /* statusbar-item.ai */,
 				65996DF2267EAEF20080A9A5 /* volume.ai */,
@@ -417,7 +417,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				65996CFD267EAB8B0080A9A5 /* appicon.icns in Resources */,
 				65996DE9267EAE6D0080A9A5 /* dsa_pub.pem in Resources */,
 				65996DFB267EAF330080A9A5 /* AccessibilityDialog.xib in Resources */,
 				65996DE4267EAE1F0080A9A5 /* Credits.rtf in Resources */,
@@ -437,6 +436,7 @@
 				65996E02267EB0DB0080A9A5 /* StatusItemView.m in Sources */,
 				65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */,
 				65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */,
+				657C05C0267EB9CC00FE7E98 /* VolumeWindow.m in Sources */,
 				65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */,
 				65996E09267EB0FF0080A9A5 /* main.m in Sources */,
 			);
@@ -559,6 +559,7 @@
 		65996C67267EA86B0080A9A5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VolumeControl/VolumeControl.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -584,6 +585,7 @@
 		65996C68267EA86B0080A9A5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VolumeControl/VolumeControl.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";

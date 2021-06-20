@@ -24,7 +24,7 @@
 }
 
 /*
-- (NSImage *)_cornerMask
+- (NSImage *)_cornerMaskabout
 {
     NSLog(@"triggered");
     CGFloat radius = 18.0;
