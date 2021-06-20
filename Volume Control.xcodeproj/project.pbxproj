@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
 		657C05C0267EB9CC00FE7E98 /* VolumeWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E00267EB0DB0080A9A5 /* VolumeWindow.m */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
 		65996D07267EAC8E0080A9A5 /* SystemVolume.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 65996D06267EAC8E0080A9A5 /* SystemVolume.scpt */; };
@@ -45,6 +46,7 @@
 /* Begin PBXFileReference section */
 		65220C75267F49CB007BE316 /* generate_keys.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = generate_keys.rb; sourceTree = "<group>"; };
 		65220C76267F49D4007BE316 /* sign_update.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = sign_update.rb; sourceTree = "<group>"; };
+		65533216267F5D86004231D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		65996C55267EA86A0080A9A5 /* Volume Control.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65996CDD267EAB3C0080A9A5 /* iTunes-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "iTunes-icon.icns"; sourceTree = "<group>"; };
 		65996CDE267EAB3C0080A9A5 /* spotify-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "spotify-icon.icns"; sourceTree = "<group>"; };
@@ -86,7 +88,6 @@
 		65996D13267EAD390080A9A5 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		65996D15267EAD410080A9A5 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		65996D17267EAD470080A9A5 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		65996DE1267EAE170080A9A5 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		65996DE3267EAE1F0080A9A5 /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		65996DE7267EAE650080A9A5 /* dsa_pub.pem */ = {isa = PBXFileReference; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		65996DF2267EAEF20080A9A5 /* volume.ai */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = volume.ai; sourceTree = "<group>"; };
@@ -332,7 +333,7 @@
 			isa = PBXGroup;
 			children = (
 				65996DE5267EAE590080A9A5 /* Signing tools */,
-				65996DE1267EAE170080A9A5 /* README.md */,
+				65533216267F5D86004231D6 /* README.md */,
 				65996DE3267EAE1F0080A9A5 /* Credits.rtf */,
 			);
 			path = Resources;
@@ -419,6 +420,7 @@
 				65996DE9267EAE6D0080A9A5 /* dsa_pub.pem in Resources */,
 				65996DFB267EAF330080A9A5 /* AccessibilityDialog.xib in Resources */,
 				65996DE4267EAE1F0080A9A5 /* Credits.rtf in Resources */,
+				65533217267F5D86004231D6 /* README.md in Resources */,
 				65996D07267EAC8E0080A9A5 /* SystemVolume.scpt in Resources */,
 				65996DF7267EAEF30080A9A5 /* Media.xcassets in Resources */,
 				65996DF9267EAF260080A9A5 /* MainMenu.xib in Resources */,
