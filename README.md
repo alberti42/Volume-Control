@@ -1,50 +1,50 @@
-iTunes-Volume-Control (compatible with Music app in Catalina)
+Volume Control (for Apple Music and Spotify)
 =====================
 
 Description
 -----------
 
-* This app allows you to directly control the volume of Apple Music as well as of Spotify using ``volume-up`` and ``volume-down`` hotkeys from your keyboard.
-* <s>It also allows you to control the same iTunes volume by means of your Apple Remote control.</s>
-* In general, the app is useful to control the volume of AirPlay devices.
-* You can adjust the finesse by which you change the volume.
-* You can disable the heads-up display showing the volume status; this is useful when you are watching movies and you do not want to be distracted by the overlay volume display.
-* Using the volume keys, the volume of the currently playing application (either iTunes or Spotify) is controlled. If neither iTunes nor Spotify are playing music. Then the global volume will be affected by the volume keys.
-* With command key (⌘), you can change the behavior whether you control the volume of the system or of the music player.
+* This app allows you to directly control the volume of Apple Music and of Spotify using ``volume-up`` and ``volume-down`` keys from your keyboard.
+* The app is especially useful when listening to music on AirPlay devices.
+* You can adjust the finesse by which you step the volume.
+* You can disable the heads-up display showing the volume status; this is useful when you are watching movies and you do not want to be distracted by the overlaid volume display.
+* Using volume keys, the volume of the currently playing application (either Music or Spotify) is adjusted. If neither Music nor Spotify is playing, then the global volume will be adjusted.
+* If you also press command key (⌘), you reverse the previous behavior. In this way you can still control the global volume even when Music or Spotify is plying.
+* If the option ``Use ⌘ modifier`` is selected, then the app responds in the opposite manner, meaning that volume keys control the global volume, unless the command key is simultaneously pressed, so the volume of Music and Spotify is adjusted.
 
-![alt tag](https://raw.github.com/alberti42/iTunes-Volume-Control/master/iTunes%20Volume%20Control/Images/screenshot.png)
+![alt tag](https://raw.github.com/alberti42/Volume-Control/master/Volume%20Control/Images/screenshot.png)
 
 Why do you need this app?
 -------------------------
 
 * The volume of Apple Music (previously iTunes) cannot be directly controlled from the keyboard. Volume keys only affect the global system volume.
-* However, you might desire to directly control Apple Music's volume. This is especially relevant when listening to musing on external speakers like AirPlay devices. The volume level of AirPlay devices depends on iTunes's volume, and not on the global volume, which as a standard behavior, you can set using the volume keys.
-* <s>iTunes does not respond to volume change from your Apple Remote. Again, Apple Remote would only change the system volume settings, leaving unaffected the volume of your AirPlay devices.</s>
+* You might desire to directly control Apple Music's volume, especially  when listening to musing on external speakers like AirPlay devices. The volume level of AirPlay devices depends on the volume controlled by Music, and not on the global volume.
 * Sometimes you might desire to hide the volume heads-up overlay from your screen, especially when watching movies. This app can be configured to hide it.
+* You might want to customize the step size when adjusting the volume.
 
 How to get it installed?
 ------------------------
 
 It is simple. There is no need of any installation.
 
-* Just download either this [zip file](https://github.com/alberti42/iTunes-Volume-Control/raw/master/iTunes%20Volume%20Control.zip).
+* Just download either this [zip file](https://github.com/alberti42/Volume-Control/raw/master/Volume%20Control.zip).
 * Decompress it.
-* Drag the *iTunes Volume Control* app into your *Application* folder, or any other folder of your choice.
-* Run the *iTunes Volume Control* app and a "music note" symbol will appear in your status bar.
+* Drag the *Volume Control* app into your *Application* folder, or any other folder of your choice.
+* Run the *Volume Control* app and a "music note" symbol will appear in your status bar.
 * The first time you launch the app, you should authorize it through the *General* panel of *Security & Privacy* of the *System Preferences*.
-* If you experience problems with permissions, especially if you upgrade from an old version, go to *Accessibility* panel of *Privacy* of the *System Preferences* (see screenshot below), and try to remove the entry "iTunes Volume Control". Make sure to close the app before you remove any permissions, or else you might prevent controlling the keyboard until you reboot the machine. Once you open the app again, you will then be asked to authorize the application again.
+* If you experience problems with permissions, especially if you upgrade from an old version, go to *Accessibility* panel of *Privacy* of the *System Preferences* (see screenshot below), and try to remove the entry "Volume Control". Make sure to close the app before you remove any permissions, or else you might prevent controlling the keyboard until you reboot the machine. Once you open the app again, you will then be asked to authorize the application again.
 * Enjoy listening to your favorite music with better volume control.
 
-![alt tag](https://raw.github.com/alberti42/iTunes-Volume-Control/master/iTunes%20Volume%20Control/Images/SecurityPrivacyMojave.png)
+![alt tag](https://raw.github.com/alberti42/Volume-Control/master/Volume%20Control/Images/SecurityPrivacy.png)
 	
-Enabling control of iTunes and Spotify
+Enabling control of Music and Spotify
 --------------------------------------
 
-The System Integrity Protection under Mojave requires you to grant *iTunes Volume Control* access to iTunes and Spotify. The first time the application attempts to control their volume, you will be asked with a dialog window to grant access.
+The System Integrity Protection of macOS requires you to grant *Volume Control* access to Music and Spotify. The first time the application attempts to control their volume, you will be asked with a dialog window to grant access.
 
 If the application is running, but it is not able to read nor control the volume of the music player, you should then check that you have correctly granted access. You can change this in the *Automator* panel of *Security & Privacy* of the *System Preferences* (see screenshot below).
 
-![alt tag](https://raw.github.com/alberti42/iTunes-Volume-Control/master/iTunes%20Volume%20Control/Images/AutomationScreenshotDark.png)
+![alt tag](https://raw.github.com/alberti42/Volume-Control/master/Volume%20Control/Images/SecurityPrivacyDark.png)
 
 Requirements
 ------------
@@ -64,6 +64,7 @@ If you have any questions, you can contact me at a.alberti82@gmail.com. If you w
 
 Versions
 --------
+* [1.7.0](http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.7.0.zip): Changed name to Volume Control; compatibility with Big Sur; compiled for universal bundle for Apple M1 and Intel.
 * [1.6.8](http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.8.zip): Fixed a bug when switching appearance to dark mode; improved volume control with apple key modifier.
 * [1.6.7](http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.7.zip): Improved compatibility with Catalina and new Music app.
 * [1.6.6](http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.6.zip): Restored compatibility with MacOS High Sierra and subsequent versions.
@@ -98,4 +99,4 @@ Note: you can download old versions by clicking on the links which appear above 
 Requirements
 ------------
 
-It is required Mac OS X 10.7 (Lion). The app has been tested with Mac OS X 10.7, 10.8.
+The app has been tested with macOS Big Sur (11.4).
