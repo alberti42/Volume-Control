@@ -68,7 +68,7 @@ Troubleshooting
 Requirements
 ------------
 
-Mac OS X Mojave, Catalina, or Big Sur.
+Compatible with macOS Big Sur, and also back compatible with older macOS, starting with 10.9 (Mavericks) and subsequent versions.
 
 Credits
 -------

@@ -599,6 +599,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Alberti42.VolumeControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -625,6 +626,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Alberti42.VolumeControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
