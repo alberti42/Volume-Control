@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		652D8DEB2686697B00ABC876 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0D267EACFF0080A9A5 /* Sparkle.framework */; };
+		652D8DEC2686697B00ABC876 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0D267EACFF0080A9A5 /* Sparkle.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
 		657C05C0267EB9CC00FE7E98 /* VolumeWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E00267EB0DB0080A9A5 /* VolumeWindow.m */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
@@ -16,8 +18,6 @@
 		65996D14267EAD390080A9A5 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D13267EAD390080A9A5 /* IOKit.framework */; };
 		65996D16267EAD410080A9A5 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D15267EAD410080A9A5 /* QuartzCore.framework */; };
 		65996D18267EAD470080A9A5 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D17267EAD470080A9A5 /* Cocoa.framework */; };
-		65996D19267EAD560080A9A5 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0D267EACFF0080A9A5 /* Sparkle.framework */; };
-		65996D1A267EAD560080A9A5 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0D267EACFF0080A9A5 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		65996DE4267EAE1F0080A9A5 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 65996DE3267EAE1F0080A9A5 /* Credits.rtf */; };
 		65996DE9267EAE6D0080A9A5 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 65996DE7267EAE650080A9A5 /* dsa_pub.pem */; };
 		65996DF7267EAEF30080A9A5 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 65996DF4267EAEF30080A9A5 /* Media.xcassets */; };
@@ -30,13 +30,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		65996D1B267EAD560080A9A5 /* Embed Frameworks */ = {
+		652D8DED2686697B00ABC876 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				65996D1A267EAD560080A9A5 /* Sparkle.framework in Embed Frameworks */,
+				652D8DEC2686697B00ABC876 /* Sparkle.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -125,7 +125,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				65996D18267EAD470080A9A5 /* Cocoa.framework in Frameworks */,
-				65996D19267EAD560080A9A5 /* Sparkle.framework in Frameworks */,
+				652D8DEB2686697B00ABC876 /* Sparkle.framework in Frameworks */,
 				65996D16267EAD410080A9A5 /* QuartzCore.framework in Frameworks */,
 				65996D14267EAD390080A9A5 /* IOKit.framework in Frameworks */,
 				65996D12267EAD310080A9A5 /* ScriptingBridge.framework in Frameworks */,
@@ -370,7 +370,7 @@
 				65996C52267EA86A0080A9A5 /* Frameworks */,
 				65996C53267EA86A0080A9A5 /* Resources */,
 				656F85FD267ECA5C00747B2F /* CFBundleVersion Update Script */,
-				65996D1B267EAD560080A9A5 /* Embed Frameworks */,
+				652D8DED2686697B00ABC876 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
