@@ -11,122 +11,88 @@
 
 #import "SystemVolume.h"
 
-#include <AudioToolbox/AudioToolbox.h>
-
 @implementation SystemApplication
 
 @synthesize currentVolume = _currentVolume;
-@synthesize doubleVolume = _doubleVolume;
 
 - (void) setCurrentVolume:(double)currentVolume
 {
-    [self setDoubleVolume:currentVolume];
+    AudioDeviceID defaultOutputDeviceID = [self getDefaultOutputDevice];
     
-    NSAppleEventDescriptor* AEsetVolumeParams = [NSAppleEventDescriptor listDescriptor];
-    [AEsetVolumeParams insertDescriptor:[NSAppleEventDescriptor descriptorWithInt32:round(currentVolume)] atIndex:1];
-    [AEsetVolume setParamDescriptor:AEsetVolumeParams forKeyword:keyDirectObject];
+    AudioObjectPropertyAddress volumePropertyAddress = {
+        kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
+        kAudioDevicePropertyScopeOutput,
+        kAudioObjectPropertyElementMaster
+    };
+    
+    Float32 volume = (Float32)(currentVolume/100.);
+    UInt32 volumedataSize = sizeof(volume);
+    
+    OSStatus result = AudioObjectSetPropertyData(defaultOutputDeviceID,
+                                        &volumePropertyAddress,
+                                        0, NULL,
+                                        volumedataSize, &volume);
+    
+    if (result != kAudioHardwareNoError) {
+        NSLog(@"No volume set for device 0x%0x", defaultOutputDeviceID);
+    }        
+}
 
-    NSDictionary *error = nil;
-    NSAppleEventDescriptor *resultEventDescriptor = [ASSystemVolume executeAppleEvent:AEsetVolume error:&error];
-    if (! resultEventDescriptor) {
-        NSLog(@"%s AppleScript setVolume error = %@", __PRETTY_FUNCTION__, error);
-    }
+-(AudioDeviceID) getDefaultOutputDevice
+{
+    AudioObjectPropertyAddress getDefaultOutputDevicePropertyAddress = {
+        kAudioHardwarePropertyDefaultOutputDevice,
+        kAudioObjectPropertyScopeGlobal,
+        kAudioObjectPropertyElementMaster
+    };
     
+    AudioDeviceID defaultOutputDeviceID;
+    UInt32 volumedataSize = sizeof(defaultOutputDeviceID);
+    OSStatus result = AudioObjectGetPropertyData(kAudioObjectSystemObject,
+                                                 &getDefaultOutputDevicePropertyAddress,
+                                                 0, NULL,
+                                                 &volumedataSize, &defaultOutputDeviceID);
     
-    if([self->appDelegate PlaySoundFeedback])
+    if(kAudioHardwareNoError != result)
     {
-        AudioServicesPlayAlertSound(3);
+        NSLog(@"Cannot find default output device!");
     }
-        
-    /*NSLog(@"");
-    NSLog(@"Internal volume Mac: %1.3f",round(currentVolume));
-    NSLog(@"Internal volume Mac: %1.3f",[self doubleVolume]);
-    NSLog(@"Internal volume Mac: %1.3f",[self currentVolume]);*/
+    
+    return defaultOutputDeviceID;
 }
 
 - (double) currentVolume
 {
-    double vol = 0;
+    AudioDeviceID defaultOutputDeviceID = [self getDefaultOutputDevice];
     
-    NSAppleEventDescriptor* AEsetVolumeParams = [NSAppleEventDescriptor listDescriptor];
-    [AEsetVolume setParamDescriptor:AEsetVolumeParams forKeyword:keyDirectObject];
+    AudioObjectPropertyAddress volumePropertyAddress = {
+        kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
+        kAudioDevicePropertyScopeOutput,
+        kAudioObjectPropertyElementMaster
+    };
     
-    NSDictionary *error = nil;
-    NSAppleEventDescriptor *resultEventDescriptor = [ASSystemVolume executeAppleEvent:AEgetVolume error:&error];
-    if (! resultEventDescriptor) {
-        NSLog(@"%s AppleScript getVolume error = %@", __PRETTY_FUNCTION__, error);
-    }
-    else {
-        if ([resultEventDescriptor descriptorType] == cLongInteger) {
-            vol = (double)[resultEventDescriptor int32Value];
-        }
-        else
-        {
-            NSLog(@"%s AppleScript getVolume error = Return argument has wrong type", __PRETTY_FUNCTION__);
-        }
-    }
+    Float32 volume;
+    UInt32 volumedataSize = sizeof(volume);
+    OSStatus result = AudioObjectGetPropertyData(defaultOutputDeviceID,
+                                        &volumePropertyAddress,
+                                        0, NULL,
+                                        &volumedataSize, &volume);
     
-    //NSLog(@"External volume Mac: %1.3f",vol);
-    
-    int step;
-    
-    switch(osxVersion)
-    {
-        case 112:
-            step = 4;
-            break;
-        case 113:
-            step = 4;
-            break;
-        case 114:
-            step = 2;
-            break;
-        default:
-            step = 1;
-            break;
+    if (result != kAudioHardwareNoError) {
+        NSLog(@"No volume reported for device 0x%0x", defaultOutputDeviceID);
     }
     
-    if (fabs(vol-[self doubleVolume])<=step)
-    {
-        vol = [self doubleVolume];
-    }
-    
-    return vol;
+    return ((double)volume)*100.;
 }
 
 -(void)dealloc
 {
-    ASSystemVolume = nil;
-    AEsetVolume = nil;
-    AEgetVolume = nil;
 }
 
--(id)initWithVersion:(NSInteger)osxVersion andWithAppDelegate:(AppDelegate*)appDelegate{
+-(id)initWithVersion:(NSInteger)osxVersion{
     if (self = [super init])  {
-        [self setOldVolume: -1];
-        
-        NSURL *URL = [[NSBundle mainBundle] URLForResource:@"SystemVolume" withExtension:@"scpt"];
-        if (URL) {
-            ASSystemVolume = [[NSAppleScript alloc] initWithContentsOfURL:URL error:NULL];
-            
-            // target
-            ProcessSerialNumber psn = {0, kCurrentProcess};
-            NSAppleEventDescriptor *target = [NSAppleEventDescriptor descriptorWithDescriptorType:typeProcessSerialNumber bytes:&psn length:sizeof(ProcessSerialNumber)];
-            
-            // functions
-            NSAppleEventDescriptor *setVolumeHandler = [NSAppleEventDescriptor descriptorWithString:@"setVolume"];
-            NSAppleEventDescriptor *getVolumeHandler = [NSAppleEventDescriptor descriptorWithString:@"getVolume"];
-            
-            // events
-            AEsetVolume = [NSAppleEventDescriptor appleEventWithEventClass:kASAppleScriptSuite eventID:kASSubroutineEvent targetDescriptor:target returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
-            [AEsetVolume setParamDescriptor:setVolumeHandler forKeyword:keyASSubroutineName];
-
-            AEgetVolume = [NSAppleEventDescriptor appleEventWithEventClass:kASAppleScriptSuite eventID:kASSubroutineEvent targetDescriptor:target returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
-            [AEgetVolume setParamDescriptor:getVolumeHandler forKeyword:keyASSubroutineName];
-        }
-        
+        [self setOldVolume:[self currentVolume]];
         self->osxVersion = osxVersion;
-        self->appDelegate = appDelegate;
     }
     return self;
 }

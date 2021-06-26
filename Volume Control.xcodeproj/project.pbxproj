@@ -12,7 +12,6 @@
 		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
 		657C05C0267EB9CC00FE7E98 /* VolumeWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E00267EB0DB0080A9A5 /* VolumeWindow.m */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
-		65996D07267EAC8E0080A9A5 /* SystemVolume.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 65996D06267EAC8E0080A9A5 /* SystemVolume.scpt */; };
 		65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0F267EAD240080A9A5 /* CoreAudio.framework */; };
 		65996D12267EAD310080A9A5 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D11267EAD310080A9A5 /* ScriptingBridge.framework */; };
 		65996D14267EAD390080A9A5 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D13267EAD390080A9A5 /* IOKit.framework */; };
@@ -421,7 +420,6 @@
 				65996DFB267EAF330080A9A5 /* AccessibilityDialog.xib in Resources */,
 				65996DE4267EAE1F0080A9A5 /* Credits.rtf in Resources */,
 				65533217267F5D86004231D6 /* README.md in Resources */,
-				65996D07267EAC8E0080A9A5 /* SystemVolume.scpt in Resources */,
 				65996DF7267EAEF30080A9A5 /* Media.xcassets in Resources */,
 				65996DF9267EAF260080A9A5 /* MainMenu.xib in Resources */,
 			);

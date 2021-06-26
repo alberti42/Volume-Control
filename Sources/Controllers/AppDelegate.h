@@ -101,7 +101,9 @@
 
 - (void)resetEventTap;
 
+#ifdef OWN_WINDOW
 - (void) hideSpeakerImg:(NSTimer*)theTimer;
+#endif
 
 - (void)stopTimer;
 

@@ -985,7 +985,7 @@ static NSTimeInterval statusBarHideDelay=10;
     if([spotify isRunning])
         [spotify currentVolume];
     
-    systemAudio = [[SystemApplication alloc] initWithVersion:osxVersion andWithAppDelegate:self];
+    systemAudio = [[SystemApplication alloc] initWithVersion:osxVersion];
     
     [self showInStatusBar];   // Install icon into the menu bar
     
@@ -1436,6 +1436,11 @@ static NSTimeInterval statusBarHideDelay=10;
             [[self->OSDManager sharedManager] showImage:image onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)(round(((numFullBlks*4+numQrtsBlks)*1.5625)*100)) totalChiclets:(unsigned int)10000 locked:NO];
         
         [musicPlayerPnt setCurrentVolume:volume];
+        
+        if([self PlaySoundFeedback] && (self->timer == nil) && [musicPlayerPnt isKindOfClass:[SystemApplication class]])
+        {
+            AudioServicesPlayAlertSound(3);
+        }
         
         if([_statusBarItemView menuIsVisible])
         {
