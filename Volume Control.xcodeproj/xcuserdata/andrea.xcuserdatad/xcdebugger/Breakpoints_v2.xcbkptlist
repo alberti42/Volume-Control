@@ -14,8 +14,8 @@
             filePath = "Sources/Controllers/AppDelegate.m"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1375"
-            endingLineNumber = "1375"
+            startingLineNumber = "1393"
+            endingLineNumber = "1393"
             landmarkName = "-changeVol:"
             landmarkType = "7">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "Sources/Controllers/AppDelegate.m"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1350"
-            endingLineNumber = "1350"
+            startingLineNumber = "1368"
+            endingLineNumber = "1368"
             landmarkName = "-runningPlayer"
             landmarkType = "7">
          </BreakpointContent>

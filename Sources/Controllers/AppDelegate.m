@@ -985,7 +985,7 @@ static NSTimeInterval statusBarHideDelay=10;
     if([spotify isRunning])
         [spotify currentVolume];
     
-    systemAudio = [[SystemApplication alloc] initWithVersion:osxVersion];
+    systemAudio = [[SystemApplication alloc] initWithVersion:osxVersion andWithAppDelegate:self];
     
     [self showInStatusBar];   // Install icon into the menu bar
     
@@ -1084,6 +1084,7 @@ static NSTimeInterval statusBarHideDelay=10;
                           [NSNumber numberWithBool:true],  @"spotifyControl",
                           [NSNumber numberWithBool:true],  @"systemControl",
                           [NSNumber numberWithBool:true],  @"loadIntroAtStart",
+                          [NSNumber numberWithBool:true],  @"PlaySoundFeedback",
                           nil ]; // terminate the list
     [preferences registerDefaults:dict];
     
@@ -1103,6 +1104,7 @@ static NSTimeInterval statusBarHideDelay=10;
     [[self spotifyBtn] setState:[preferences boolForKey:   @"spotifyControl"]];
     [[self systemBtn] setState:[preferences boolForKey:    @"systemControl"]];
     [self setLoadIntroAtStart:[preferences boolForKey:     @"loadIntroAtStart"]];
+    [self setPlaySoundFeedback:[preferences boolForKey:     @"PlaySoundFeedback"]];
     
     NSInteger volumeIncSetting = [preferences integerForKey:@"volumeIncrement"];
     [self setVolumeInc:volumeIncSetting];
@@ -1126,6 +1128,22 @@ static NSTimeInterval statusBarHideDelay=10;
     _AutomaticUpdates=enabled;
     
     [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:enabled];
+}
+
+- (IBAction)togglePlaySoundFeedback:(id)sender
+{
+    [self setPlaySoundFeedback:![self PlaySoundFeedback]];
+}
+
+- (void)setPlaySoundFeedback:(bool)enabled
+{
+    [preferences setBool:enabled forKey:@"PlaySoundFeedback"];
+    [preferences synchronize];
+    
+    NSMenuItem* menuItem=[_statusMenu itemWithTag:7];
+    [menuItem setState:enabled];
+        
+    _PlaySoundFeedback=enabled;
 }
 
 - (IBAction)toggleStartAtLogin:(id)sender

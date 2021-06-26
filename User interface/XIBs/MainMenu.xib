@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -73,6 +74,12 @@
                         <action selector="toggleStartAtLogin:" target="3" id="197"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Sound when system volume changes" tag="7" id="BgS-xF-QHr" userLabel="Play sound">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="togglePlaySoundFeedback:" target="3" id="eKm-3K-hQG"/>
+                    </connections>
+                </menuItem>
                 <menuItem isSeparatorItem="YES" id="18"/>
                 <menuItem title="Music player" id="jbC-sa-4jE">
                     <modifierMask key="keyEquivalentModifierMask"/>
@@ -117,7 +124,7 @@
             <connections>
                 <outlet property="delegate" destination="3" id="36"/>
             </connections>
-            <point key="canvasLocation" x="458" y="42"/>
+            <point key="canvasLocation" x="458" y="-7"/>
         </menu>
         <customView id="65" userLabel="Step size">
             <rect key="frame" x="0.0" y="0.0" width="209" height="66"/>

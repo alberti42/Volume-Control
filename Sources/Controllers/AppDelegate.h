@@ -76,6 +76,7 @@
 @property (assign, nonatomic) NSInteger volumeInc;
 @property (assign, nonatomic) bool AppleRemoteConnected;
 @property (assign, nonatomic) bool StartAtLogin;
+@property (assign, nonatomic) bool PlaySoundFeedback;
 @property (assign, nonatomic) bool Tapping;
 @property (assign, nonatomic) bool UseAppleCMDModifier;
 @property (assign, nonatomic) bool AppleCMDModifierPressed;
@@ -89,6 +90,7 @@
 - (IBAction)toggleHideFromStatusBar:(id)sender;
 - (IBAction)toggleHideVolumeWindow:(id)sender;
 - (IBAction)toggleStartAtLogin:(id)sender;
+- (IBAction)togglePlaySoundFeedback:(id)sender;
 - (IBAction)toggleTapping:(id)sender;
 - (IBAction)aboutPanel:(id)sender;
 - (IBAction)sliderValueChanged:(NSSliderCell*)slider;

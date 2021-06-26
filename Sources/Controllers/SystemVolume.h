@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import <CoreAudio/CoreAudio.h>
 #import <AudioToolbox/AudioServices.h>
+#import "AppDelegate.h"
 
 @interface SystemApplication : NSObject{
     
@@ -19,9 +20,10 @@
 @private
     
     NSInteger osxVersion;
+    AppDelegate* appDelegate;
 }
 
--(id)initWithVersion:(NSInteger)osxVersion;
+-(id)initWithVersion:(NSInteger)osxVersion andWithAppDelegate:(AppDelegate*)appDelegate;
     
 @property (assign, nonatomic) double currentVolume;  // The sound output volume (0 = minimum, 100 = maximum)
 @property (assign, nonatomic) double oldVolume;

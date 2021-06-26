@@ -11,6 +11,8 @@
 
 #import "SystemVolume.h"
 
+#include <AudioToolbox/AudioToolbox.h>
+
 @implementation SystemApplication
 
 @synthesize currentVolume = _currentVolume;
@@ -30,6 +32,12 @@
         NSLog(@"%s AppleScript setVolume error = %@", __PRETTY_FUNCTION__, error);
     }
     
+    
+    if([self->appDelegate PlaySoundFeedback])
+    {
+        AudioServicesPlayAlertSound(3);
+    }
+        
     /*NSLog(@"");
     NSLog(@"Internal volume Mac: %1.3f",round(currentVolume));
     NSLog(@"Internal volume Mac: %1.3f",[self doubleVolume]);
@@ -93,7 +101,7 @@
     AEgetVolume = nil;
 }
 
--(id)initWithVersion:(NSInteger)osxVersion {
+-(id)initWithVersion:(NSInteger)osxVersion andWithAppDelegate:(AppDelegate*)appDelegate{
     if (self = [super init])  {
         [self setOldVolume: -1];
         
@@ -118,6 +126,7 @@
         }
         
         self->osxVersion = osxVersion;
+        self->appDelegate = appDelegate;
     }
     return self;
 }

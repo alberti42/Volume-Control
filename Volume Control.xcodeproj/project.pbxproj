@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		652D8DEB2686697B00ABC876 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0D267EACFF0080A9A5 /* Sparkle.framework */; };
-		652D8DEC2686697B00ABC876 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0D267EACFF0080A9A5 /* Sparkle.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		652D8DEC2686697B00ABC876 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0D267EACFF0080A9A5 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
 		657C05C0267EB9CC00FE7E98 /* VolumeWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E00267EB0DB0080A9A5 /* VolumeWindow.m */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
