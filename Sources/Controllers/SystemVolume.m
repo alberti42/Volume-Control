@@ -15,29 +15,6 @@
 
 @synthesize currentVolume = _currentVolume;
 
-- (void) setCurrentVolume:(double)currentVolume
-{
-    AudioDeviceID defaultOutputDeviceID = [self getDefaultOutputDevice];
-    
-    AudioObjectPropertyAddress volumePropertyAddress = {
-        kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
-        kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
-    };
-    
-    Float32 volume = (Float32)(currentVolume/100.);
-    UInt32 volumedataSize = sizeof(volume);
-    
-    OSStatus result = AudioObjectSetPropertyData(defaultOutputDeviceID,
-                                        &volumePropertyAddress,
-                                        0, NULL,
-                                        volumedataSize, &volume);
-    
-    if (result != kAudioHardwareNoError) {
-        NSLog(@"No volume set for device 0x%0x", defaultOutputDeviceID);
-    }        
-}
-
 -(AudioDeviceID) getDefaultOutputDevice
 {
     AudioObjectPropertyAddress getDefaultOutputDevicePropertyAddress = {
@@ -59,6 +36,29 @@
     }
     
     return defaultOutputDeviceID;
+}
+
+- (void) setCurrentVolume:(double)currentVolume
+{
+    AudioDeviceID defaultOutputDeviceID = [self getDefaultOutputDevice];
+    
+    AudioObjectPropertyAddress volumePropertyAddress = {
+        kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
+        kAudioDevicePropertyScopeOutput,
+        kAudioObjectPropertyElementMaster
+    };
+    
+    Float32 volume = (Float32)(currentVolume/100.);
+    UInt32 volumedataSize = sizeof(volume);
+    
+    OSStatus result = AudioObjectSetPropertyData(defaultOutputDeviceID,
+                                        &volumePropertyAddress,
+                                        0, NULL,
+                                        volumedataSize, &volume);
+    
+    if (result != kAudioHardwareNoError) {
+        NSLog(@"No volume set for device 0x%0x", defaultOutputDeviceID);
+    }        
 }
 
 - (double) currentVolume
