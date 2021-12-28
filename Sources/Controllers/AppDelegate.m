@@ -518,81 +518,6 @@ static NSTimeInterval statusBarHideDelay=10;
     }
 }
 
-/*
- // Apple remote
- - (void) appleRemoteButton: (AppleRemoteEventIdentifier)buttonIdentifier pressedDown: (BOOL) pressedDown clickCount: (unsigned int) count {
- 
- switch (buttonIdentifier)
- {
- case kRemoteButtonVolume_Plus_Hold:
- if(timer)
- {
- [self stopTimer];
- 
- //                    if(!timerImgSpeaker&&!fadeInAnimationReady) {
- //                        timerImgSpeaker=[NSTimer scheduledTimerWithTimeInterval:waitOverlayPanel target:self selector:@selector(hideSpeakerImg:) userInfo:nil repeats:NO];
- //                        [[NSRunLoop mainRunLoop] addTimer:timerImgSpeaker forMode:NSRunLoopCommonModes];
- //                    }
- }
- else
- {
- [[NSNotificationCenter defaultCenter] postNotificationName:@"IncreaseITunesVolumeRamp" object:NULL];
- }
- break;
- case kRemoteButtonVolume_Plus:
- [[NSNotificationCenter defaultCenter] postNotificationName:@"IncreaseITunesVolume" object:NULL];
- break;
- 
- case kRemoteButtonVolume_Minus_Hold:
- if(timer)
- {
- [self stopTimer];
- 
- //                    if(!timerImgSpeaker&&!fadeInAnimationReady){
- //                        timerImgSpeaker=[NSTimer scheduledTimerWithTimeInterval:waitOverlayPanel target:self selector:@selector(hideSpeakerImg:) userInfo:nil repeats:NO];
- //                        [[NSRunLoop mainRunLoop] addTimer:timerImgSpeaker forMode:NSRunLoopCommonModes];
- //                    }
- }
- else
- {
- [[NSNotificationCenter defaultCenter] postNotificationName:@"DecreaseITunesVolumeRamp" object:NULL];
- }
- break;
- case kRemoteButtonVolume_Minus:
- [[NSNotificationCenter defaultCenter] postNotificationName:@"DecreaseITunesVolume" object:NULL];
- break;
- 
- case k2009RemoteButtonFullscreen:
- break;
- 
- case k2009RemoteButtonPlay:
- case kRemoteButtonPlay:
- [[NSNotificationCenter defaultCenter] postNotificationName:@"PlayPauseITunes" object:NULL];
- break;
- 
- case kRemoteButtonLeft_Hold:
- case kRemoteButtonLeft:
- [[NSNotificationCenter defaultCenter] postNotificationName:@"PreviousTrackITunes" object:NULL];
- break;
- 
- case kRemoteButtonRight_Hold:
- case kRemoteButtonRight:
- [[NSNotificationCenter defaultCenter] postNotificationName:@"NextTrackITunes" object:NULL];
- break;
- 
- case kRemoteButtonMenu_Hold:
- case kRemoteButtonMenu:
- break;
- 
- case kRemoteButtonPlay_Sleep:
- break;
- 
- default:
- break;
- }
- }
- */
-
 - (id)init
 {
     self = [super init];
@@ -710,11 +635,6 @@ static NSTimeInterval statusBarHideDelay=10;
     // NSString* iTunesVersion = [[NSString alloc] initWithString:[iTunes version]];
     // NSString* spotifyVersion = [[NSString alloc] initWithString:[spotify version]];
     
-    // CGDisplayRegisterReconfigurationCallback(displayPreferencesChanged, NULL);
-    
-    // Apple remote
-    // [self appleRemoteInit];
-    
     [self initializePreferences];
     
     [self setStartAtLogin:[self StartAtLogin] savePreferences:false];
@@ -791,7 +711,6 @@ static NSTimeInterval statusBarHideDelay=10;
     NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
                           [NSNumber numberWithInt:2],      @"volumeIncrement",
                           [NSNumber numberWithBool:true] , @"TappingEnabled",
-                          //[NSNumber numberWithBool:false], @"AppleRemoteConnected",
                           [NSNumber numberWithBool:false], @"UseAppleCMDModifier",
                           [NSNumber numberWithBool:true],  @"AutomaticUpdates",
                           [NSNumber numberWithBool:false], @"hideFromStatusBarPreference",
@@ -803,7 +722,6 @@ static NSTimeInterval statusBarHideDelay=10;
                           nil ]; // terminate the list
     [preferences registerDefaults:dict];
     
-    // [self setAppleRemoteConnected:[preferences boolForKey: @"AppleRemoteConnected"]];
     [self setTapping:[preferences boolForKey:              @"TappingEnabled"]];
     [self setUseAppleCMDModifier:[preferences boolForKey:  @"UseAppleCMDModifier"]];
     [self setAutomaticUpdates:[preferences boolForKey:     @"AutomaticUpdates"]];
@@ -960,7 +878,6 @@ static NSTimeInterval statusBarHideDelay=10;
 
 - (void) receiveWakeNote: (NSNotification*) note
 {
-    NSLog(@"Awaken!!!!!!!!!");
     [self setTapping:[self Tapping]];
     [_statusBarItemView setAppropriateColorScheme];
 }

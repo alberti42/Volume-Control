@@ -23,21 +23,9 @@
                 <outlet property="systemBtn" destination="0bg-hh-XNT" id="OGo-XQ-z8N"/>
                 <outlet property="systemPerc" destination="tqe-nv-xjS" id="ZpI-lj-eHB"/>
                 <outlet property="volumeIncrementsSlider" destination="99" id="196"/>
-                <outlet property="volumeWindow" destination="1" id="QVK-kj-HYh"/>
             </connections>
         </customObject>
         <customObject id="4" customClass="SUUpdater"/>
-        <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" animationBehavior="default" id="1" userLabel="Volume Window" customClass="VolumeWindow">
-            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
-            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="196" y="240" width="200" height="200"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1055"/>
-            <view key="contentView" id="2">
-                <rect key="frame" x="0.0" y="0.0" width="200" height="200"/>
-                <autoresizingMask key="autoresizingMask"/>
-            </view>
-            <point key="canvasLocation" x="-363" y="284"/>
-        </window>
         <menu id="5" userLabel="Status Menu">
             <items>
                 <menuItem title="Enabled" state="on" tag="1" id="6" userLabel="Enabled">
@@ -124,7 +112,7 @@
             <connections>
                 <outlet property="delegate" destination="3" id="36"/>
             </connections>
-            <point key="canvasLocation" x="458" y="-7"/>
+            <point key="canvasLocation" x="289" y="-44"/>
         </menu>
         <customView id="65" userLabel="Step size">
             <rect key="frame" x="0.0" y="0.0" width="209" height="66"/>
