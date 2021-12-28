@@ -45,6 +45,10 @@
     
     Class OSDManager;
     
+    NSImage *statusImageWhite;
+    NSImage *statusImageBlack;
+    NSImage *statusImageGray;
+    
 @public
     PlayerApplication* iTunes;
     PlayerApplication* spotify;

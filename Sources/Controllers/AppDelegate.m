@@ -694,7 +694,7 @@ static NSTimeInterval statusBarHideDelay=10;
         // the view now reacts to the mouseDown event to show the menu
         
         _statusBar =  [[NSStatusBar systemStatusBar] statusItemWithLength:26];
-        [_statusBar setMenu:_statusMenu];
+        [[self statusBar] setMenu:[self statusMenu]];
     }
     
     if (!_statusBarItemView)
@@ -702,7 +702,18 @@ static NSTimeInterval statusBarHideDelay=10;
         _statusBarItemView = [[StatusItemView alloc] initWithStatusItem:_statusBar];
     }
     
-    [_statusBar setView:_statusBarItemView];
+    //[_statusBar setView:_statusBarItemView];
+    
+    statusImageBlack = [NSImage imageNamed:@"statusbar-item-black"];
+    statusImageGray = [NSImage imageNamed:@"statusbar-item-gray"];
+    statusImageWhite = [NSImage imageNamed:@"statusbar-item-white"];
+    
+    [statusImageWhite setTemplate:YES];
+        
+    NSStatusBarButton *statusBarButton = [[self statusBar] button];
+    [statusBarButton setImage:statusImageWhite];
+    
+    
 }
 
 - (void)initializePreferences
@@ -1149,8 +1160,8 @@ static NSTimeInterval statusBarHideDelay=10;
     if (! _hideFromStatusBarHintPopover)
     {
         CGRect popoverRect = (CGRect) {
-            .size.width = 225,
-            .size.height = 50
+            .size.width = 250,
+            .size.height = 65
         };
         
         _hideFromStatusBarHintLabel = [[NSTextField alloc] initWithFrame:CGRectInset(popoverRect, 10, 10)];
@@ -1182,7 +1193,7 @@ static NSTimeInterval statusBarHideDelay=10;
 
 - (void)setHideFromStatusBarHintLabelWithSeconds:(NSUInteger)seconds
 {
-    [_hideFromStatusBarHintLabel setStringValue:[NSString stringWithFormat:@"iTunes Volume Control will hide after %ld seconds.\n\nLaunch it again to re-show the icon.",seconds]];
+    [_hideFromStatusBarHintLabel setStringValue:[NSString stringWithFormat:@"iTunes Volume Control will hide after %ld seconds. Launch the app again to make the icon reappear in the manubar.",seconds]];
 }
 
 #pragma mark - Music players

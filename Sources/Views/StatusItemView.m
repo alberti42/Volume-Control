@@ -52,11 +52,7 @@
 
 - (void) dealloc
 {
-    /*
-    statusImageOnClicked=nil;
-    statusImageOn=nil;
-    statusImageOff=nil;    
-     */
+
 }
 
 - (void) viewDidChangeEffectiveAppearance
@@ -76,8 +72,6 @@
     self = [super initWithFrame:itemRect];
     
     if (self != nil) {
-        
-        //[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(darkModeChanged:) name:@"AppleInterfaceThemeChangedNotification" object:nil];
 
         _statusItem = statusItem;
         
@@ -117,13 +111,6 @@
     }
 
 }
-
-//-(void)darkModeChanged:(NSNotification *)notif
-//{
-//
-//
-//}
-
 
 -(void)setMenuIsVisible:(BOOL)menuIsVisible
 {
