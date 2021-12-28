@@ -59,7 +59,6 @@
     bool fadeInAnimationReady;
 }
 
-@property (nonatomic, assign) IBOutlet NSWindow* volumeWindow;
 @property (nonatomic, assign) IBOutlet NSMenu* statusMenu;
 @property (nonatomic, assign) IBOutlet NSSliderCell* volumeIncrementsSlider;
 

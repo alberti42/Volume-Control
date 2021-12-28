@@ -40,7 +40,7 @@
 		</dict>
 	</dict>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>Volume Control requires to communicate with iTunes and Spotify through AppleEvents.</string>
+	<string>Volume Control requires to communicate with Music and Spotify through AppleEvents.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2012 Andrea Alberti. All rights reserved.</string>
 	<key>NSMainNibFile</key>
