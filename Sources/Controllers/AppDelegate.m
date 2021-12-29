@@ -1089,7 +1089,7 @@ static NSTimeInterval statusBarHideDelay=10;
     {
         CGRect popoverRect = (CGRect) {
             .size.width = 250,
-            .size.height = 65
+            .size.height = 63
         };
         
         _hideFromStatusBarHintLabel = [[NSTextField alloc] initWithFrame:CGRectInset(popoverRect, 10, 10)];
@@ -1110,8 +1110,8 @@ static NSTimeInterval statusBarHideDelay=10;
         [_hideFromStatusBarHintPopover setContentViewController:_hintVC];
     }
     
-    // TODO
-    //[_hideFromStatusBarHintPopover showRelativeToRect:[_statusBarItemView frame] ofView:_statusBarItemView preferredEdge:NSMinYEdge];
+    NSStatusBarButton *statusBarButton = [[self statusBar] button];
+    [_hideFromStatusBarHintPopover showRelativeToRect:[statusBarButton bounds] ofView:statusBarButton preferredEdge:NSMinYEdge];
 }
 
 - (void)updateHideFromStatusBarHintPopover:(NSTimer*)aTimer
@@ -1163,8 +1163,8 @@ static NSTimeInterval statusBarHideDelay=10;
 
 - (void)menuWillOpen:(NSMenu *)menu
 {
-    menuIsVisible=true;
     [_hideFromStatusBarHintPopover close];
+    menuIsVisible=true;
 }
 
 - (void)menuDidClose:(NSMenu *)menu
