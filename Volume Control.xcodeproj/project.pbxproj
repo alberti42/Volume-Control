@@ -92,8 +92,6 @@
 		65996DF4267EAEF30080A9A5 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		65996DF8267EAF260080A9A5 /* MainMenu.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainMenu.xib; sourceTree = "<group>"; };
 		65996DFA267EAF330080A9A5 /* AccessibilityDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AccessibilityDialog.xib; sourceTree = "<group>"; };
-		65996DFE267EB0DB0080A9A5 /* StatusItemView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusItemView.h; sourceTree = "<group>"; };
-		65996DFF267EB0DB0080A9A5 /* StatusItemView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatusItemView.m; sourceTree = "<group>"; };
 		65996E04267EB0FE0080A9A5 /* iTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
 		65996E05267EB0FF0080A9A5 /* iTunes Volume Control-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "iTunes Volume Control-Prefix.pch"; sourceTree = "<group>"; };
 		65996E06267EB0FF0080A9A5 /* Music.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Music.h; sourceTree = "<group>"; };
@@ -282,8 +280,6 @@
 		65996D0A267EACC40080A9A5 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				65996DFE267EB0DB0080A9A5 /* StatusItemView.h */,
-				65996DFF267EB0DB0080A9A5 /* StatusItemView.m */,
 			);
 			path = Views;
 			sourceTree = "<group>";

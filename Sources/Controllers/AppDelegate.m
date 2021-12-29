@@ -465,15 +465,12 @@ static NSTimeInterval statusBarHideDelay=10;
             [musicPlayerPnt setOldVolume:-1];
         }
         
-        if(menuIsVisible)
-        {
-            if( musicPlayerPnt == iTunes)
-                [self setItunesVolume:[musicPlayerPnt currentVolume]];
-            else if( musicPlayerPnt == spotify)
-                [self setSpotifyVolume:[musicPlayerPnt currentVolume]];
-            else if( musicPlayerPnt == systemAudio)
-                [self setSystemVolume:[musicPlayerPnt currentVolume]];
-        }
+        if( musicPlayerPnt == iTunes)
+            [self setItunesVolume:[musicPlayerPnt currentVolume]];
+        else if( musicPlayerPnt == spotify)
+            [self setSpotifyVolume:[musicPlayerPnt currentVolume]];
+        else if( musicPlayerPnt == systemAudio)
+            [self setSystemVolume:[musicPlayerPnt currentVolume]];
     }
 }
 
@@ -953,15 +950,13 @@ static NSTimeInterval statusBarHideDelay=10;
             AudioServicesPlayAlertSound(3);
         }
         
-        if(menuIsVisible)
-        {
-            if( musicPlayerPnt == iTunes)
-                [self setItunesVolume:volume];
-            else if( musicPlayerPnt == spotify)
-                [self setSpotifyVolume:volume];
-            else if( musicPlayerPnt == systemAudio)
-                [self setSystemVolume:volume];
-        }
+        if( musicPlayerPnt == iTunes)
+            [self setItunesVolume:volume];
+        else if( musicPlayerPnt == spotify)
+            [self setSpotifyVolume:volume];
+        else if( musicPlayerPnt == systemAudio)
+            [self setSystemVolume:volume];
+    
         [self refreshVolumeBar:(int)volume];
     }
 }

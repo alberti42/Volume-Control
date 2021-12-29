@@ -44,13 +44,13 @@
                         <action selector="toggleUseAppleCMDModifier:" target="3" id="ypk-61-qkE"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Hide from Status Bar" tag="5" id="10" userLabel="Hide from Status Bar">
+                <menuItem title="Hide menu bar icon" tag="5" id="10" userLabel="Hide from Status Bar">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="toggleHideFromStatusBar:" target="3" id="5IS-cK-VYc"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Hide volume window" tag="6" id="IG3-xA-1iJ">
+                <menuItem title="Hide volume feedback bezel" tag="6" id="IG3-xA-1iJ">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="toggleHideVolumeWindow:" target="3" id="YZl-KG-mLA"/>
@@ -102,7 +102,7 @@
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="21"/>
-                <menuItem title="Close" id="16" userLabel="Close">
+                <menuItem title="Quit" id="16" userLabel="Close">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="terminate:" target="3" id="Hwo-lV-uSz"/>
