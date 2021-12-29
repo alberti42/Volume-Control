@@ -219,6 +219,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 static NSTimeInterval volumeRampTimeInterval=0.01;
 static NSTimeInterval statusBarHideDelay=10;
+static NSTimeInterval checkPlayerTimeout=1;
 
 - (IBAction)terminate:(id)sender
 {
@@ -243,6 +244,9 @@ static NSTimeInterval statusBarHideDelay=10;
     
     [volumeRampTimer invalidate];
     volumeRampTimer = nil;
+    
+    [checkPlayerTimer invalidate];
+    checkPlayerTimer = nil;
     
     [timerImgSpeaker invalidate];
     timerImgSpeaker = nil;
@@ -367,11 +371,11 @@ static NSTimeInterval statusBarHideDelay=10;
 
 - (void)stopVolumeRampTimer
 {
-    if([self PlaySoundFeedback] && _AppleCMDModifierPressed != _UseAppleCMDModifier)
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"SoundFeedback" object:NULL];
-
     [volumeRampTimer invalidate];
     volumeRampTimer=nil;
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"SoundFeedback" object:NULL];
+    
+    checkPlayerTimer = [NSTimer scheduledTimerWithTimeInterval:checkPlayerTimeout target:self selector:@selector(resetCurrentPlayer:) userInfo:nil repeats:NO];
 }
 
 - (void)rampVolumeUp:(NSTimer*)theTimer
@@ -475,6 +479,8 @@ static NSTimeInterval statusBarHideDelay=10;
 {
     if( [[aNotification name] isEqualToString:@"IncVolRamp"] )
     {
+        [checkPlayerTimer invalidate];
+        checkPlayerTimer = nil;
         volumeRampTimer=[NSTimer scheduledTimerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeUp:) userInfo:nil repeats:YES];
         
         [[NSRunLoop mainRunLoop] addTimer:volumeRampTimer forMode:NSRunLoopCommonModes];
@@ -491,6 +497,8 @@ static NSTimeInterval statusBarHideDelay=10;
 {
     if( [[aNotification name] isEqualToString:@"DecVolRamp"] )
     {
+        [checkPlayerTimer invalidate];
+        checkPlayerTimer = nil;
         volumeRampTimer=[NSTimer scheduledTimerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeDown:) userInfo:nil repeats:YES];
         
         [[NSRunLoop mainRunLoop] addTimer:volumeRampTimer forMode:NSRunLoopCommonModes];
@@ -547,6 +555,7 @@ static NSTimeInterval statusBarHideDelay=10;
             osxVersion = 115;
         }
         
+        menuIsVisible=false;
         
     }
     return self;
@@ -599,13 +608,12 @@ static NSTimeInterval statusBarHideDelay=10;
     [self initializePreferences];
     
     [self setStartAtLogin:[self StartAtLogin] savePreferences:false];
-    
-    menuIsVisible=false;
 }
 
 - (void)emitAcousticFeedback:(NSNotification *)aNotification
 {
-    AudioServicesPlayAlertSound(3);
+    if([self PlaySoundFeedback] && (_AppleCMDModifierPressed != _UseAppleCMDModifier || [[self runningPlayer] isKindOfClass:[SystemApplication class]]))
+        AudioServicesPlayAlertSound(3);
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
@@ -856,29 +864,39 @@ static NSTimeInterval statusBarHideDelay=10;
     
 }
 
+- (void)resetCurrentPlayer:(NSTimer*)theTimer
+{
+    [checkPlayerTimer invalidate];
+    checkPlayerTimer = nil;
+    currentPlayer = nil;
+}
+
 - (id)runningPlayer
 {
-    id musicPlayerPnt = nil;
+    if(currentPlayer)
+        return currentPlayer;
+    
+    checkPlayerTimer = [NSTimer scheduledTimerWithTimeInterval:checkPlayerTimeout target:self selector:@selector(resetCurrentPlayer:) userInfo:nil repeats:NO];
     
     if(_AppleCMDModifierPressed == _UseAppleCMDModifier)
     {
         if([_iTunesBtn state] && [iTunes isRunning] && [iTunes playerState] == iTunesEPlSPlaying)
         {
-            musicPlayerPnt = iTunes;
+            currentPlayer = iTunes;
         }
         else if([_spotifyBtn state] && [spotify isRunning] && [spotify playerState] == SpotifyEPlSPlaying)
         {
-            musicPlayerPnt = spotify;
+            currentPlayer = spotify;
         }
         else if([_systemBtn state])
         {
-            musicPlayerPnt = systemAudio;
+            currentPlayer = systemAudio;
         }
     }
     else
-        musicPlayerPnt = systemAudio;
+        currentPlayer = systemAudio;
     
-    return musicPlayerPnt;
+    return currentPlayer;
 }
 
 - (void)setVolumeUp:(bool)increase
@@ -915,7 +933,7 @@ static NSTimeInterval statusBarHideDelay=10;
         
         [musicPlayerPnt setCurrentVolume:volume];
         
-        if([self PlaySoundFeedback] && (self->volumeRampTimer == nil) && _AppleCMDModifierPressed != _UseAppleCMDModifier)
+        if(self->volumeRampTimer == nil)
             [self emitAcousticFeedback:nil];
         
         if( musicPlayerPnt == iTunes)
@@ -1163,6 +1181,8 @@ static NSTimeInterval statusBarHideDelay=10;
 
 - (void)menuWillOpen:(NSMenu *)menu
 {
+    [self updatePercentages];
+    
     [_hideFromStatusBarHintPopover close];
     menuIsVisible=true;
 }

@@ -43,6 +43,8 @@
     
     double increment;
     
+    id currentPlayer;
+    
     Class OSDManager;
     
 @public
@@ -55,6 +57,7 @@
     
     NSTimer* volumeRampTimer;
     NSTimer* timerImgSpeaker;
+    NSTimer* checkPlayerTimer;
     NSTimeInterval waitOverlayPanel;
     bool fadeInAnimationReady;
 }
