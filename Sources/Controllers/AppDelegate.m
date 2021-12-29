@@ -606,12 +606,18 @@ static NSTimeInterval checkPlayerTimeout=1;
     [self initializePreferences];
     
     [self setStartAtLogin:[self StartAtLogin] savePreferences:false];
+    
+    volumeSound = [[NSSound alloc] initWithContentsOfFile:@"/System/Library/LoginPlugins/BezelServices.loginPlugin/Contents/Resources/volume.aiff" byReference:false];
 }
 
 - (void)emitAcousticFeedback:(NSNotification *)aNotification
 {
     if([self PlaySoundFeedback] && (_AppleCMDModifierPressed != _UseAppleCMDModifier || [[self runningPlayer] isKindOfClass:[SystemApplication class]]))
-        AudioServicesPlayAlertSound(3);
+    {
+        if([volumeSound isPlaying])
+            [volumeSound stop];
+        [volumeSound play];
+    }
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification

@@ -47,6 +47,8 @@
     
     Class OSDManager;
     
+    NSSound* volumeSound;
+    
 @public
     PlayerApplication* iTunes;
     PlayerApplication* spotify;
