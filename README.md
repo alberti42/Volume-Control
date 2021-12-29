@@ -51,7 +51,9 @@ First download
 * You can download the application from this [zip file](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
 * Optional step: Move the ``Volume Control`` app to your application folder ``/Applications``
 * The first time you launch the application you will be presented the error message
-* 
+
+	![Unknown developer](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Unknown_developer.png)
+
 * You have to authorize from *Security & Privacy* of the *System Preferences* the first launch of the application
 
 	![Security and Privacy panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacy.png)
