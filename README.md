@@ -1,10 +1,7 @@
 Volume Control (for Apple Music and Spotify)
 =====================
 
-| :warning: WARNING          |
-|:---------------------------|
-| If you have an M1 Apple computer, read the instructions below how to launch the app. |
-
+:warning: If you have an M1 Apple computer, read the instructions [below](#M1_note) how to launch the app.
 
 
 Description
@@ -63,8 +60,10 @@ First download
 	![Open anyway panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Open_anyway_panel.png)
 * You can avoid the previous steps by downloading the source file and compiling the application by yourself with Apple *Xcode*.
 
+<a name="M1_note">
 Running the app on the newer Apple M1 computers (native ARM64 Apple application)
 --------------------------------------------------------------------------
+</a>
 
 If you own an Apple computer of latest generation (Apple M1), you cannot run the application without signinig it. This is a security change introduce first with Big Sur. For more details, check the [link](https://wiki.lazarus.freepascal.org/Code_Signing_for_macOS), where it is explained that all native ARM64 code must be signed or the operating system prevents its execution. In order to sign the application, follow these steps:
 
