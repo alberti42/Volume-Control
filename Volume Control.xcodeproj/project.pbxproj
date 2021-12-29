@@ -238,7 +238,6 @@
 			isa = PBXGroup;
 			children = (
 				65996D0B267EACCC0080A9A5 /* Supporting files */,
-				65996D0A267EACC40080A9A5 /* Views */,
 				65996D09267EACB50080A9A5 /* Controllers */,
 				65996D05267EAC800080A9A5 /* AppleScripts */,
 			);
@@ -275,13 +274,6 @@
 				65996E16267EB14F0080A9A5 /* SystemVolume.m */,
 			);
 			path = Controllers;
-			sourceTree = "<group>";
-		};
-		65996D0A267EACC40080A9A5 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Views;
 			sourceTree = "<group>";
 		};
 		65996D0B267EACCC0080A9A5 /* Supporting files */ = {
