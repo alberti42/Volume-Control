@@ -53,13 +53,19 @@ First download
 * The first time you launch the application you will be presented the error message
 
 	![Unknown developer](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Unknown_developer.png)
-* From *Security & Privacy* of the *System Preferences*, click on the button *Oen
+* From *Security & Privacy* of the *System Preferences*, click on the button *Open anyway*
 	![Open anyway panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Open_anyway_panel.png)
+* You can avoid the previous steps by downloading the source file and compiling the application by yourself with Apple *Xcode*.
 
-* You have to authorize from *Security & Privacy* of the *System Preferences* the first launch of the application
-	![Security and Privacy panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacy.png)
+Special note for newer Apple M1 computers (native ARM64 Apple application)
+--------------------------------------------------------------------------
 
-* If you want to avoid these steps, you can download the source file and compile the application by yourself with Apple Xcode.
+If you own an Apple computer of latest generation (Apple M1), you cannot run the application without signinig it. This is a security change introduce first with Big Sur. For more details, check the [link](https://wiki.lazarus.freepascal.org/Code_Signing_for_macOS), where it is explained that all native ARM64 code must be signed or the operating system prevents its execution. In order to sign the application, follow these steps:
+
+* Open the command line (i.e., launch the terminal app)
+* Assuming that the application *Volume Control* is in the application folder, type the following command:
+	``codesign --force --deep -s - /Applications/Volume\ Control.app``
+
 
 Permission to control Music's and Spotify's volume
 --------------------------------------------------
