@@ -60,16 +60,16 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     {
         case NX_KEYTYPE_MUTE:
             
-            if(previousKeyCode!=keyCode && app->timer)
+            if(previousKeyCode!=keyCode && app->volumeRampTimer)
             {
-                [app stopTimer];
+                [app stopVolumeRampTimer];
             }
             previousKeyCode=keyCode;
             
             if( keyState == 1 )
             {
                 muteDown = true;
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"MuteITunesVolume" object:NULL];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"MuteVol" object:NULL];
             }
             else
             {
@@ -82,33 +82,27 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
             
             if(!muteDown)
             {
-                if(previousKeyCode!=keyCode && app->timer)
+                if(previousKeyCode!=keyCode && app->volumeRampTimer)
                 {
-                    [app stopTimer];
+                    [app stopVolumeRampTimer];
                 }
                 previousKeyCode=keyCode;
                 
                 if( keyState == 1 )
                 {
-                    if( !app->timer )
+                    if( !app->volumeRampTimer )
                     {
                         if( keyCode == NX_KEYTYPE_SOUND_UP )
-                        {
-                            [[NSNotificationCenter defaultCenter]
-                             postNotificationName:(keyIsRepeat?@"IncreaseITunesVolumeRamp":@"IncreaseITunesVolume") object:NULL];
-                        }
+                            [[NSNotificationCenter defaultCenter] postNotificationName:(keyIsRepeat?@"IncVolRamp":@"IncVol") object:NULL];
                         else
-                        {
-                            [[NSNotificationCenter defaultCenter]
-                             postNotificationName:(keyIsRepeat?@"DecreaseITunesVolumeRamp":@"DecreaseITunesVolume") object:NULL];
-                        }
+                            [[NSNotificationCenter defaultCenter] postNotificationName:(keyIsRepeat?@"DecVolRamp":@"DecVol") object:NULL];
                     }
                 }
                 else
                 {
-                    if(app->timer)
+                    if(app->volumeRampTimer)
                     {
-                        [app stopTimer];
+                        [app stopVolumeRampTimer];
                     }
                 }
                 return NULL;
@@ -247,8 +241,8 @@ static NSTimeInterval statusBarHideDelay=10;
     accessibilityDialog = nil;
     introWindowController = nil;
     
-    [timer invalidate];
-    timer = nil;
+    [volumeRampTimer invalidate];
+    volumeRampTimer = nil;
     
     [timerImgSpeaker invalidate];
     timerImgSpeaker = nil;
@@ -371,20 +365,23 @@ static NSTimeInterval statusBarHideDelay=10;
     }
 }
 
-- (void)stopTimer
+- (void)stopVolumeRampTimer
 {
-    [timer invalidate];
-    timer=nil;
+    if([self PlaySoundFeedback] && _AppleCMDModifierPressed != _UseAppleCMDModifier)
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"SoundFeedback" object:NULL];
+
+    [volumeRampTimer invalidate];
+    volumeRampTimer=nil;
 }
 
 - (void)rampVolumeUp:(NSTimer*)theTimer
 {
-    [self changeVol:true];
+    [self setVolumeUp:true];
 }
 
 - (void)rampVolumeDown:(NSTimer*)theTimer
 {
-    [self changeVol:false];
+    [self setVolumeUp:false];
 }
 
 - (bool)createEventTap
@@ -424,22 +421,22 @@ static NSTimeInterval statusBarHideDelay=10;
     // NSLog(@"%d keycode (up) sent",key);
 }
 
-- (void)playPauseITunes:(NSNotification *)aNotification
+- (void)PlayPauseMusic:(NSNotification *)aNotification
 {
     [self sendMediaKey:NX_KEYTYPE_PLAY];
 }
 
-- (void)nextTrackITunes:(NSNotification *)aNotification
+- (void)NextTrackMusic:(NSNotification *)aNotification
 {
     [self sendMediaKey:NX_KEYTYPE_NEXT];
 }
 
-- (void)previousTrackITunes:(NSNotification *)aNotification
+- (void)PreviousTrackMusic:(NSNotification *)aNotification
 {
     [self sendMediaKey:NX_KEYTYPE_PREVIOUS];
 }
 
-- (void)muteITunesVolume:(NSNotification *)aNotification
+- (void)MuteVol:(NSNotification *)aNotification
 {
     id musicPlayerPnt = [self runningPlayer];
     
@@ -474,43 +471,35 @@ static NSTimeInterval statusBarHideDelay=10;
     }
 }
 
-- (void)increaseITunesVolume:(NSNotification *)aNotification
+- (void)IncVol:(NSNotification *)aNotification
 {
-#ifdef OWN_WINDOW
-    [self displayVolumeBar];
-#endif
-    
-    if( [[aNotification name] isEqualToString:@"IncreaseITunesVolumeRamp"] )
+    if( [[aNotification name] isEqualToString:@"IncVolRamp"] )
     {
-        timer=[NSTimer scheduledTimerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeUp:) userInfo:nil repeats:YES];
+        volumeRampTimer=[NSTimer scheduledTimerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeUp:) userInfo:nil repeats:YES];
         
-        [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
+        [[NSRunLoop mainRunLoop] addTimer:volumeRampTimer forMode:NSRunLoopCommonModes];
         
         if(timerImgSpeaker) {[timerImgSpeaker invalidate]; timerImgSpeaker=nil;}
     }
     else
     {
-        [self changeVol:true];
+        [self setVolumeUp:true];
     }
 }
 
-- (void)decreaseITunesVolume:(NSNotification *)aNotification
+- (void)DecVol:(NSNotification *)aNotification
 {
-#ifdef OWN_WINDOW
-    [self displayVolumeBar];
-#endif
-    
-    if( [[aNotification name] isEqualToString:@"DecreaseITunesVolumeRamp"] )
+    if( [[aNotification name] isEqualToString:@"DecVolRamp"] )
     {
-        timer=[NSTimer scheduledTimerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeDown:) userInfo:nil repeats:YES];
+        volumeRampTimer=[NSTimer scheduledTimerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeDown:) userInfo:nil repeats:YES];
         
-        [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
+        [[NSRunLoop mainRunLoop] addTimer:volumeRampTimer forMode:NSRunLoopCommonModes];
         
         if(timerImgSpeaker) {[timerImgSpeaker invalidate]; timerImgSpeaker=nil;}
     }
     else
     {
-        [self changeVol:false];
+        [self setVolumeUp:false];
     }
 }
 
@@ -614,21 +603,24 @@ static NSTimeInterval statusBarHideDelay=10;
     menuIsVisible=false;
 }
 
+- (void)emitAcousticFeedback:(NSNotification *)aNotification
+{
+    AudioServicesPlayAlertSound(3);
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(increaseITunesVolume:) name:@"IncreaseITunesVolume" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(increaseITunesVolume:) name:@"IncreaseITunesVolumeRamp" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(decreaseITunesVolume:) name:@"DecreaseITunesVolume" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(decreaseITunesVolume:) name:@"DecreaseITunesVolumeRamp" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(muteITunesVolume:) name:@"MuteITunesVolume" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playPauseITunes:) name:@"PlayPauseITunes" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nextTrackITunes:) name:@"NextTrackITunes" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(previousTrackITunes:) name:@"PreviousTrackITunes" object:nil];
-    //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(displayResolutionChanged:) name:@"displayResolutionHasChanged" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(emitAcousticFeedback:) name:@"SoundFeedback" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(IncVol:) name:@"IncVol" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(IncVol:) name:@"IncVolRamp" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(DecVol:) name:@"DecVol" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(DecVol:) name:@"DecVolRamp" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(MuteVol:) name:@"MuteVol" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(PlayPauseMusic:) name:@"PlayPauseMusic" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(NextTrackMusic:) name:@"NextTrackMusic" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(PreviousTrackMusic:) name:@"PreviousTrackMusic" object:nil];
     
-    [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
-                                                           selector: @selector(receiveWakeNote:)
-                                                               name: NSWorkspaceDidWakeNotification object: NULL];
+    [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self selector: @selector(receiveWakeNote:) name:NSWorkspaceDidWakeNotification object: NULL];
     
     signal(SIGTERM, handleSIGTERM);
     
@@ -724,7 +716,6 @@ static NSTimeInterval statusBarHideDelay=10;
 
 - (void) setAutomaticUpdates:(bool)enabled
 {
-    NSLog(@"Status %d",enabled);
     NSMenuItem* menuItem=[_statusMenu itemWithTag:8];
     [menuItem setState:enabled];
     
@@ -733,7 +724,7 @@ static NSTimeInterval statusBarHideDelay=10;
     
     _AutomaticUpdates=enabled;
     
-    //[[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:enabled];
+    [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:enabled];
 }
 
 - (IBAction)togglePlaySoundFeedback:(id)sender
@@ -780,14 +771,7 @@ static NSTimeInterval statusBarHideDelay=10;
     
     CGEventTapEnable(eventTap, enabled);
     
-    if(enabled)
-    {
-        //[_statusBarItemView setIconStatusBarIsGrayed:NO];
-    }
-    else
-    {
-        //[_statusBarItemView setIconStatusBarIsGrayed:YES];
-    }
+    [[[self statusBar] button] setAppearsDisabled:!enabled];
     
     [preferences setBool:enabled forKey:@"TappingEnabled"];
     [preferences synchronize];
@@ -852,8 +836,8 @@ static NSTimeInterval statusBarHideDelay=10;
 
 - (void) receiveWakeNote: (NSNotification*) note
 {
+    NSLog(@"receiveWakeNote: %@", [note name]);
     [self setTapping:[self Tapping]];
-    //[_statusBarItemView setAppropriateColorScheme];
 }
 
 - (void) dealloc
@@ -868,7 +852,7 @@ static NSTimeInterval statusBarHideDelay=10;
 
 - (IBAction)increaseVol:(id)sender
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"IncreaseITunesVolume" object:NULL];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"IncVol" object:NULL];
     
 }
 
@@ -897,7 +881,7 @@ static NSTimeInterval statusBarHideDelay=10;
     return musicPlayerPnt;
 }
 
-- (void)changeVol:(bool)increase
+- (void)setVolumeUp:(bool)increase
 {
     id musicPlayerPnt = [self runningPlayer];
     
@@ -919,21 +903,6 @@ static NSTimeInterval statusBarHideDelay=10;
         if (volume<0) volume=0;
         if (volume>100) volume=100;
         
-        /*
-         NSInteger i = 0;
-         double diff1 = abs(100);
-         double diff2;
-         
-         for (NSInteger j = 1; j < numPos; j++ ) {
-         diff2 = fabs(volume - (double)positions[j]);
-         if ( diff2<diff1 )
-         {
-         diff1 = diff2;
-         i = j;
-         }
-         }
-         */
-        
         OSDGraphic image = (volume > 0)? OSDGraphicSpeaker : OSDGraphicSpeakerMute;
         
         NSInteger numFullBlks = floor(volume/6.25);
@@ -946,10 +915,8 @@ static NSTimeInterval statusBarHideDelay=10;
         
         [musicPlayerPnt setCurrentVolume:volume];
         
-        if([self PlaySoundFeedback] && (self->timer == nil) && [musicPlayerPnt isKindOfClass:[SystemApplication class]])
-        {
-            AudioServicesPlayAlertSound(3);
-        }
+        if([self PlaySoundFeedback] && (self->volumeRampTimer == nil) && _AppleCMDModifierPressed != _UseAppleCMDModifier)
+            [self emitAcousticFeedback:nil];
         
         if( musicPlayerPnt == iTunes)
             [self setItunesVolume:volume];

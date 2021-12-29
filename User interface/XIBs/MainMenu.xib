@@ -34,16 +34,7 @@
                         <action selector="toggleTapping:" target="3" id="HHI-BF-9NR"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Apple Remote intercepted" tag="2" hidden="YES" enabled="NO" id="7" userLabel="Apple Remote intercepted">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                </menuItem>
                 <menuItem isSeparatorItem="YES" id="17"/>
-                <menuItem title="Use ⌘ modifier" tag="3" id="9" userLabel="Use ⌘ modifier">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="toggleUseAppleCMDModifier:" target="3" id="ypk-61-qkE"/>
-                    </connections>
-                </menuItem>
                 <menuItem title="Hide menu bar icon" tag="5" id="10" userLabel="Hide from Status Bar">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
@@ -56,16 +47,22 @@
                         <action selector="toggleHideVolumeWindow:" target="3" id="YZl-KG-mLA"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Emit sound for system volume" tag="7" id="BgS-xF-QHr" userLabel="Play sound">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="togglePlaySoundFeedback:" target="3" id="eKm-3K-hQG"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Toggle behavior with ⌘ key" tag="3" id="9" userLabel="Use ⌘ modifier">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="toggleUseAppleCMDModifier:" target="3" id="ypk-61-qkE"/>
+                    </connections>
+                </menuItem>
                 <menuItem title="Start at login" tag="4" id="12" userLabel="Start at login">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="toggleStartAtLogin:" target="3" id="197"/>
-                    </connections>
-                </menuItem>
-                <menuItem title="Sound when system volume changes" tag="7" id="BgS-xF-QHr" userLabel="Play sound">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="togglePlaySoundFeedback:" target="3" id="eKm-3K-hQG"/>
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="18"/>
@@ -273,7 +270,7 @@
                     </textFieldCell>
                 </textField>
             </subviews>
-            <point key="canvasLocation" x="459" y="306"/>
+            <point key="canvasLocation" x="-29" y="-71"/>
         </customView>
     </objects>
     <resources>

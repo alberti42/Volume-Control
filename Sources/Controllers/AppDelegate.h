@@ -53,7 +53,7 @@
     IntroWindowController *introWindowController;
     AccessibilityDialog *accessibilityDialog;
     
-    NSTimer* timer;
+    NSTimer* volumeRampTimer;
     NSTimer* timerImgSpeaker;
     NSTimeInterval waitOverlayPanel;
     bool fadeInAnimationReady;
@@ -104,7 +104,7 @@
 - (void) hideSpeakerImg:(NSTimer*)theTimer;
 #endif
 
-- (void)stopTimer;
+- (void)stopVolumeRampTimer;
 
 - (void)updatePercentages;
 
