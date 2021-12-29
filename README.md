@@ -6,11 +6,11 @@ Description
 
 * This app allows you to directly control the volume of Apple Music and of Spotify using ``volume-up`` and ``volume-down`` keys from your keyboard.
 * The app is especially useful when listening to music on AirPlay devices.
-* You can adjust the finesse by which you step the volume.
-* You can disable the heads-up display showing the volume status; this is useful when you are watching movies and you do not want to be distracted by the overlaid volume display.
-* Using volume keys, the volume of the currently playing application (either Music or Spotify) is adjusted. If neither Music nor Spotify is playing, then the global volume will be adjusted.
-* If you also press command key (⌘), you reverse the previous behavior. In this way you can still control the global volume even when Music or Spotify is plying.
-* If the option ``Use ⌘ modifier`` is selected, then the app responds in the opposite manner, meaning that volume keys control the global volume, unless the command key is simultaneously pressed, in which case the volume of Music and Spotify is adjusted.
+* You can adjust the step size by which the volume is changed.
+* You can disable the feedback bezel with the volume level. This is useful when you are watching movies and you do not want to be distracted by the overlaid bezel.
+* Using volume keys, the volume of the currently playing application (either Music or Spotify) is adjusted. If neither Music nor Spotify is playing, then the system volume will be adjusted.
+* When you press command key (⌘), you control the system volume regardless whether Music or Spotify is playing.
+* The option ``Use ⌘ modifier`` toggles the app behavior, meaning that volume keys control the system volume, and when ``⌘`` is simultaneously pressed, in which case the volume of Music and Spotify is adjusted.
 
 ![Screenshot of the application](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/screenshot.png)
 
