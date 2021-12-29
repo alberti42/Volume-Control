@@ -9,8 +9,8 @@ Description
 * You can adjust the step size by which the volume is changed.
 * You can disable the feedback bezel with the volume level. This is useful when you are watching movies and you do not want to be distracted by the overlaid bezel.
 * Using volume keys, the volume of the currently playing application (either Music or Spotify) is adjusted. If neither Music nor Spotify is playing, then the system volume will be adjusted.
-* When you press command key (⌘), you control the system volume regardless whether Music or Spotify is playing.
-* The option ``Use ⌘ modifier`` toggles the app behavior, meaning that volume keys control the system volume, and when ``⌘`` is simultaneously pressed, in which case the volume of Music and Spotify is adjusted.
+* When you press command key (``⌘``), you control the system volume regardless whether Music or Spotify is playing.
+* The option ``Use ⌘ modifier`` toggles the app behavior, meaning that volume keys control the system volume, and when ``⌘`` is simultaneously pressed, the volume of Music and Spotify is then controlled.
 
 ![Screenshot of the application](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/screenshot.png)
 
@@ -38,6 +38,7 @@ It is simple. There is no need of any installation.
 First download
 --------------
 
+<!--
 * If you downloaded for the first time the app, you might encounter the error shown below.
 	![Security and Privacy panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/firstDownload.png)
 * The error occurs because of the extended attribute ``com.apple.quarantine``, which is automatically applied by Apple on all applications downloaded from the internet, unless officially authorized by Apple itself.
@@ -46,7 +47,12 @@ First download
 	``sudo xattr -d com.apple.quarantine "/Applications/Volume Control.app"``
 	
 	For more information, check [StackExchange](https://superuser.com/questions/526920/how-to-remove-quarantine-from-file-permissions-in-os-x).
-* You might have to authorize from *Security & Privacy* of the *System Preferences* the first launch of the application
+-->
+* You can download the application from this [zip file](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
+* Optional step: Move the ``Volume Control`` app to your application folder ``/Applications``
+* The first time you launch the application you will be presented the error message
+* 
+* You have to authorize from *Security & Privacy* of the *System Preferences* the first launch of the application
 
 	![Security and Privacy panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacy.png)
 
@@ -55,7 +61,7 @@ First download
 Permission to control Music's and Spotify's volume
 --------------------------------------------------
 
-The System Integrity Protection of macOS requires you to grant *Volume Control* access to Music and Spotify. The first time the application attempts to control their volume, you will be asked with a dialog window to grant access, as shown in the screenshot below.
+The System Integrity Protection of macOS requires you to grant *Volume Control* access to Music and Spotify. The first time the application attempts to control their volume, you will be asked with a dialog window to grant access, as shown in the screenshot below. If you experience problems, remove the entry ``Volume Control`` from the Accessibility list and repeat the procedure.
 ![Security and Privacy Accessibility](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAccessibility.png)
 
 Troubleshooting
