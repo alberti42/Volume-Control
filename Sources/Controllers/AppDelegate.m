@@ -7,7 +7,6 @@
 //
 
 #import "AppDelegate.h"
-#import "StatusItemView.h"
 #import "SystemVolume.h"
 #import "AccessibilityDialog.h"
 
@@ -125,7 +124,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 @interface AppDelegate () <NSMenuDelegate>
 {
-    StatusItemView* _statusBarItemView;
+    //StatusItemView* _statusBarItemView;
     NSTimer* _statusBarHideTimer;
     NSPopover* _hideFromStatusBarHintPopover;
     NSTextField* _hideFromStatusBarHintLabel;
@@ -466,7 +465,7 @@ static NSTimeInterval statusBarHideDelay=10;
             [musicPlayerPnt setOldVolume:-1];
         }
         
-        if([_statusBarItemView menuIsVisible])
+        if(menuIsVisible)
         {
             if( musicPlayerPnt == iTunes)
                 [self setItunesVolume:[musicPlayerPnt currentVolume]];
@@ -524,30 +523,7 @@ static NSTimeInterval statusBarHideDelay=10;
     if(self)
     {
         self->eventTap = nil;
-        
-#ifdef OWN_WINDOW
-        fadeOutAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
-        [fadeOutAnimation setDuration:fadeOutDuration];
-        [fadeOutAnimation setRemovedOnCompletion:NO];
-        [fadeOutAnimation setFillMode:kCAFillModeForwards];
-        [fadeOutAnimation setFromValue:[NSNumber numberWithFloat:1.0f]];
-        [fadeOutAnimation setToValue:[NSNumber numberWithFloat:0.0f]];
-        // [fadeOutAnimation setDelegate:self];
-        
-        fadeInAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
-        [fadeInAnimation setDuration:fadeInDuration];
-        [fadeInAnimation setRemovedOnCompletion:NO];
-        [fadeInAnimation setFillMode:kCAFillModeForwards];
-        [fadeInAnimation setFromValue:[NSNumber numberWithFloat:0.0f]];
-        [fadeInAnimation setToValue:[NSNumber numberWithFloat:1.0f]];
-        // [fadeInAnimation setDelegate:self];
-        
-        fadeInAnimationReady=true;
-        
-        waitOverlayPanel=1.0;
-#endif
-        
-        
+                
         if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_6) {
             //10.6.x or earlier systems
             osxVersion = 106;
@@ -605,7 +581,6 @@ static NSTimeInterval statusBarHideDelay=10;
     
     [[SUUpdater sharedUpdater] setFeedURL:[NSURL URLWithString:[NSString stringWithFormat: @"http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/VolumeControlCast.xml.php?version=%@&osxversion=%@",version,[operatingSystemVersionString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]]]];
     
-    
     [[SUUpdater sharedUpdater] setUpdateCheckInterval:60*60*24*7]; // look for new updates every 7 days
     
     // [self _loadBezelServices]; // El Capitan and probably older systems
@@ -639,6 +614,7 @@ static NSTimeInterval statusBarHideDelay=10;
     
     [self setStartAtLogin:[self StartAtLogin] savePreferences:false];
     
+    menuIsVisible=false;
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
@@ -660,8 +636,7 @@ static NSTimeInterval statusBarHideDelay=10;
     signal(SIGTERM, handleSIGTERM);
     
     extern CFStringRef kAXTrustedCheckOptionPrompt __attribute__((weak_import));
-    
-    
+        
     if( AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)@{(__bridge id)kAXTrustedCheckOptionPrompt: @NO}) && [self createEventTap] )
     {
         [self completeInitialization];
@@ -693,26 +668,16 @@ static NSTimeInterval statusBarHideDelay=10;
         // the status bar item needs a custom view so that we can show a NSPopover for the hide-from-status-bar hint
         // the view now reacts to the mouseDown event to show the menu
         
-        _statusBar =  [[NSStatusBar systemStatusBar] statusItemWithLength:26];
+        _statusBar =  [[NSStatusBar systemStatusBar] statusItemWithLength:15];
         [[self statusBar] setMenu:[self statusMenu]];
     }
-    
-    if (!_statusBarItemView)
-    {
-        _statusBarItemView = [[StatusItemView alloc] initWithStatusItem:_statusBar];
-    }
-    
-    //[_statusBar setView:_statusBarItemView];
-    
-    statusImageBlack = [NSImage imageNamed:@"statusbar-item-black"];
-    statusImageGray = [NSImage imageNamed:@"statusbar-item-gray"];
-    statusImageWhite = [NSImage imageNamed:@"statusbar-item-white"];
-    
-    [statusImageWhite setTemplate:YES];
+        
+    NSImage* icon = [NSImage imageNamed:@"statusbar-icon"];
+    [icon setTemplate:YES];
         
     NSStatusBarButton *statusBarButton = [[self statusBar] button];
-    [statusBarButton setImage:statusImageWhite];
-    
+    [statusBarButton setImage:icon];
+    [statusBarButton setAppearsDisabled:false];
     
 }
 
@@ -819,11 +784,11 @@ static NSTimeInterval statusBarHideDelay=10;
     
     if(enabled)
     {
-        [_statusBarItemView setIconStatusBarIsGrayed:NO];
+        //[_statusBarItemView setIconStatusBarIsGrayed:NO];
     }
     else
     {
-        [_statusBarItemView setIconStatusBarIsGrayed:YES];
+        //[_statusBarItemView setIconStatusBarIsGrayed:YES];
     }
     
     [preferences setBool:enabled forKey:@"TappingEnabled"];
@@ -890,7 +855,7 @@ static NSTimeInterval statusBarHideDelay=10;
 - (void) receiveWakeNote: (NSNotification*) note
 {
     [self setTapping:[self Tapping]];
-    [_statusBarItemView setAppropriateColorScheme];
+    //[_statusBarItemView setAppropriateColorScheme];
 }
 
 - (void) dealloc
@@ -988,7 +953,7 @@ static NSTimeInterval statusBarHideDelay=10;
             AudioServicesPlayAlertSound(3);
         }
         
-        if([_statusBarItemView menuIsVisible])
+        if(menuIsVisible)
         {
             if( musicPlayerPnt == iTunes)
                 [self setItunesVolume:volume];
@@ -1182,7 +1147,8 @@ static NSTimeInterval statusBarHideDelay=10;
         [_hideFromStatusBarHintPopover setContentViewController:_hintVC];
     }
     
-    [_hideFromStatusBarHintPopover showRelativeToRect:[_statusBarItemView frame] ofView:_statusBarItemView preferredEdge:NSMinYEdge];
+    // TODO
+    //[_hideFromStatusBarHintPopover showRelativeToRect:[_statusBarItemView frame] ofView:_statusBarItemView preferredEdge:NSMinYEdge];
 }
 
 - (void)updateHideFromStatusBarHintPopover:(NSTimer*)aTimer
@@ -1232,16 +1198,15 @@ static NSTimeInterval statusBarHideDelay=10;
     [preferences synchronize];
 }
 
-
 - (void)menuWillOpen:(NSMenu *)menu
 {
-    [_statusBarItemView setMenuIsVisible:true];
+    menuIsVisible=true;
     [_hideFromStatusBarHintPopover close];
 }
 
 - (void)menuDidClose:(NSMenu *)menu
 {
-    [_statusBarItemView setMenuIsVisible:false];
+    menuIsVisible=false;
     if ([self hideFromStatusBar])
         [self showHideFromStatusBarHintPopover];
 }

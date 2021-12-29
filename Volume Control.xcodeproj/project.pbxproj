@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		652AE6E8277B8659000625E3 /* StatusItemView.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996DFF267EB0DB0080A9A5 /* StatusItemView.m */; };
 		654864A827480DE600F78F99 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 654864A627480DCC00F78F99 /* Sparkle.framework */; };
 		654864A927480DE600F78F99 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 654864A627480DCC00F78F99 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
@@ -243,7 +242,6 @@
 				65996D0B267EACCC0080A9A5 /* Supporting files */,
 				65996D0A267EACC40080A9A5 /* Views */,
 				65996D09267EACB50080A9A5 /* Controllers */,
-				65996D08267EACB00080A9A5 /* Models */,
 				65996D05267EAC800080A9A5 /* AppleScripts */,
 			);
 			path = Sources;
@@ -263,13 +261,6 @@
 				65996D06267EAC8E0080A9A5 /* SystemVolume.scpt */,
 			);
 			path = AppleScripts;
-			sourceTree = "<group>";
-		};
-		65996D08267EACB00080A9A5 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Models;
 			sourceTree = "<group>";
 		};
 		65996D09267EACB50080A9A5 /* Controllers */ = {
@@ -451,7 +442,6 @@
 				65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */,
 				65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */,
 				65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */,
-				652AE6E8277B8659000625E3 /* StatusItemView.m in Sources */,
 				65996E09267EB0FF0080A9A5 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

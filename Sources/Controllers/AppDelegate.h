@@ -35,7 +35,7 @@
     CFMachPortRef eventTap;
     CFRunLoopSourceRef runLoopSource;
 
-    // AppleRemote* remote;
+    bool menuIsVisible;
     
     NSInteger oldVolumeSetting;
     
@@ -44,10 +44,6 @@
     double increment;
     
     Class OSDManager;
-    
-    NSImage *statusImageWhite;
-    NSImage *statusImageBlack;
-    NSImage *statusImageGray;
     
 @public
     PlayerApplication* iTunes;
