@@ -49,13 +49,14 @@ First download
 	For more information, check [StackExchange](https://superuser.com/questions/526920/how-to-remove-quarantine-from-file-permissions-in-os-x).
 -->
 * You can download the application from this [zip file](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
-* Optional step: Move the ``Volume Control`` app to your application folder ``/Applications``
+* Optional step: Move the *Volume Control* app to your application folder ``/Applications``
 * The first time you launch the application you will be presented the error message
 
 	![Unknown developer](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Unknown_developer.png)
+* From *Security & Privacy* of the *System Preferences*, click on the button *Oen
+	![Open anyway panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Open_anyway_panel.png)
 
 * You have to authorize from *Security & Privacy* of the *System Preferences* the first launch of the application
-
 	![Security and Privacy panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacy.png)
 
 * If you want to avoid these steps, you can download the source file and compile the application by yourself with Apple Xcode.
