@@ -89,7 +89,7 @@
                         <action selector="checkForUpdates:" target="4" id="40"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Automatic weekly updates" state="on" tag="6" id="8" userLabel="Automatic weekly updates">
+                <menuItem title="Automatic weekly updates" state="on" tag="8" id="8" userLabel="Automatic weekly updates">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="toggleAutomaticUpdates:" target="3" id="39"/>

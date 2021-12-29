@@ -724,7 +724,8 @@ static NSTimeInterval statusBarHideDelay=10;
 
 - (void) setAutomaticUpdates:(bool)enabled
 {
-    NSMenuItem* menuItem=[_statusMenu itemWithTag:6];
+    NSLog(@"Status %d",enabled);
+    NSMenuItem* menuItem=[_statusMenu itemWithTag:8];
     [menuItem setState:enabled];
     
     [preferences setBool:enabled forKey:@"AutomaticUpdates"];
@@ -732,7 +733,7 @@ static NSTimeInterval statusBarHideDelay=10;
     
     _AutomaticUpdates=enabled;
     
-    [[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:enabled];
+    //[[SUUpdater sharedUpdater] setAutomaticallyChecksForUpdates:enabled];
 }
 
 - (IBAction)togglePlaySoundFeedback:(id)sender
