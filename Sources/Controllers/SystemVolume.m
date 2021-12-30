@@ -61,6 +61,31 @@
     }        
 }
 
+- (bool) isMuted
+{
+    AudioDeviceID defaultOutputDeviceID = [self getDefaultOutputDevice];
+    
+    AudioObjectPropertyAddress volumePropertyAddress = {
+        kAudioDevicePropertyMute,
+        kAudioDevicePropertyScopeOutput,
+        kAudioObjectPropertyElementMaster
+    };
+    
+    UInt32 muteVal;
+    UInt32 muteValSize = sizeof(muteVal);
+    OSStatus result = AudioObjectGetPropertyData(defaultOutputDeviceID,
+                                        &volumePropertyAddress,
+                                        0, NULL,
+                                        &muteValSize, &muteVal);
+    
+    if (result != kAudioHardwareNoError) {
+        NSLog(@"No volume reported for device 0x%0x", defaultOutputDeviceID);
+    }
+    
+    return muteVal;
+}
+
+
 - (double) currentVolume
 {
     AudioDeviceID defaultOutputDeviceID = [self getDefaultOutputDevice];

@@ -46,12 +46,13 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     // if ([sysEvent subtype] != NX_SUBTYPE_AUX_CONTROL_BUTTONS && [sysEvent subtype] != NX_SUBTYPE_AUX_MOUSE_BUTTONS) return event;
     if ([sysEvent subtype] != NX_SUBTYPE_AUX_CONTROL_BUTTONS) return event;
     
+    AppDelegate* app=(__bridge AppDelegate *)(refcon);
+    
     int keyFlags = ([sysEvent data1] & 0x0000FFFF);
     int keyCode = (([sysEvent data1] & 0xFFFF0000) >> 16);
     int keyState = (((keyFlags & 0xFF00) >> 8)) == 0xA;
-    CGEventFlags keyModifier = [sysEvent modifierFlags]|0xFFFF;
-    AppDelegate* app=(__bridge AppDelegate *)(refcon);
     bool keyIsRepeat = (keyFlags & 0x1);
+    CGEventFlags keyModifier = [sysEvent modifierFlags]|0xFFFF;
     
     // store whether Apple CMD modifier has been pressed or not
     [app setAppleCMDModifierPressed:(keyModifier&NX_COMMANDMASK)==NX_COMMANDMASK];
@@ -217,9 +218,10 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 @synthesize statusMenu = _statusMenu;
 
-static NSTimeInterval volumeRampTimeInterval=0.01;
-static NSTimeInterval statusBarHideDelay=10;
-static NSTimeInterval checkPlayerTimeout=1;
+static NSTimeInterval volumeRampTimeInterval=0.01f;
+static NSTimeInterval statusBarHideDelay=10.0f;
+static NSTimeInterval checkPlayerTimeout=1.0f;
+static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (IBAction)terminate:(id)sender
 {
@@ -251,6 +253,9 @@ static NSTimeInterval checkPlayerTimeout=1;
     [timerImgSpeaker invalidate];
     timerImgSpeaker = nil;
     
+    [updateSystemVolumeTimer invalidate];
+    updateSystemVolumeTimer = nil;
+     
     preferences = nil;
     
     [NSApp terminate:nil];
@@ -556,6 +561,12 @@ static NSTimeInterval checkPlayerTimeout=1;
         }
         
         menuIsVisible=false;
+        currentPlayer=nil;
+        
+        updateSystemVolumeTimer=nil;
+        volumeRampTimer=nil;
+        timerImgSpeaker=nil;
+        checkPlayerTimer=nil;
         
     }
     return self;
@@ -682,6 +693,14 @@ static NSTimeInterval checkPlayerTimeout=1;
     
 }
 
+- (void)updateSystemVolume:(NSTimer*)theTimer
+{
+    if([systemAudio isMuted])
+        [[self systemPerc] setStringValue:[NSString stringWithFormat:@"(%d%%)",0]];
+    else
+        [[self systemPerc] setStringValue:[NSString stringWithFormat:@"(%d%%)",(int)[systemAudio currentVolume]]];
+}
+
 - (void)initializePreferences
 {
     preferences = [NSUserDefaults standardUserDefaults];
@@ -710,9 +729,10 @@ static NSTimeInterval checkPlayerTimeout=1;
         [[self iTunesBtn] setTitle:@"Music"];
     }
     [[self iTunesBtn] setState:[preferences boolForKey:    @"iTunesControl"]];
-    
     [[self spotifyBtn] setState:[preferences boolForKey:   @"spotifyControl"]];
-    [[self systemBtn] setState:[preferences boolForKey:    @"systemControl"]];
+    //[[self systemBtn] setState:[preferences boolForKey:    @"systemControl"]];
+    [[self systemBtn] setState:true];  // hard coded always to true
+    [[self systemBtn] setEnabled:false];
     [self setPlaySoundFeedback:[preferences boolForKey:     @"PlaySoundFeedback"]];
     
     NSInteger volumeIncSetting = [preferences integerForKey:@"volumeIncrement"];
@@ -848,7 +868,7 @@ static NSTimeInterval checkPlayerTimeout=1;
 
 - (void) receiveWakeNote: (NSNotification*) note
 {
-    NSLog(@"receiveWakeNote: %@", [note name]);
+    NSLog(@"Received WakeNote: %@", [note name]);
     [self setTapping:[self Tapping]];
 }
 
@@ -1158,10 +1178,7 @@ static NSTimeInterval checkPlayerTimeout=1;
     {
         [preferences setBool:[sender state] forKey:@"spotifyControl"];
     }
-    else if (sender == _systemBtn)
-    {
-        [preferences setBool:[sender state] forKey:@"systemControl"];
-    }
+    
     [preferences synchronize];
 }
 
@@ -1187,6 +1204,12 @@ static NSTimeInterval checkPlayerTimeout=1;
 {
     [self updatePercentages];
     
+    if(!_Tapping)
+    {
+        updateSystemVolumeTimer = [NSTimer scheduledTimerWithTimeInterval:updateSystemVolumeInterval target:self selector:@selector(updateSystemVolume:) userInfo:nil repeats:YES];
+        [[NSRunLoop mainRunLoop] addTimer:updateSystemVolumeTimer forMode:NSRunLoopCommonModes];
+    }
+    
     [_hideFromStatusBarHintPopover close];
     menuIsVisible=true;
 }
@@ -1194,8 +1217,14 @@ static NSTimeInterval checkPlayerTimeout=1;
 - (void)menuDidClose:(NSMenu *)menu
 {
     menuIsVisible=false;
-    if ([self hideFromStatusBar])
+    if([self hideFromStatusBar])
         [self showHideFromStatusBarHintPopover];
+    
+    if(updateSystemVolumeTimer)
+    {
+        [updateSystemVolumeTimer invalidate];
+        updateSystemVolumeTimer = nil;
+    }
 }
 
 @end

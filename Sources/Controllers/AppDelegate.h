@@ -14,8 +14,6 @@
 #import "Spotify.h"
 // #import "AppleRemote.h"
 
-//#define OWN_WINDOW
-
 @class IntroWindowController, AccessibilityDialog, StatusBarItem, PlayerApplication, SystemApplication;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate> {
@@ -60,6 +58,7 @@
     NSTimer* volumeRampTimer;
     NSTimer* timerImgSpeaker;
     NSTimer* checkPlayerTimer;
+    NSTimer* updateSystemVolumeTimer;
     NSTimeInterval waitOverlayPanel;
     bool fadeInAnimationReady;
 }
@@ -104,10 +103,6 @@
 // - (void)appleRemoteButton: (AppleRemoteEventIdentifier)buttonIdentifier pressedDown: (BOOL) pressedDown clickCount: (unsigned int) count;
 
 - (void)resetEventTap;
-
-#ifdef OWN_WINDOW
-- (void) hideSpeakerImg:(NSTimer*)theTimer;
-#endif
 
 - (void)stopVolumeRampTimer;
 
