@@ -53,7 +53,7 @@
                         <action selector="togglePlaySoundFeedback:" target="3" id="eKm-3K-hQG"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Toggle behavior with ⌘ key" tag="3" id="9" userLabel="Use ⌘ modifier">
+                <menuItem title="Invert behavior of ⌘ modifier" tag="3" id="9" userLabel="Use ⌘ modifier">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="toggleUseAppleCMDModifier:" target="3" id="ypk-61-qkE"/>
