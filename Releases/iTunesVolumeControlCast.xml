@@ -1,0 +1,30 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>iTunes Volume Control</title>
+        <item>
+            <title>1.4.4</title>
+            <pubDate>Fri, 31 Dec 2021 12:59:39 +0100</pubDate>
+            <sparkle:version>1.4.4.83</sparkle:version>
+            <sparkle:shortVersionString>1.4.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>10.7</sparkle:minimumSystemVersion>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.4.zip" length="501984" type="application/octet-stream" sparkle:dsaSignature="MC0CFBTYcqGB8Lz0uayJWP1eRbaVMSmXAhUA0AsKAGaefMGfn5VHlBnrcWY5hB0="/>
+        </item>
+        <item>
+            <title>1.4.3</title>
+            <pubDate>Fri, 31 Dec 2021 12:59:38 +0100</pubDate>
+            <sparkle:version>1.4.3.81</sparkle:version>
+            <sparkle:shortVersionString>1.4.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>10.7</sparkle:minimumSystemVersion>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.3.zip" length="502054" type="application/octet-stream" sparkle:dsaSignature="MC0CFQCFhq+WVaJA/Z+DdcCii6j2eYBiYwIUB+FQnoWLC86Ewqs6KfEVRrjIowU="/>
+        </item>
+        <item>
+            <title>1.4.2</title>
+            <pubDate>Fri, 31 Dec 2021 12:59:39 +0100</pubDate>
+            <sparkle:version>1.4.2.72</sparkle:version>
+            <sparkle:shortVersionString>1.4.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>10.7</sparkle:minimumSystemVersion>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.2.zip" length="501693" type="application/octet-stream" sparkle:dsaSignature="MCwCFAdzKgt9K81u6LpxNzHLDMYdE5R9AhRsAIrrzmf/Sv+IWvfDlaJwXeRPUQ=="/>
+        </item>
+    </channel>
+</rss>
