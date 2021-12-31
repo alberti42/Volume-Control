@@ -221,7 +221,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 static NSTimeInterval volumeRampTimeInterval=0.01f;
 static NSTimeInterval statusBarHideDelay=10.0f;
-static NSTimeInterval checkPlayerTimeout=1.0f;
+static NSTimeInterval checkPlayerTimeout=0.1f;
 static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (IBAction)terminate:(id)sender
@@ -381,7 +381,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     volumeRampTimer=nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:@"SoundFeedback" object:NULL];
     
-    checkPlayerTimer = [NSTimer scheduledTimerWithTimeInterval:checkPlayerTimeout target:self selector:@selector(resetCurrentPlayer:) userInfo:nil repeats:NO];
+    checkPlayerTimer = [NSTimer timerWithTimeInterval:checkPlayerTimeout target:self selector:@selector(resetCurrentPlayer:) userInfo:nil repeats:NO];
+    [[NSRunLoop mainRunLoop] addTimer:checkPlayerTimer forMode:NSRunLoopCommonModes];
 }
 
 - (void)rampVolumeUp:(NSTimer*)theTimer
@@ -487,8 +488,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     {
         [checkPlayerTimer invalidate];
         checkPlayerTimer = nil;
-        volumeRampTimer=[NSTimer scheduledTimerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeUp:) userInfo:nil repeats:YES];
-        
+        volumeRampTimer=[NSTimer timerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeUp:) userInfo:nil repeats:YES];
         [[NSRunLoop mainRunLoop] addTimer:volumeRampTimer forMode:NSRunLoopCommonModes];
         
         if(timerImgSpeaker) {[timerImgSpeaker invalidate]; timerImgSpeaker=nil;}
@@ -505,8 +505,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     {
         [checkPlayerTimer invalidate];
         checkPlayerTimer = nil;
-        volumeRampTimer=[NSTimer scheduledTimerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeDown:) userInfo:nil repeats:YES];
-        
+        volumeRampTimer=[NSTimer timerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeDown:) userInfo:nil repeats:YES];
         [[NSRunLoop mainRunLoop] addTimer:volumeRampTimer forMode:NSRunLoopCommonModes];
         
         if(timerImgSpeaker) {[timerImgSpeaker invalidate]; timerImgSpeaker=nil;}
@@ -898,7 +897,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     if(currentPlayer)
         return currentPlayer;
     
-    checkPlayerTimer = [NSTimer scheduledTimerWithTimeInterval:checkPlayerTimeout target:self selector:@selector(resetCurrentPlayer:) userInfo:nil repeats:NO];
+    checkPlayerTimer = [NSTimer timerWithTimeInterval:checkPlayerTimeout target:self selector:@selector(resetCurrentPlayer:) userInfo:nil repeats:NO];
+    [[NSRunLoop mainRunLoop] addTimer:checkPlayerTimer forMode:NSRunLoopCommonModes];
     
     if(_AppleCMDModifierPressed == _UseAppleCMDModifier)
     {
@@ -1093,9 +1093,9 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         if (![_statusBarHideTimer isValid] && [self statusBar])
         {
             [self setHideFromStatusBarHintLabelWithSeconds:statusBarHideDelay];
-            _statusBarHideTimer = [NSTimer scheduledTimerWithTimeInterval:statusBarHideDelay target:self selector:@selector(doHideFromStatusBar:) userInfo:nil repeats:NO];
+            _statusBarHideTimer = [NSTimer timerWithTimeInterval:statusBarHideDelay target:self selector:@selector(doHideFromStatusBar:) userInfo:nil repeats:NO];
             [[NSRunLoop mainRunLoop] addTimer:_statusBarHideTimer forMode:NSRunLoopCommonModes];
-            _hideFromStatusBarHintPopoverUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(updateHideFromStatusBarHintPopover:) userInfo:nil repeats:YES];
+            _hideFromStatusBarHintPopoverUpdateTimer = [NSTimer timerWithTimeInterval:0.5 target:self selector:@selector(updateHideFromStatusBarHintPopover:) userInfo:nil repeats:YES];
             [[NSRunLoop mainRunLoop] addTimer:_hideFromStatusBarHintPopoverUpdateTimer forMode:NSRunLoopCommonModes];
         }
     }
@@ -1204,7 +1204,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     
     if(!_Tapping)
     {
-        updateSystemVolumeTimer = [NSTimer scheduledTimerWithTimeInterval:updateSystemVolumeInterval target:self selector:@selector(updateSystemVolume:) userInfo:nil repeats:YES];
+        updateSystemVolumeTimer = [NSTimer timerWithTimeInterval:updateSystemVolumeInterval target:self selector:@selector(updateSystemVolume:) userInfo:nil repeats:YES];
         [[NSRunLoop mainRunLoop] addTimer:updateSystemVolumeTimer forMode:NSRunLoopCommonModes];
     }
     
