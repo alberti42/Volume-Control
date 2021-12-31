@@ -28,14 +28,16 @@ Why do you need this app?
 How to get it installed?
 ------------------------
 
-It is simple. There is no need of any installation.
-
-* Just download either this [zip file](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
+* Download the [zip file](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
 * Decompress it.
 * Drag the *Volume Control* app into your *Application* folder, or any other folder of your choice.
-* Remove the extended attribute ``com.apple.quarantine`` from the downloaded application (see instructions below under *First download*; this is a necessary step since macOS Catalina).
+* The first time you start the app, you will get an error message because the app is not signed.
+![Unknown developer](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Unknown_developer.png)
+<br/>Sorry, I don't have the costly Apple Developer Subscription, which would allow me to sign the app as a certified developer.
+* To circumvent the problem, from *Security & Privacy* of the *System Preferences*, click on the button *Open anyway*
+![Open anyway panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Open_anyway_panel.png)
 * Run the *Volume Control* app. You should see the symbol of a "music note" appearing in your status bar, as shown in the screenshot above.
-* The first time you launch the app, you should authorize it through the *General* panel of *Security & Privacy* of the *System Preferences*, as shown in the screenshot below. Follow instructions explained below under *Enabling control of Music and Spotify*.
+* The first time you launch the app, you should also authorize it through the *General* panel of *Security & Privacy* of the *System Preferences*, as shown in the screenshot below. For more information, see [below](#enabling_permissions).
 * Enjoy listening to your favorite music with better volume control.
 
 First download
@@ -54,7 +56,6 @@ First download
 * You can download the application from this [zip file](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
 * Optional step: Move the *Volume Control* app to your application folder ``/Applications``
 * The first time you launch the application you will be presented the error message
-
 	![Unknown developer](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Unknown_developer.png)
 * From *Security & Privacy* of the *System Preferences*, click on the button *Open anyway*
 	![Open anyway panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Open_anyway_panel.png)
@@ -73,6 +74,7 @@ If you own an Apple computer of latest generation (Apple M1), you cannot run the
 
 Permission to control Music's and Spotify's volume
 --------------------------------------------------
+<a name="enabling_permissions"></a>
 
 The System Integrity Protection of macOS requires you to grant *Volume Control* access to Music and Spotify. The first time the application attempts to control their volume, you will be asked with a dialog window to grant access, as shown in the screenshot below. If you experience problems, remove the entry ``Volume Control`` from the Accessibility list and repeat the procedure.
 ![Security and Privacy Accessibility](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAccessibility.png)
@@ -87,7 +89,7 @@ Troubleshooting
 Requirements
 ------------
 
-Compatible with macOS Big Sur, and also back compatible with older macOS, starting with 10.9 (Mavericks) and subsequent versions.
+Compatible with macOS Big Sur and subsequent versions.
 
 Credits
 -------
