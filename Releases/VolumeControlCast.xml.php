@@ -189,11 +189,11 @@
 	</ul>
 ]]>
     </description>
-<pubDate>Wed, 29 Dec 2021 16:54:00 +0100</pubDate>
+<pubDate>Fri, 31 Dec 2021 16:54:00 +0100</pubDate>
 <sparkle:minimumSystemVersion>10.15</sparkle:minimumSystemVersion>
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.7.2.zip"
+<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.7.3.zip"
 				sparkle:dsaSignature="MCwCFEWt68oAsSpF/MsFdpojwqCDh48bAhRb9CIQQcxX5/usGlnIT3jRBYvnjQ=="
-			  sparkle:version="1.7.2"
+			  sparkle:version="1.7.3"
 				length="3373909"
 			  type="application/octet-stream" />
 </item>
