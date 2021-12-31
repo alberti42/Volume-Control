@@ -418,7 +418,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Updating version/build number from git...\"\n\nversionnum=`git for-each-ref --format='%(*committerdate:raw)%(committerdate:raw) %(refname) %(*objectname) %(objectname)' refs/tags | sort -n | awk '{ print $3; }' | tail -n1 | sed 's/refs\\/tags\\/v\\(.*\\)/\\1/'`\nbuildnum=`git rev-list HEAD | awk 'END{print NR}'`\nplist=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n\n# versionnum='1.4.8'\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion ${versionnum}.$buildnum\" \"${plist}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString ${versionnum}\" \"${plist}\"\n\n";
+			shellScript = "echo \"Updating version/build number from git...\"\n\nversionnum=`git for-each-ref --format='%(*committerdate:raw)%(committerdate:raw) %(refname) %(*objectname) %(objectname)' refs/tags | sort -n | awk '{ print $3; }' | tail -n1 | sed 's/refs\\/tags\\/v\\(.*\\)/\\1/'`\nbuildnum=`git rev-list HEAD | awk 'END{print NR}'`\nplist=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n\nversionnum='1.7.2'\nbuildnum='10'\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion ${versionnum}.$buildnum\" \"${plist}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString ${versionnum}\" \"${plist}\"\n\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
