@@ -17,6 +17,6 @@ build/*
 *.pbxuser
 xcuserdata
 
-
 /OSDUIHelper.hop
 /readme.txt
+bin/*
