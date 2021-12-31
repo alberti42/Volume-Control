@@ -38,28 +38,8 @@ How to get it installed?
 ![Open anyway panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Open_anyway_panel.png)
 * Run the *Volume Control* app. You should see the symbol of a "music note" appearing in your status bar, as shown in the screenshot above.
 * The first time you launch the app, you should also authorize it through the *General* panel of *Security & Privacy* of the *System Preferences*, as shown in the screenshot below. For more information, see [below](#enabling_permissions).
+* If you have an M1 Apple computer, you also need to sign the application with an ad-hoc signature. Follow the procedure explaiend [below](#M1_note).
 * Enjoy listening to your favorite music with better volume control.
-
-First download
---------------
-
-<!--
-* If you downloaded for the first time the app, you might encounter the error shown below.
-	![Security and Privacy panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/firstDownload.png)
-* The error occurs because of the extended attribute ``com.apple.quarantine``, which is automatically applied by Apple on all applications downloaded from the internet, unless officially authorized by Apple itself.
-* To remove the quarantine extended attribute, type from terminal:
-
-	``sudo xattr -d com.apple.quarantine "/Applications/Volume Control.app"``
-	
-	For more information, check [StackExchange](https://superuser.com/questions/526920/how-to-remove-quarantine-from-file-permissions-in-os-x).
--->
-* You can download the application from this [zip file](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
-* Optional step: Move the *Volume Control* app to your application folder ``/Applications``
-* The first time you launch the application you will be presented the error message
-	![Unknown developer](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Unknown_developer.png)
-* From *Security & Privacy* of the *System Preferences*, click on the button *Open anyway*
-	![Open anyway panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Open_anyway_panel.png)
-* You can avoid the previous steps by downloading the source file and compiling the application by yourself with Apple *Xcode*.
 
 Running the app on the newer Apple M1 computers (native ARM64 Apple application)
 --------------------------------------------------------------------------
