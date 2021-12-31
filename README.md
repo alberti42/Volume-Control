@@ -41,9 +41,9 @@ How to get it installed?
 * If you have an M1 Apple computer, you also need to sign the application with an ad-hoc signature. Follow the procedure explaiend [below](#M1_note).
 * Enjoy listening to your favorite music with better volume control.
 
+<a name="M1_note"></a>
 Running the app on the newer Apple M1 computers (native ARM64 Apple application)
 --------------------------------------------------------------------------
-<a name="M1_note"></a>
 
 If you own an Apple computer of latest generation (Apple M1), you cannot run the application without signinig it. This is a security change introduce first with Big Sur. For more details, check the [link](https://wiki.lazarus.freepascal.org/Code_Signing_for_macOS), where it is explained that all native ARM64 code must be signed or the operating system prevents its execution. In order to sign the application, follow these steps:
 
@@ -52,9 +52,9 @@ If you own an Apple computer of latest generation (Apple M1), you cannot run the
 	``codesign --force --deep -s - /Applications/Volume\ Control.app``
 
 
+<a name="enabling_permissions"></a>
 Permission to control Music's and Spotify's volume
 --------------------------------------------------
-<a name="enabling_permissions"></a>
 
 The System Integrity Protection of macOS requires you to grant *Volume Control* access to Music and Spotify. The first time the application attempts to control their volume, you will be asked with a dialog window to grant access, as shown in the screenshot below. If you experience problems, remove the entry ``Volume Control`` from the Accessibility list and repeat the procedure.
 ![Security and Privacy Accessibility](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAccessibility.png)
