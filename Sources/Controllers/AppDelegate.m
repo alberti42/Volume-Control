@@ -11,7 +11,6 @@
 #import "AccessibilityDialog.h"
 
 #import <IOKit/hidsystem/ev_keymap.h>
-#import <Sparkle/SUUpdater.h>
 
 #import "OSD.h"
 
@@ -215,6 +214,8 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 @synthesize iTunesPerc = _iTunesPerc;
 @synthesize spotifyPerc = _spotifyPerc;
 @synthesize systemPerc = _systemPerc;
+
+@synthesize sparkle_updater = _sparkle_updater;
 
 @synthesize statusMenu = _statusMenu;
 
@@ -580,12 +581,15 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 -(void)completeInitialization
 {
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
-    NSString * operatingSystemVersionString = [[NSProcessInfo processInfo] operatingSystemVersionString];
+    //NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
+    //NSString * operatingSystemVersionString = [[NSProcessInfo processInfo] operatingSystemVersionString];
     
-    [[SUUpdater sharedUpdater] setFeedURL:[NSURL URLWithString:[NSString stringWithFormat: @"http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/VolumeControlCast.xml.php?version=%@&osxversion=%@",version,[operatingSystemVersionString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]]]];
+    SUUpdater* updater = [[self sparkle_updater] updater];
+    [updater setFeedURL:[NSURL URLWithString:@"https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControlCast.xml"]];
+    [updater setUpdateCheckInterval:60*60*24*7]; // look for new updates every 7 days
     
-    [[SUUpdater sharedUpdater] setUpdateCheckInterval:60*60*24*7]; // look for new updates every 7 days
+    //[[SUUpdater sharedUpdater] setFeedURL:[NSURL URLWithString:[NSString stringWithFormat: @"http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/VolumeControlCast.xml.php?version=%@&osxversion=%@",version,[operatingSystemVersionString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]]]];
+    //[[SUUpdater sharedUpdater] setUpdateCheckInterval:60*60*24*7]; // look for new updates every 7 days
     
     // [self _loadBezelServices]; // El Capitan and probably older systems
     [[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/OSD.framework"] load];
@@ -880,12 +884,6 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 -(void)resetEventTap
 {
     CGEventTapEnable(eventTap, _Tapping);
-}
-
-- (IBAction)increaseVol:(id)sender
-{
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"IncVol" object:NULL];
-    
 }
 
 - (void)resetCurrentPlayer:(NSTimer*)theTimer

@@ -17,6 +17,7 @@
             <connections>
                 <outlet property="iTunesBtn" destination="i0t-Ei-94H" id="b2x-eC-ShE"/>
                 <outlet property="iTunesPerc" destination="Gbm-9b-kdp" id="lRa-C2-Ba4"/>
+                <outlet property="sparkle_updater" destination="4" id="Zh2-S0-PPi"/>
                 <outlet property="spotifyBtn" destination="hrb-gt-hEq" id="9Cf-nW-Vli"/>
                 <outlet property="spotifyPerc" destination="q1C-RX-nra" id="cJQ-q7-Hwo"/>
                 <outlet property="statusMenu" destination="5" id="34"/>
@@ -25,7 +26,7 @@
                 <outlet property="volumeIncrementsSlider" destination="99" id="196"/>
             </connections>
         </customObject>
-        <customObject id="4" customClass="SUUpdater"/>
+        <customObject id="4" userLabel="Sparkle updater" customClass="SPUStandardUpdaterController"/>
         <menu id="5" userLabel="Status Menu">
             <items>
                 <menuItem title="Enabled" state="on" tag="1" id="6" userLabel="Enabled">
@@ -83,7 +84,7 @@
                 <menuItem title="Check for Updates..." id="11" userLabel="Check for Updates...">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
-                        <action selector="checkForUpdates:" target="4" id="40"/>
+                        <action selector="checkForUpdates:" target="4" id="Hjs-yG-RM5"/>
                     </connections>
                 </menuItem>
                 <menuItem title="Automatic weekly updates" state="on" tag="8" id="8" userLabel="Automatic weekly updates">
@@ -179,7 +180,7 @@
                     </sliderCell>
                 </slider>
             </subviews>
-            <point key="canvasLocation" x="97" y="42"/>
+            <point key="canvasLocation" x="-142" y="113"/>
         </customView>
         <customView id="516" userLabel="Select music player">
             <rect key="frame" x="0.0" y="0.0" width="187" height="119"/>

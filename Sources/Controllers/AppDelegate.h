@@ -9,10 +9,11 @@
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/CoreAnimation.h>
 
+#import <Sparkle/Sparkle.h>
+
 #import "iTunes.h"
 // #import "Music.h"
 #import "Spotify.h"
-// #import "AppleRemote.h"
 
 @class IntroWindowController, AccessibilityDialog, StatusBarItem, PlayerApplication, SystemApplication;
 
@@ -73,6 +74,8 @@
 @property (nonatomic, assign) IBOutlet NSTextField* iTunesPerc;
 @property (nonatomic, assign) IBOutlet NSTextField* spotifyPerc;
 @property (nonatomic, assign) IBOutlet NSTextField* systemPerc;
+
+@property (assign, nonatomic) IBOutlet SPUStandardUpdaterController* sparkle_updater;
 
 @property (nonatomic, readonly, strong) NSStatusItem* statusBar;
 
