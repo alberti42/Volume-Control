@@ -188,8 +188,7 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-	</description>
+]]></description>
     <pubDate>Fri, 31 Dec 2021 17:30:38 +0100</pubDate>
     <sparkle:version>1.7.4.66</sparkle:version>
     <sparkle:shortVersionString>1.7.4</sparkle:shortVersionString>
@@ -379,8 +378,7 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-	</description>
+]]></description>
     <pubDate>Fri, 31 Dec 2021 17:30:38 +0100</pubDate>
     <sparkle:version>1.7.3.65</sparkle:version>
     <sparkle:shortVersionString>1.7.3</sparkle:shortVersionString>

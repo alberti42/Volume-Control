@@ -580,11 +580,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 -(void)completeInitialization
 {
-    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    //NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     //NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     //NSString * operatingSystemVersionString = [[NSProcessInfo processInfo] operatingSystemVersionString];
     
-    SUUpdater* updater = [[self sparkle_updater] updater];
+    SPUUpdater* updater = [[self sparkle_updater] updater];
     [updater setFeedURL:[NSURL URLWithString:@"https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControlCast.xml"]];
     [updater setUpdateCheckInterval:60*60*24*7]; // look for new updates every 7 days
     
