@@ -221,7 +221,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 static NSTimeInterval volumeRampTimeInterval=0.01f;
 static NSTimeInterval statusBarHideDelay=10.0f;
-static NSTimeInterval checkPlayerTimeout=0.1f;
+static NSTimeInterval checkPlayerTimeout=0.3f;
 static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (IBAction)terminate:(id)sender
