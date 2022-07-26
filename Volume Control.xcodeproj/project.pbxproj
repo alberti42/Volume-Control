@@ -46,8 +46,6 @@
 		654864A627480DCC00F78F99 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		65533216267F5D86004231D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		65996C55267EA86A0080A9A5 /* Volume Control.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		65996CDD267EAB3C0080A9A5 /* iTunes-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "iTunes-icon.icns"; sourceTree = "<group>"; };
-		65996CDE267EAB3C0080A9A5 /* spotify-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "spotify-icon.icns"; sourceTree = "<group>"; };
 		65996CDF267EAB660080A9A5 /* keyboard.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = keyboard.png; sourceTree = "<group>"; };
 		65996CE0267EAB660080A9A5 /* introButtons-next.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-next.png"; sourceTree = "<group>"; };
 		65996CE1267EAB660080A9A5 /* statusbar-screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "statusbar-screenshot.png"; sourceTree = "<group>"; };
@@ -172,7 +170,6 @@
 		65996CD9267EAADB0080A9A5 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				65996CDA267EAAFB0080A9A5 /* program icons */,
 				65996CDB267EAB100080A9A5 /* Intro window */,
 				65996CDC267EAB280080A9A5 /* appicon */,
 				65996DF4267EAEF30080A9A5 /* Media.xcassets */,
@@ -180,15 +177,6 @@
 				65996DF2267EAEF20080A9A5 /* volume.ai */,
 			);
 			path = Images;
-			sourceTree = "<group>";
-		};
-		65996CDA267EAAFB0080A9A5 /* program icons */ = {
-			isa = PBXGroup;
-			children = (
-				65996CDD267EAB3C0080A9A5 /* iTunes-icon.icns */,
-				65996CDE267EAB3C0080A9A5 /* spotify-icon.icns */,
-			);
-			path = "program icons";
 			sourceTree = "<group>";
 		};
 		65996CDB267EAB100080A9A5 /* Intro window */ = {
