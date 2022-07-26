@@ -14,6 +14,7 @@
 #import "iTunes.h"
 // #import "Music.h"
 #import "Spotify.h"
+#import "Doppler.h"
 
 @class IntroWindowController, AccessibilityDialog, StatusBarItem, PlayerApplication, SystemApplication;
 
@@ -52,6 +53,7 @@
     PlayerApplication* iTunes;
     PlayerApplication* spotify;
     SystemApplication* systemAudio;
+    PlayerApplication* doppler;
     
     IntroWindowController *introWindowController;
     AccessibilityDialog *accessibilityDialog;
@@ -70,10 +72,12 @@
 @property (nonatomic, assign) IBOutlet NSButton* iTunesBtn;
 @property (nonatomic, assign) IBOutlet NSButton* spotifyBtn;
 @property (nonatomic, assign) IBOutlet NSButton* systemBtn;
+@property (nonatomic, assign) IBOutlet NSButton* dopplerBtn;
 
 @property (nonatomic, assign) IBOutlet NSTextField* iTunesPerc;
 @property (nonatomic, assign) IBOutlet NSTextField* spotifyPerc;
 @property (nonatomic, assign) IBOutlet NSTextField* systemPerc;
+@property (nonatomic, assign) IBOutlet NSTextField* dopplerPerc;
 
 @property (assign, nonatomic) IBOutlet SPUStandardUpdaterController* sparkle_updater;
 
