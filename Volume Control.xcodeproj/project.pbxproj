@@ -108,6 +108,7 @@
 		65996E16267EB14F0080A9A5 /* SystemVolume.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemVolume.m; sourceTree = "<group>"; };
 		65996E17267EB14F0080A9A5 /* ISSoundAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISSoundAdditions.h; sourceTree = "<group>"; };
 		65996E1C267EB3030080A9A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = VolumeControl/Info.plist; sourceTree = "<group>"; };
+		BC20FAA128902EF500CF5CAF /* Doppler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Doppler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -273,6 +274,7 @@
 				65996E08267EB0FF0080A9A5 /* main.m */,
 				65996E06267EB0FF0080A9A5 /* Music.h */,
 				65996E07267EB0FF0080A9A5 /* Spotify.h */,
+				BC20FAA128902EF500CF5CAF /* Doppler.h */,
 			);
 			path = "Supporting files";
 			sourceTree = "<group>";
