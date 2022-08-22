@@ -210,10 +210,12 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 @synthesize iTunesBtn = _iTunesBtn;
 @synthesize spotifyBtn = _spotifyBtn;
 @synthesize systemBtn = _systemBtn;
+@synthesize dopplerBtn = _dopplerBtn;
 
 @synthesize iTunesPerc = _iTunesPerc;
 @synthesize spotifyPerc = _spotifyPerc;
 @synthesize systemPerc = _systemPerc;
+@synthesize dopplerPerc = _dopplerPerc;
 
 @synthesize sparkle_updater = _sparkle_updater;
 
@@ -239,6 +241,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     systemAudio = nil;
     iTunes = nil;
     spotify = nil;
+    doppler = nil;
     
     _statusBar = nil;
     
@@ -473,11 +476,13 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             [musicPlayerPnt setOldVolume:-1];
         }
         
-        if( musicPlayerPnt == iTunes)
+        if (musicPlayerPnt == iTunes)
             [self setItunesVolume:[musicPlayerPnt currentVolume]];
-        else if( musicPlayerPnt == spotify)
+        else if (musicPlayerPnt == spotify)
             [self setSpotifyVolume:[musicPlayerPnt currentVolume]];
-        else if( musicPlayerPnt == systemAudio)
+        else if (musicPlayerPnt == doppler)
+            [self setSpotifyVolume:[musicPlayerPnt currentVolume]];
+        else if (musicPlayerPnt == systemAudio)
             [self setSystemVolume:[musicPlayerPnt currentVolume]];
     }
 }
@@ -603,12 +608,16 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.iTunes"];
     
     spotify = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.spotify.client"];
+
+    doppler = [[PlayerApplication alloc] initWithBundleIdentifier:@"co.brushedtype.doppler-macos"];
     
     // Force MacOS to ask for authorization to AppleEvents if this was not already given
     if([iTunes isRunning])
         [iTunes currentVolume];
     if([spotify isRunning])
         [spotify currentVolume];
+    if([doppler isRunning])
+        [doppler currentVolume];
     
     systemAudio = [[SystemApplication alloc] initWithVersion:osxVersion];
     
@@ -716,6 +725,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
                           [NSNumber numberWithBool:false], @"hideVolumeWindowPreference",
                           [NSNumber numberWithBool:true],  @"iTunesControl",
                           [NSNumber numberWithBool:true],  @"spotifyControl",
+                          [NSNumber numberWithBool:true],  @"dopplerControl",
                           [NSNumber numberWithBool:true],  @"systemControl",
                           [NSNumber numberWithBool:true],  @"PlaySoundFeedback",
                           nil ]; // terminate the list
@@ -733,6 +743,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     }
     [[self iTunesBtn] setState:[preferences boolForKey:    @"iTunesControl"]];
     [[self spotifyBtn] setState:[preferences boolForKey:   @"spotifyControl"]];
+    [[self dopplerBtn] setState:[preferences boolForKey:   @"dopplerControl"]];
     //[[self systemBtn] setState:[preferences boolForKey:    @"systemControl"]];
     [[self systemBtn] setState:true];  // hard coded always to true
     [[self systemBtn] setEnabled:false];
@@ -910,6 +921,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         {
             currentPlayer = spotify;
         }
+        else if([_dopplerBtn state] && [doppler isRunning] && [doppler playerState] == DopplerEPlSPlaying)
+        {
+            currentPlayer = doppler;
+        }
         else if([_systemBtn state])
         {
             currentPlayer = systemAudio;
@@ -962,6 +977,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             [self setItunesVolume:volume];
         else if( musicPlayerPnt == spotify)
             [self setSpotifyVolume:volume];
+        else if (musicPlayerPnt == doppler)
+            [self setDopplerVolume:volume];
         else if( musicPlayerPnt == systemAudio)
             [self setSystemVolume:volume];
     
@@ -991,6 +1008,17 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     }
 }
 
+- (void) setDopplerVolume:(NSInteger)volume
+{
+    if (volume == -1)
+        [[self dopplerPerc] setHidden:YES];
+    else
+    {
+        [[self dopplerPerc] setHidden:NO];
+        [[self dopplerPerc] setStringValue:[NSString stringWithFormat:@"(%d%%)",(int)volume]];
+    }
+}
+
 - (void) setSystemVolume:(NSInteger)volume
 {
     if (volume == -1)
@@ -1014,6 +1042,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         [self setSpotifyVolume:[spotify currentVolume]];
     else
         [self setSpotifyVolume:-1];
+
+    if ([doppler isRunning])
+        [self setDopplerVolume:[doppler currentVolume]];
+    else
+        [self setDopplerVolume:-1];
     
     [self setSystemVolume:[systemAudio currentVolume]];
 }
@@ -1175,6 +1208,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     else if (sender == _spotifyBtn)
     {
         [preferences setBool:[sender state] forKey:@"spotifyControl"];
+    }
+    else if (sender == _dopplerBtn)
+    {
+        [preferences setBool:[sender state] forKey:@"dopplerControl"];
     }
     
     [preferences synchronize];
