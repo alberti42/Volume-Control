@@ -584,12 +584,13 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 -(void)completeInitialization
 {
-    //NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     //NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     //NSString * operatingSystemVersionString = [[NSProcessInfo processInfo] operatingSystemVersionString];
+    NSString* releasesCast = [infoDict objectForKey:@"ReleasesCast"];
     
     SPUUpdater* updater = [[self sparkle_updater] updater];
-    [updater setFeedURL:[NSURL URLWithString:@"https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControlCast.xml"]];
+    [updater setFeedURL:[NSURL URLWithString:releasesCast]];
     [updater setUpdateCheckInterval:60*60*24*7]; // look for new updates every 7 days
     
     //[[SUUpdater sharedUpdater] setFeedURL:[NSURL URLWithString:[NSString stringWithFormat: @"http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/VolumeControlCast.xml.php?version=%@&osxversion=%@",version,[operatingSystemVersionString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]]]];

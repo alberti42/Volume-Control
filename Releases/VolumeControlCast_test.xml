@@ -195,10 +195,10 @@
 	</ul>
 ]]></description>
     <pubDate>Sun, 25 Sep 2022 18:00:38 +0100</pubDate>
-    <sparkle:version>1.7.4.93</sparkle:version>
+    <sparkle:version>1.7.4.99</sparkle:version>
     <sparkle:shortVersionString>1.7.4</sparkle:shortVersionString>
     <sparkle:minimumSystemVersion>10.14</sparkle:minimumSystemVersion>
-    <enclosure url="VolumeControl-v1.7.4.zip" length="3736621" type="application/octet-stream" sparkle:dsaSignature="MC4CFQCMYxoIG7MEGetDlJ3PusVRCqaYkgIVAMEBHXnD/NB1kq/5BtuTsYLkaat5"/>
+    <enclosure url="VolumeControl-v1.7.4.zip" length="3733037" type="application/octet-stream" sparkle:dsaSignature="MCwCFAiIeFeS4HhwEjWbHp7eAu9RtB/FAhQYIvsvTRHVH7i3Ahxp6eEOAUUdiw=="/>
 </item>
 
 <item>
