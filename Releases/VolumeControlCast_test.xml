@@ -194,11 +194,11 @@
 		<li>Other minor bug fixes.</li>
 	</ul>
 ]]></description>
-    <pubDate>Sun, 25 Sep 2022 18:00:38 +0100</pubDate>
+    <pubDate>Sun, 25 Sep 2022 18:28:48 +0200</pubDate>
     <sparkle:version>1.7.4.99</sparkle:version>
     <sparkle:shortVersionString>1.7.4</sparkle:shortVersionString>
     <sparkle:minimumSystemVersion>10.14</sparkle:minimumSystemVersion>
-    <enclosure url="VolumeControl-v1.7.4.zip" length="3733037" type="application/octet-stream" sparkle:dsaSignature="MCwCFAiIeFeS4HhwEjWbHp7eAu9RtB/FAhQYIvsvTRHVH7i3Ahxp6eEOAUUdiw=="/>
+    <enclosure url="VolumeControl-v1.7.4.zip" length="3733037" type="application/octet-stream" sparkle:edSignature="UuGREQ71aUel4zvwrSGNr8Yxq6c8SkCzz/h2kdF+h6d4qMpEC6o+FUBG2xfLkq6NT9vAdIxWghSmMIeBphPUAA==" sparkle:dsaSignature="MC4CFQCcBm3I+jVGqCeGWNCSKuN90Sr8DgIVANiVtJ+2IoD1Sjen/PQIKL1+yXL6"/>
 </item>
 
 <item>
