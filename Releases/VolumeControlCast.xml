@@ -198,7 +198,7 @@
     <sparkle:version>1.7.4.93</sparkle:version>
     <sparkle:shortVersionString>1.7.4</sparkle:shortVersionString>
     <sparkle:minimumSystemVersion>10.14</sparkle:minimumSystemVersion>
-    <enclosure url="VolumeControl-v1.7.4.zip" length="3736621" type="application/octet-stream" sparkle:dsaSignature="MC0CFFg2XDXLvGs6UVN8DzYkvzKNk0IUAhUAte+rbJm6uYoPDoeE+H5Dn3AEgd8="/>
+    <enclosure url="VolumeControl-v1.7.4.zip" length="3736621" type="application/octet-stream" sparkle:dsaSignature="MC4CFQCMYxoIG7MEGetDlJ3PusVRCqaYkgIVAMEBHXnD/NB1kq/5BtuTsYLkaat5"/>
 </item>
 
 <item>
