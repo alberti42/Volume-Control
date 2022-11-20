@@ -1,7 +1,7 @@
 Volume Control (for Apple Music and Spotify)
 =====================
 
-:warning: If you have an M1 Apple computer, read the instructions [below](#M1_note) how to launch the app.
+:warning: If you are running MacOS Ventura or you have an M1/M2 Apple computer, read the instructions [below](#M1_note) how to launch the app.
 
 
 Description
@@ -42,10 +42,10 @@ How to get it installed?
 * Enjoy listening to your favorite music with better volume control.
 
 <a name="M1_note"></a>
-Running the app on the newer Apple M1 computers (native ARM64 Apple application)
+Running the app on MacOS Ventura and the newer Apple M1/M2 computers (Apple Silicon ARM64)
 --------------------------------------------------------------------------
 
-If you own an Apple computer of latest generation (Apple M1), you cannot run the application without signinig it. This is a security change introduce first with Big Sur. For more details, check the [link](https://wiki.lazarus.freepascal.org/Code_Signing_for_macOS), where it is explained that all native ARM64 code must be signed or the operating system prevents its execution. In order to sign the application, follow these steps:
+If you run MacOS Ventura or you own an Apple Silicon computer (Apple M1 or M2), you cannot run the application without signinig it. This is a security change introduce first with Big Sur. For more details, check the [link](https://wiki.lazarus.freepascal.org/Code_Signing_for_macOS), where it is explained that all native ARM64 code must be signed or the operating system prevents its execution. In order to sign the application, follow these steps:
 
 * Open the command line (i.e., launch the terminal app)
 * Assuming that the application *Volume Control* is in the application folder, type the following command:
