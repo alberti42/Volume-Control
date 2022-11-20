@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>ReleasesCast</key>
-	<string>https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControlCast.xml</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -34,6 +32,8 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>ReleasesCast</key>
+	<string>https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControlCast.xml</string>
 	<key>SUExpectsDSASignature</key>
 	<true/>
 	<key>SUPublicDSAKeyFile</key>
