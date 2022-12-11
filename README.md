@@ -1,7 +1,8 @@
 Volume Control (for Apple Music and Spotify)
 =====================
 
-:warning: If you are running MacOS Ventura or you have an M1/M2 Apple computer, read the instructions [below](#note_codesign) how to launch the app.
+:warning: If you are running with Macos Ventura, read the note [below](#ventura).
+:warning: If you are running on an M1/M2 Apple computer, read the instructions [below](#note_codesign) how to launch the app.
 
 
 Description
@@ -42,15 +43,23 @@ How to get it installed?
 * Enjoy listening to your favorite music with better volume control.
 
 <a name="note_codesign"></a>
-Running the app on MacOS Ventura and the newer Apple M1/M2 computers (Apple Silicon ARM64)
+Running with newer Apple M1/M2 computers (Apple Silicon ARM64)
 --------------------------------------------------------------------------
 
-If you run MacOS Ventura or you own an Apple Silicon computer (Apple M1 or M2), you cannot run the application without signinig it. This is a security change introduce first with Big Sur. For more details, check the [link](https://wiki.lazarus.freepascal.org/Code_Signing_for_macOS), where it is explained that all native ARM64 code must be signed or the operating system prevents its execution. In order to sign the application, follow these steps:
+If you own an Apple Silicon computer (Apple M1 or M2), you cannot run the application without signinig it. This is a security change introduce first with Big Sur. For more details, check the [link](https://wiki.lazarus.freepascal.org/Code_Signing_for_macOS), where it is explained that all native ARM64 code must be signed or the operating system prevents its execution. In order to sign the application, follow these steps:
 
 * Open the command line (i.e., launch the terminal app)
 * Assuming that the application *Volume Control* is in the application folder, type the following command:
 	``codesign --force --deep -s - /Applications/Volume\ Control.app``
 
+
+<a name="ventura"></a>
+Running with Macos Ventura
+--------------------------------------------------
+Many people reported problems in launching the application after a recent upgrade of Macos Ventura. This is a security feature of Macos Ventura. To overcome it, you need to compile the application by yourself with Xcode, which is provided by Apple on the App store for free. Aside from this security block, the application is fully compatible with Macos Ventrura.
+
+The alternative option, which is for now excluded, is to have this app being certified by Apple. This is expensive and time consuming. Also, since the App 
+is using undocumented functions of Macos, I suspect that Apple would not even grant an authorization to sell the app on the App store.
 
 <a name="enabling_permissions"></a>
 Permission to control Music's and Spotify's volume
