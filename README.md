@@ -1,7 +1,7 @@
 Volume Control (for Apple Music and Spotify)
 =====================
 
-:warning: If you are running MacOS Ventura or you have an M1/M2 Apple computer, read the instructions [below](#M1_note) how to launch the app.
+:warning: If you are running MacOS Ventura or you have an M1/M2 Apple computer, read the instructions [below](#note_codesign) how to launch the app.
 
 
 Description
@@ -41,7 +41,7 @@ How to get it installed?
 * If you have an M1 Apple computer, you also need to sign the application with an ad-hoc signature. Follow the procedure explaiend [below](#M1_note).
 * Enjoy listening to your favorite music with better volume control.
 
-<a name="M1_note"></a>
+<a name="note_codesign"></a>
 Running the app on MacOS Ventura and the newer Apple M1/M2 computers (Apple Silicon ARM64)
 --------------------------------------------------------------------------
 
