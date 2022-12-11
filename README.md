@@ -57,7 +57,7 @@ If you own an Apple Silicon computer (Apple M1 or M2), you cannot run the applic
 <a name="ventura"></a>
 Running with Macos Ventura
 --------------------------------------------------
-Many people reported problems in launching the application after a recent upgrade of Macos Ventura. This is a security feature of Macos Ventura. To overcome it, you need to compile the application by yourself using [[https://developer.apple.com/xcode/ | Xcode]], which is provided by Apple on the App store for free. Aside from this security block, the application is fully compatible with Macos Ventrura.
+Many people reported problems in launching the application after a recent upgrade of Macos Ventura. This is a security feature of Macos Ventura. To overcome it, you need to compile the application by yourself using ![Xcode](https://developer.apple.com/xcode/), which is provided by Apple on the App store for free. Aside from this security block, the application is fully compatible with Macos Ventrura.
 
 The alternative option, which is for now excluded, is to have this app being certified by Apple. This is expensive and time consuming. Also, since the App 
 is using undocumented functions of Macos, I suspect that Apple would not even grant an authorization to sell the app on the App store.
