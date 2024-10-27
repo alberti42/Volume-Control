@@ -1196,7 +1196,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (void)setHideFromStatusBarHintLabelWithSeconds:(NSUInteger)seconds
 {
-    [_hideFromStatusBarHintLabel setStringValue:[NSString stringWithFormat:@"iTunes Volume Control will hide after %ld seconds. Launch the app again to make the icon reappear in the manubar.",seconds]];
+    [_hideFromStatusBarHintLabel setStringValue:[NSString stringWithFormat:@"Volume Control will hide after %ld seconds. Launch the app again to make the icon reappear in the menu bar.",seconds]];
 }
 
 #pragma mark - Music players
