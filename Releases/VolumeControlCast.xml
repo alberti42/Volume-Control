@@ -200,12 +200,12 @@
 		<li>Other minor bug fixes.</li>
 	</ul>
 ]]></description>
-    <pubDate>Sun, 27 Oct 2022 17:25:00 +0100</pubDate>
-    <sparkle:version>1.7.6.110</sparkle:version>
-    <sparkle:shortVersionString>1.7.6</sparkle:shortVersionString>
-    <sparkle:minimumSystemVersion>10.14</sparkle:minimumSystemVersion>
-    <enclosure url="VolumeControl-v1.7.6.zip" length="3693385" type="application/octet-stream" sparkle:edSignature="AvihQ0OHKFvfwRGJv+hhcdrxGoabvKJbvkTTw+khfc91uf6eNCwBs2BOtWk0kMr8BQTmYGG8wl+HINYGTzsIAQ==" sparkle:dsaSignature="MC0CFHJF8mFrGYc37yiM1YG1EEWZFxU/AhUAtYGZvT/ea/EjMfXxgmtz86vD1/c="/>
-</item>
+	<pubDate>Sun, 27 Oct 2024 17:31:02 +0100</pubDate>
+  <sparkle:version>1.7.6.110</sparkle:version>
+  <sparkle:shortVersionString>1.7.6</sparkle:shortVersionString>
+  <sparkle:minimumSystemVersion>10.14</sparkle:minimumSystemVersion>
+  <enclosure url="VolumeControl-v1.7.6.zip" length="3693388" type="application/octet-stream" sparkle:edSignature="WdNNp/xySyWgH8xh8J+p9OVBSZEOQK+b0cyjB9VrxvuXJ7CjngdzmEIyQfxIqOt+TtKorCW+6jqUCOVPcCIaCw==" sparkle:dsaSignature="MC4CFQCoSpOlSLoUe6pDgsVwUbTzdbxglQIVAIXMjID7SV8xfzMij2vnSfLKjCTh"/>
+</item>    
 
 <item>
 	<title>Version 1.7.4 (support for Doppler Music Player)</title>
