@@ -332,7 +332,6 @@
 				65996C51267EA86A0080A9A5 /* Sources */,
 				65996C52267EA86A0080A9A5 /* Frameworks */,
 				65996C53267EA86A0080A9A5 /* Resources */,
-				656F85FD267ECA5C00747B2F /* CFBundleVersion Update Script */,
 				65240F052697021A007ABB5F /* Embed Frameworks */,
 			);
 			buildRules = (
@@ -390,27 +389,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		656F85FD267ECA5C00747B2F /* CFBundleVersion Update Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "CFBundleVersion Update Script";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "echo \"Updating version/build number from git...\"\n\nversionnum=`git for-each-ref --format='%(*committerdate:raw)%(committerdate:raw) %(refname) %(*objectname) %(objectname)' refs/tags | sort -n | awk '{ print $3; }' | tail -n1 | sed 's/refs\\/tags\\/v\\(.*\\)/\\1/'`\nbuildnum=`git rev-list HEAD | awk 'END{print NR}'`\nplist=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n\n#versionnum='1.7.2'\n#buildnum='10'\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion ${versionnum}.$buildnum\" \"${plist}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString ${versionnum}\" \"${plist}\"\n\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		65996C51267EA86A0080A9A5 /* Sources */ = {
@@ -563,7 +541,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				PRODUCT_BUNDLE_IDENTIFIER = org.Alberti42.VolumeControl;
+				PRODUCT_BUNDLE_IDENTIFIER = org.Alberti42.VolumeControlApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
@@ -592,7 +570,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				PRODUCT_BUNDLE_IDENTIFIER = org.Alberti42.VolumeControl;
+				PRODUCT_BUNDLE_IDENTIFIER = org.Alberti42.VolumeControlApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
