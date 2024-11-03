@@ -54,7 +54,7 @@
 + (void)applyMute:(Boolean)m;
 + (Boolean)isMuted;
 
-#define	THRESHOLD	0.000			//if the volume should be set under this value, the device will be muted
+#define	ZERO_THRESHOLD	0.000			//if the volume should be set under this value, the device will be muted
 
 @end
 

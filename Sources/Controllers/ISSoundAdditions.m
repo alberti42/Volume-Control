@@ -128,17 +128,17 @@ AudioDeviceID obtainDefaultOutputDevice()
 		return;
 	}
 	
-		//check if the new value is in the correct range - normalize it if not
-	newValue = theVolume > 1.0 ? 1.0 : (theVolume <= 0.0 ? 0.0 : theVolume);
+    //check if the new value is in the correct range - normalize it if not
+	newValue = theVolume > 1.0 ? 1.0 : (theVolume <= THRESHOLD ? ZERO_THRESHOLD : theVolume);
 	if (newValue != theVolume) {
 		NSLog(@"Tentative volume (%5.2f) was out of range; reset to %5.2f", theVolume, newValue);
 	}
-	
+    
 	theAddress.mElement = kAudioObjectPropertyElementMaster;
 	theAddress.mScope = kAudioDevicePropertyScopeOutput;
 	
-		//set the selector to mute or not by checking if under threshold and check if a mute command is available
-	if ( (muteValue = (newValue <= THRESHOLD)) )
+    //set the selector to mute or not by checking if under threshold and check if a mute command is available
+	if ( (muteValue = (newValue <= ZERO_THRESHOLD)) )
 	{
 		theAddress.mSelector = kAudioDevicePropertyMute;
 		hasMute = AudioObjectHasProperty(defaultDevID, &theAddress);
@@ -158,16 +158,16 @@ AudioDeviceID obtainDefaultOutputDevice()
 		theAddress.mSelector = kAudioHardwareServiceDeviceProperty_VirtualMasterVolume;
 	}
 	
-// **** now manage the volume following the what we found ****
+    // **** now manage the volume following the what we found ****
 	
-		//be sure the device has a volume command
+    //be sure the device has a volume command
 	if (! AudioObjectHasProperty(defaultDevID, &theAddress))
 	{
 		NSLog(@"The device 0x%0x does not have a volume to set", defaultDevID);
 		return;
 	}
 	
-		//be sure the device can set the volume
+    //be sure the device can set the volume
 	theError = AudioObjectIsPropertySettable(defaultDevID, &theAddress, &canSetVol);
 	if ( theError!=noErr || !canSetVol )
 	{
@@ -175,7 +175,7 @@ AudioDeviceID obtainDefaultOutputDevice()
 		return;
 	}
 	
-		//if under the threshold then mute it, only if possible - done/exit
+    //if under the threshold then mute it, only if possible - done/exit
 	if (muteValue && hasMute && canMute)
 	{
 		muted = 1;
@@ -193,7 +193,7 @@ AudioDeviceID obtainDefaultOutputDevice()
 		{
 			NSLog(@"The device 0x%0x was unable to set volume", defaultDevID);
 		}
-			//if device is able to handle muting, maybe it was muted, so unlock it
+        //if device is able to handle muting, maybe it was muted, so unlock it
 		if (hasMute && canMute)
 		{
 			theAddress.mSelector = kAudioDevicePropertyMute;
