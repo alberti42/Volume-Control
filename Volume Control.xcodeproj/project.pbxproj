@@ -541,7 +541,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Alberti42.VolumeControlApp;
+				PRODUCT_BUNDLE_IDENTIFIER = org.Alberti42.VolumeControlApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
@@ -570,7 +570,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Alberti42.VolumeControlApp;
+				PRODUCT_BUNDLE_IDENTIFIER = org.Alberti42.VolumeControlApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
