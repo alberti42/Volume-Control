@@ -944,6 +944,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     if (musicPlayerPnt != nil)
     {
         double volume = [musicPlayerPnt currentVolume];
+        NSLog(@"Current volume: %1.2f%%", volume);
         
         if([musicPlayerPnt oldVolume]<0) // if it was not mute
         {
@@ -984,6 +985,9 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             [self setSystemVolume:volume];
     
         [self refreshVolumeBar:(int)volume];
+        
+        NSLog(@"New volume: %1.2f%%", [musicPlayerPnt currentVolume]);
+        
     }
 }
 
