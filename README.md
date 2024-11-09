@@ -81,23 +81,36 @@ Requirements
 
 Compatible with macOS Big Sur and subsequent versions.
 
+
 Credits
 -------
 
-This app has been inspired by *Volume for iTunes* by Yogi Patel. The icon has been designed by Alexandro Rei. The apple remote control has been adapted from iremotepipe by Steven Wittens. The utilization of MacOS native HUD is based on code written by Benno Krauss and on reverse engineering of */System/Library/CoreServices/OSDUIHelper.app/Contents/MacOS/OSDUIHelper*. Support for 
+This app has been inspired by *Volume for iTunes* by Yogi Patel. The icon has been designed by Alexandro Rei. The apple remote control has been adapted from `iremotepipe` by Steven Wittens. The utilization of MacOS native HUD is based on code written by Benno Krauss and on reverse engineering of */System/Library/CoreServices/OSDUIHelper.app/Contents/MacOS/OSDUIHelper*. Support for 
 Doppler Music Player has been provided by Ed Wellbrook.
 
-Contacts
---------
 
-If you have any questions, you can contact me at a.alberti82@gmail.com. If you want to know what I do in the real life, visit [http://quantum-technologies.iap.uni-bonn.de/alberti/](http://quantum-technologies.iap.uni-bonn.de/alberti/).
+Donations
+---------
 
+I would be grateful for any donation to support the development of this plugin.
+
+[<img src="Images/buy_me_coffee.png" width=300 alt="Buy Me a Coffee QR Code"/>](https://buymeacoffee.com/alberti)
+
+Author
+------
+
+- **Author:** Andrea Alberti
+- **GitHub Profile:** [alberti42](https://github.com/alberti42)
+- **Donations:** [![Buy Me a Coffee](https://img.shields.io/badge/Donate-Buy%20Me%20a%20Coffee-orange)](https://buymeacoffee.com/alberti)
+
+Feel free to contribute to the development of this plugin or report any issues in the [GitHub repository](https://github.com/alberti42/Volume-Control/issues).
 
 Versions
 --------
 
 Note: you can download old versions by clicking on the links appearing down below.
 
+* [1.7.6](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v1.7.6.zip): Fixes some bugs with the volume not reaching zero.
 * [1.7.5](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v1.7.5.zip): Universal application compiled to run natively on both Apple Silicon and Apple Intel.
 * [1.7.4](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v1.7.4.zip): Added support for Doppler Music Player thanks to Ed Wellbrook.
 * [1.7.3](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v1.7.3.zip): Made acoustic feedback when changing volume more responsive. Fixed minor bugs. Switch to updates through GitHub repository.
