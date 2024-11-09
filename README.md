@@ -1,6 +1,8 @@
 Volume Control (for Apple Music and Spotify)
 =====================
 
+:information_source: Compatible with macOS Sequoia.
+
 :warning: If you upgraded the app and this does not start anymore, please read the instructions [below](#note_codesign) how to _codesign_ the app.
 
 :warning: If you are running with Macos Ventura and later macOS versions, read the note [below](#ventura).
