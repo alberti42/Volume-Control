@@ -1,4 +1,4 @@
-Volume Control (for Apple Music and Spotify)
+Volume Control (for Apple Music, Spotify, and Doppler music players)
 =====================
 
 :information_source: Compatible with macOS Sequoia.
@@ -13,7 +13,7 @@ Volume Control (for Apple Music and Spotify)
 Description
 -----------
 
-* This app allows you to directly control the volume of Apple Music and of Spotify using ``volume-up`` and ``volume-down`` keys from your keyboard.
+* This app allows you to directly control the volume of [Apple Music](https://apps.apple.com/app/apple-music/id1108187390), [Spotify](https://apps.apple.com/app/spotify-music-and-podcasts/id324684580), and [Doppler](https://brushedtype.co/doppler/) music players using ``volume-up`` and ``volume-down`` keys from your keyboard.
 * The app is especially useful when listening to music on AirPlay devices.
 * You can adjust the step size by which the volume is changed.
 * You can disable the feedback bezel with the volume level. This is useful when you are watching movies and you do not want to be distracted by the overlaid bezel.
