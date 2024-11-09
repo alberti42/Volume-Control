@@ -1,7 +1,9 @@
 Volume Control (for Apple Music and Spotify)
 =====================
 
-:warning: If you are running with Macos Ventura, read the note [below](#ventura).
+:warning: If you upgraded the app and this does not start anymore, please read the instructions [below](#note_codesign) how to _codesign_ the app.
+
+:warning: If you are running with Macos Ventura and later macOS versions, read the note [below](#ventura).
 
 :warning: If you are running on an M1/M2 Apple computer, read the instructions [below](#note_codesign) how to launch the app.
 
