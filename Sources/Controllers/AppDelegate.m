@@ -234,6 +234,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 static NSTimeInterval volumeRampTimeInterval=0.01f;
 static NSTimeInterval statusBarHideDelay=10.0f;
 static NSTimeInterval checkPlayerTimeout=0.3f;
+static NSTimeInterval volumeLockSyncInterval=1.0f;
 static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (IBAction)terminate:(id)sender
@@ -462,14 +463,19 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (void)MuteVol:(NSNotification *)aNotification
 {
-    id musicPlayerPnt = [self runningPlayer];
+    id runningPlayerPtr = [self runningPlayer];
     
-    if (musicPlayerPnt != nil)
+    if (runningPlayerPtr != nil)
     {
-        if([musicPlayerPnt oldVolume]<0)
+        if([runningPlayerPtr oldVolume]<0)
         {
-            [musicPlayerPnt setOldVolume:[musicPlayerPnt currentVolume]];
-            [musicPlayerPnt setCurrentVolume:0];
+            [runningPlayerPtr setOldVolume:[runningPlayerPtr currentVolume]];
+            [runningPlayerPtr setCurrentVolume:0];
+            
+            if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
+                [systemAudio setOldVolume:[systemAudio currentVolume]];
+                [systemAudio setCurrentVolume:0];
+            }
             
             if(!_hideVolumeWindow)
                 [[self->OSDManager sharedManager] showImage:OSDGraphicSpeakerMute onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:0 totalChiclets:(unsigned int)100 locked:NO];
@@ -477,23 +483,27 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         }
         else
         {
-            [musicPlayerPnt setCurrentVolume:[musicPlayerPnt oldVolume]];
-            [volumeImageLayer setContents:imgVolOn];
+            [runningPlayerPtr setCurrentVolume:[runningPlayerPtr oldVolume]];
+            
+            if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
+                [systemAudio setCurrentVolume:[systemAudio oldVolume]];
+            }
             
             if(!_hideVolumeWindow)
-                [[self->OSDManager sharedManager] showImage:OSDGraphicSpeaker onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)[musicPlayerPnt oldVolume] totalChiclets:(unsigned int)100 locked:NO];
+                [[self->OSDManager sharedManager] showImage:OSDGraphicSpeaker onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)[runningPlayerPtr oldVolume] totalChiclets:(unsigned int)100 locked:NO];
             
-            [musicPlayerPnt setOldVolume:-1];
+            [runningPlayerPtr setOldVolume:-1];
         }
         
-        if (musicPlayerPnt == iTunes)
-            [self setItunesVolume:[musicPlayerPnt currentVolume]];
-        else if (musicPlayerPnt == spotify)
-            [self setSpotifyVolume:[musicPlayerPnt currentVolume]];
-        else if (musicPlayerPnt == doppler)
-            [self setSpotifyVolume:[musicPlayerPnt currentVolume]];
-        else if (musicPlayerPnt == systemAudio)
-            [self setSystemVolume:[musicPlayerPnt currentVolume]];
+        if (runningPlayerPtr == iTunes)
+            [self setItunesVolume:[runningPlayerPtr currentVolume]];
+        else if (runningPlayerPtr == spotify)
+            [self setSpotifyVolume:[runningPlayerPtr currentVolume]];
+        else if (runningPlayerPtr == doppler)
+            [self setSpotifyVolume:[runningPlayerPtr currentVolume]];
+        
+        if (_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio)
+            [self setSystemVolume:[runningPlayerPtr currentVolume]];
     }
 }
 
@@ -837,6 +847,30 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [self setLockSystemAndPlayerVolume:![self LockSystemAndPlayerVolume]];
 }
 
+/*
+- (void) syncSystemVolume:(NSTimer*)theTimer
+{
+    id runningPlayerPtr = [self runningPlayer];
+    
+    if (runningPlayerPtr != nil && runningPlayerPtr != systemAudio)
+    {
+        double systemVolume = [systemAudio currentVolume];
+        double volume = [runningPlayerPtr currentVolume];
+        double diff = systemVolume - volume;
+        if (diff<0) diff = -diff;
+        if( diff>1E-3 ) {
+            NSLog(@"EQUALIZING");
+            NSLog(@"Player volume: %1.5f",volume);
+            NSLog(@"Apple Music: %d",runningPlayerPtr == iTunes);
+            NSLog(@"System volume: %1.5f",systemVolume);
+            NSLog(@"Diff: %1.10f",diff);
+            [systemAudio setCurrentVolume:volume];
+            [self setSystemVolume:volume];
+        }
+    }
+}
+*/
+
 - (void) setLockSystemAndPlayerVolume:(bool)enabled
 {
     NSMenuItem* menuItem=[_statusMenu itemWithTag:LOCK_SYSTEM_AND_PLAYER_VOLUME_ID];
@@ -846,6 +880,16 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [preferences synchronize];
 
     _LockSystemAndPlayerVolume=enabled;
+    
+    /*
+    if(_LockSystemAndPlayerVolume) {
+        volumeLockSyncTimer = [NSTimer timerWithTimeInterval:volumeLockSyncInterval target:self selector:@selector(syncSystemVolume:) userInfo:nil repeats:YES];
+        [[NSRunLoop mainRunLoop] addTimer:volumeLockSyncTimer forMode:NSRunLoopCommonModes];
+    } else {
+        [volumeLockSyncTimer invalidate];
+        volumeLockSyncTimer = nil;
+    }
+    */
 }
 
 - (void) setTapping:(bool)enabled
@@ -936,6 +980,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (void)resetCurrentPlayer:(NSTimer*)theTimer
 {
+    // Keep memory of the current player until this timeout is reached
+    // After the timeout, it is forced to check again what the current player is
     [checkPlayerTimer invalidate];
     checkPlayerTimer = nil;
     currentPlayer = nil;
@@ -1009,9 +1055,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         
         [runningPlayerPtr setCurrentVolume:volume];
         if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
-            NSLog(@"CHANGING: %1.3f", volume);
             [systemAudio setCurrentVolume:volume];
-            [self setSystemVolume:volume];
         }
     
         if(self->volumeRampTimer == nil)
@@ -1023,7 +1067,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             [self setSpotifyVolume:volume];
         else if (runningPlayerPtr == doppler)
             [self setDopplerVolume:volume];
-        else if( runningPlayerPtr == systemAudio)
+        
+        if(_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio)
             [self setSystemVolume:volume];
         
         [self refreshVolumeBar:(int)volume];

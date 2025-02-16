@@ -58,6 +58,7 @@
     IntroWindowController *introWindowController;
     AccessibilityDialog *accessibilityDialog;
     
+    // NSTimer* volumeLockSyncTimer;
     NSTimer* volumeRampTimer;
     NSTimer* timerImgSpeaker;
     NSTimer* checkPlayerTimer;
