@@ -18,7 +18,7 @@
 
 @class IntroWindowController, AccessibilityDialog, StatusBarItem, PlayerApplication, SystemApplication;
 
-@interface AppDelegate : NSObject <NSApplicationDelegate> {
+@interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuItemValidation> {
     CALayer *mainLayer;
     CALayer *volumeImageLayer;
     CALayer *iconLayer;
@@ -89,6 +89,7 @@
 @property (assign, nonatomic) bool PlaySoundFeedback;
 @property (assign, nonatomic) bool Tapping;
 @property (assign, nonatomic) bool UseAppleCMDModifier;
+@property (assign, nonatomic) bool LockSystemAndPlayerVolume;
 @property (assign, nonatomic) bool AppleCMDModifierPressed;
 @property (assign, nonatomic) bool AutomaticUpdates;
 @property (assign, nonatomic) bool hideFromStatusBar;
@@ -96,6 +97,7 @@
 @property (assign, nonatomic) bool loadIntroAtStart;
 
 - (IBAction)toggleUseAppleCMDModifier:(id)sender;
+- (IBAction)toggleLockSystemAndPlayerVolume:(id)sender;
 - (IBAction)toggleAutomaticUpdates:(id)sender;
 - (IBAction)toggleHideFromStatusBar:(id)sender;
 - (IBAction)toggleHideVolumeWindow:(id)sender;

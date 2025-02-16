@@ -19,6 +19,15 @@ void handleSIGTERM(int sig) {
     [NSApp terminate:nil];
 }
 
+#define USE_APPLE_CMD_MODIFIER_MENU_ID 3
+#define LOCK_SYSTEM_AND_PLAYER_VOLUME_ID 9
+#define START_AT_LOGIN_ID 4
+#define AUTOMATIC_UPDATES_ID 8
+#define PLAY_SOUND_FEEDBACK_ID 7
+#define TAPPING_ID 1
+#define HIDE_FROM_STATUS_BAR_ID 5
+#define HIDE_VOLUME_WINDOW_ID 6
+
 #pragma mark - Tapping key stroke events
 
 //static void displayPreferencesChanged(CGDirectDisplayID displayID, CGDisplayChangeSummaryFlags flags, void *userInfo) {
@@ -200,6 +209,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 @synthesize StartAtLogin=_StartAtLogin;
 @synthesize Tapping=_Tapping;
 @synthesize UseAppleCMDModifier=_UseAppleCMDModifier;
+@synthesize LockSystemAndPlayerVolume=_LockSystemAndPlayerVolume;
 @synthesize AppleCMDModifierPressed=_AppleCMDModifierPressed;
 @synthesize AutomaticUpdates=_AutomaticUpdates;
 @synthesize hideFromStatusBar = _hideFromStatusBar;
@@ -320,7 +330,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (void)setStartAtLogin:(bool)enabled savePreferences:(bool)savePreferences
 {
-    NSMenuItem* menuItem=[_statusMenu itemWithTag:4];
+    NSMenuItem* menuItem=[_statusMenu itemWithTag:START_AT_LOGIN_ID];
     [menuItem setState:enabled];
     
     if(savePreferences)
@@ -634,6 +644,13 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     volumeSound = [[NSSound alloc] initWithContentsOfFile:@"/System/Library/LoginPlugins/BezelServices.loginPlugin/Contents/Resources/volume.aiff" byReference:false];
 }
 
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    //    if (menuItem.tag == USE_APPLE_CMD_MODIFIER_MENU_ID) { // CMD Modifier menu item
+    //        return ![self LockSystemAndPlayerVolume]; // Disable when locked
+    //    }
+    return YES; // Default behavior
+}
+
 - (void)emitAcousticFeedback:(NSNotification *)aNotification
 {
     if([self PlaySoundFeedback] && (_AppleCMDModifierPressed != _UseAppleCMDModifier || [[self runningPlayer] isKindOfClass:[SystemApplication class]]))
@@ -721,6 +738,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
                           [NSNumber numberWithInt:2],      @"volumeIncrement",
                           [NSNumber numberWithBool:true] , @"TappingEnabled",
                           [NSNumber numberWithBool:false], @"UseAppleCMDModifier",
+                          [NSNumber numberWithBool:false], @"LockSystemAndPlayerVolume",
                           [NSNumber numberWithBool:true],  @"AutomaticUpdates",
                           [NSNumber numberWithBool:false], @"hideFromStatusBarPreference",
                           [NSNumber numberWithBool:false], @"hideVolumeWindowPreference",
@@ -734,6 +752,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     
     [self setTapping:[preferences boolForKey:              @"TappingEnabled"]];
     [self setUseAppleCMDModifier:[preferences boolForKey:  @"UseAppleCMDModifier"]];
+    [self setLockSystemAndPlayerVolume:[preferences boolForKey:  @"LockSystemAndPlayerVolume"]];
     [self setAutomaticUpdates:[preferences boolForKey:     @"AutomaticUpdates"]];
     [self setHideFromStatusBar:[preferences boolForKey:    @"hideFromStatusBarPreference"]];
     [self setHideVolumeWindow:[preferences boolForKey:     @"hideVolumeWindowPreference"]];
@@ -763,7 +782,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (void) setAutomaticUpdates:(bool)enabled
 {
-    NSMenuItem* menuItem=[_statusMenu itemWithTag:8];
+    NSMenuItem* menuItem=[_statusMenu itemWithTag:AUTOMATIC_UPDATES_ID];
     [menuItem setState:enabled];
     
     [preferences setBool:enabled forKey:@"AutomaticUpdates"];
@@ -784,7 +803,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [preferences setBool:enabled forKey:@"PlaySoundFeedback"];
     [preferences synchronize];
     
-    NSMenuItem* menuItem=[_statusMenu itemWithTag:7];
+    NSMenuItem* menuItem=[_statusMenu itemWithTag:PLAY_SOUND_FEEDBACK_ID];
     [menuItem setState:enabled];
         
     _PlaySoundFeedback=enabled;
@@ -797,7 +816,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (void) setUseAppleCMDModifier:(bool)enabled
 {
-    NSMenuItem* menuItem=[_statusMenu itemWithTag:3];
+    NSMenuItem* menuItem=[_statusMenu itemWithTag:USE_APPLE_CMD_MODIFIER_MENU_ID];
     [menuItem setState:enabled];
     
     [preferences setBool:enabled forKey:@"UseAppleCMDModifier"];
@@ -811,9 +830,27 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [self setUseAppleCMDModifier:![self UseAppleCMDModifier]];
 }
 
+- (IBAction)toggleLockSystemAndPlayerVolume:(id)sender
+{
+    NSMenuItem* CMDModifierMenuItem=[_statusMenu itemWithTag:USE_APPLE_CMD_MODIFIER_MENU_ID];
+    
+    [self setLockSystemAndPlayerVolume:![self LockSystemAndPlayerVolume]];
+}
+
+- (void) setLockSystemAndPlayerVolume:(bool)enabled
+{
+    NSMenuItem* menuItem=[_statusMenu itemWithTag:LOCK_SYSTEM_AND_PLAYER_VOLUME_ID];
+    [menuItem setState:enabled];
+
+    [preferences setBool:enabled forKey:@"LockSystemAndPlayerVolume"];
+    [preferences synchronize];
+
+    _LockSystemAndPlayerVolume=enabled;
+}
+
 - (void) setTapping:(bool)enabled
 {
-    NSMenuItem* menuItem=[_statusMenu itemWithTag:1];
+    NSMenuItem* menuItem=[_statusMenu itemWithTag:TAPPING_ID];
     [menuItem setState:enabled];
     
     CGEventTapEnable(eventTap, enabled);
@@ -939,14 +976,14 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (void)setVolumeUp:(bool)increase
 {
-    id musicPlayerPnt = [self runningPlayer];
+    id runningPlayerPtr = [self runningPlayer];
     
-    if (musicPlayerPnt != nil)
+    if (runningPlayerPtr != nil)
     {
-        double volume = [musicPlayerPnt currentVolume];
+        double volume = [runningPlayerPtr currentVolume];
         NSLog(@"Current volume: %1.2f%%", volume);
         
-        if([musicPlayerPnt oldVolume]<0) // if it was not mute
+        if([runningPlayerPtr oldVolume]<0) // if it was not mute
         {
             //volume=[musicProgramPnt soundVolume]+_volumeInc*(increase?1:-1);
             volume += (increase?1:-1)*increment;
@@ -954,8 +991,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         else // if it was mute
         {
             // [volumeImageLayer setContents:imgVolOn];  // restore the image of the speaker from mute speaker
-            volume=[musicPlayerPnt oldVolume];
-            [musicPlayerPnt setOldVolume:-1];  // this says that it is not mute
+            volume=[runningPlayerPtr oldVolume];
+            [runningPlayerPtr setOldVolume:-1];  // this says that it is not mute
         }
         if (volume<0) volume=0;
         if (volume>100) volume=100;
@@ -970,24 +1007,28 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         if(!_hideVolumeWindow)
             [[self->OSDManager sharedManager] showImage:image onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)(round(((numFullBlks*4+numQrtsBlks)*1.5625)*100)) totalChiclets:(unsigned int)10000 locked:NO];
         
-        [musicPlayerPnt setCurrentVolume:volume];
-        
+        [runningPlayerPtr setCurrentVolume:volume];
+        if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
+            NSLog(@"CHANGING: %1.3f", volume);
+            [systemAudio setCurrentVolume:volume];
+            [self setSystemVolume:volume];
+        }
+    
         if(self->volumeRampTimer == nil)
             [self emitAcousticFeedback:nil];
         
-        if( musicPlayerPnt == iTunes)
+        if( runningPlayerPtr == iTunes)
             [self setItunesVolume:volume];
-        else if( musicPlayerPnt == spotify)
+        else if( runningPlayerPtr == spotify)
             [self setSpotifyVolume:volume];
-        else if (musicPlayerPnt == doppler)
+        else if (runningPlayerPtr == doppler)
             [self setDopplerVolume:volume];
-        else if( musicPlayerPnt == systemAudio)
+        else if( runningPlayerPtr == systemAudio)
             [self setSystemVolume:volume];
-    
+        
         [self refreshVolumeBar:(int)volume];
         
-        NSLog(@"New volume: %1.2f%%", [musicPlayerPnt currentVolume]);
-        
+        NSLog(@"New volume: %1.2f%%", [runningPlayerPtr currentVolume]);
     }
 }
 
@@ -1120,7 +1161,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 {
     _hideFromStatusBar=enabled;
     
-    NSMenuItem* menuItem=[_statusMenu itemWithTag:5];
+    NSMenuItem* menuItem=[_statusMenu itemWithTag:HIDE_FROM_STATUS_BAR_ID];
     [menuItem setState:[self hideFromStatusBar]];
     
     [preferences setBool:enabled forKey:@"hideFromStatusBarPreference"];
@@ -1233,7 +1274,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 {
     _hideVolumeWindow=enabled;
     
-    NSMenuItem* menuItem=[_statusMenu itemWithTag:6];
+    NSMenuItem* menuItem=[_statusMenu itemWithTag:HIDE_VOLUME_WINDOW_ID];
     [menuItem setState:[self hideVolumeWindow]];
     
     [preferences setBool:enabled forKey:@"hideVolumeWindowPreference"];
