@@ -117,9 +117,9 @@ The app requires Accessibility and Automation permissions to control other apps'
    - Remove and re-add *Volume Control*.
    - Also check **Automation** and ensure both Music and Spotify are enabled.
 
-![Accessibility Permissions](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Accessability_dark_2x.png)
+<img src="Images/Accessability_dark_2x.png" alt="Screenshot of Accessibility" width="50%">
 
-![Automation Permissions](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Automation.jpg)
+<img src="Images/Automation.jpg" alt="Screenshot of Automation Permissions" width="50%">
 
 ---
 
