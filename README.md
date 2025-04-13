@@ -144,9 +144,7 @@ The app requires Accessibility and Automation permissions to control other apps'
 
 ## Building from Source
 
-If you prefer or need to compile the app yourself using Xcode, see the instructions here:
-
-👉 [docs/compile.md](Docs/Compile.md)
+If you prefer or need to compile the app yourself using Xcode, see the instructions 👉 [here](Docs/Compile.md).
 
 ---
 
