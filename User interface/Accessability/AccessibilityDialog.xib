@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23504" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23727" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23727"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -19,14 +19,14 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="F0z-JX-Cv5">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
-            <rect key="contentRect" x="1003" y="186" width="636" height="709"/>
+            <rect key="contentRect" x="1003" y="186" width="735" height="635"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
             <view key="contentView" id="se5-gp-TjO">
-                <rect key="frame" x="0.0" y="0.0" width="636" height="709"/>
+                <rect key="frame" x="0.0" y="0.0" width="735" height="635"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DhN-Mq-WeH">
-                        <rect key="frame" x="31" y="658" width="567" height="32"/>
+                        <rect key="frame" x="29" y="584" width="679" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" title="It appears that &quot;Volume Control&quot; is not authorized to respond upon events where the volume keys are pressed." id="C0n-fo-hqe">
                             <font key="font" metaFont="system"/>
@@ -35,17 +35,19 @@
                         </textFieldCell>
                     </textField>
                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PIX-HH-DTm">
-                        <rect key="frame" x="31" y="594" width="578" height="48"/>
+                        <rect key="frame" x="29" y="535" width="686" height="48"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" id="VRb-Ek-uTW">
                             <font key="font" metaFont="system"/>
-                            <string key="title">Open the "System Preferences", go to "Security &amp; Privacy", and enable "Volume Control" in "Accessibility". If "iTunes Volume Control" appears to be already enabled, remove it from "Accessibility" and then restart "iTunes Volume Control", so as to force MacOS to reconsider it.</string>
+                            <string key="title">Open the "System Preferences", go to "Privacy &amp; Security", and enable "Volume Control" in "Accessibility".
+If "Volume Control" appears to be already enabled, remove it from "Accessibility" and then restart
+"Volume Control", so as to force macOS to reconsider it.</string>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6s5-2r-bkF">
-                        <rect key="frame" x="416" y="13" width="191" height="32"/>
+                        <rect key="frame" x="522" y="13" width="191" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Go to Security &amp; Privacy" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Q50-SY-4K2">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -55,13 +57,8 @@
                             <action selector="onOpenSecurityPrivacy:" target="-2" id="4Hl-oS-0tU"/>
                         </connections>
                     </button>
-                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3x8-bD-4It" customClass="ScreenshotView">
-                        <rect key="frame" x="-23" y="24" width="682" height="569"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="SecurityPrivacyDark" id="hSz-3m-4Wa"/>
-                    </imageView>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GgD-iV-iDG">
-                        <rect key="frame" x="186" y="13" width="116" height="32"/>
+                        <rect key="frame" x="292" y="13" width="116" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Exit" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="GSY-vs-oaw">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -72,7 +69,7 @@
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BLf-Cv-fVC">
-                        <rect key="frame" x="302" y="13" width="116" height="32"/>
+                        <rect key="frame" x="408" y="13" width="116" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Restart" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xSN-4w-5fV">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -82,15 +79,20 @@
                             <action selector="onRestart:" target="-2" id="s5h-eu-qU6"/>
                         </connections>
                     </button>
+                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3x8-bD-4It" customClass="ScreenshotView">
+                        <rect key="frame" x="26" y="4" width="682" height="569"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="SecurityPrivacyDark" id="hSz-3m-4Wa"/>
+                    </imageView>
                 </subviews>
             </view>
             <connections>
                 <outlet property="delegate" destination="-2" id="0bl-1N-AYu"/>
             </connections>
-            <point key="canvasLocation" x="287" y="146"/>
+            <point key="canvasLocation" x="336.5" y="108.5"/>
         </window>
     </objects>
     <resources>
-        <image name="SecurityPrivacyDark" width="762" height="656"/>
+        <image name="SecurityPrivacyDark" width="715" height="470"/>
     </resources>
 </document>
