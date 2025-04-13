@@ -21,7 +21,7 @@ Description
 * When you press command key (``⌘``), you control the system volume regardless whether Music or Spotify is playing.
 * The option ``Use ⌘ modifier`` toggles the app behavior, meaning that volume keys control the system volume, and when ``⌘`` is simultaneously pressed, the volume of Music and Spotify is then controlled.
 
-![Screenshot of the application](Images/screenshot.png)
+![Screenshot of the application](Images/screenshot.jpg)
 
 Why do you need this app?
 -------------------------
