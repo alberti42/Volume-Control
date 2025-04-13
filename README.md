@@ -1,118 +1,185 @@
-Volume Control (for Apple Music, Spotify, and Doppler music players)
-=====================
+# Volume Control for macOS
 
-:information_source: Compatible with macOS Sequoia.
+🎵 **Control the volume of Apple Music, Spotify, and Doppler using your keyboard — seamlessly.**
 
-:warning: If you upgraded the app and this does not start anymore, please read the instructions [below](#note_codesign) how to _codesign_ the app.
+This app is the spiritual successor to *iTunes Volume Control*, offering a simple yet powerful way to adjust volume for your favorite music apps directly from your keyboard — especially when listening via AirPlay or external speakers.
 
-:warning: If you are running with Macos Ventura and later macOS versions, read the note [below](#ventura).
-
-:warning: If you are running on an M1/M2 Apple computer, read the instructions [below](#note_codesign) how to launch the app.
-
-
-Description
------------
-
-* This app allows you to directly control the volume of [Apple Music](https://apps.apple.com/app/apple-music/id1108187390), [Spotify](https://apps.apple.com/app/spotify-music-and-podcasts/id324684580), and [Doppler](https://brushedtype.co/doppler/) music players using ``volume-up`` and ``volume-down`` keys from your keyboard.
-* The app is especially useful when listening to music on AirPlay devices.
-* You can adjust the step size by which the volume is changed.
-* You can disable the feedback bezel with the volume level. This is useful when you are watching movies and you do not want to be distracted by the overlaid bezel.
-* Using volume keys, the volume of the currently playing application (either Music or Spotify) is adjusted. If neither Music nor Spotify is playing, then the system volume will be adjusted.
-* When you press command key (``⌘``), you control the system volume regardless whether Music or Spotify is playing.
-* The option ``Use ⌘ modifier`` toggles the app behavior, meaning that volume keys control the system volume, and when ``⌘`` is simultaneously pressed, the volume of Music and Spotify is then controlled.
+> ⚠️ Due to macOS security restrictions, the app is not signed with an official Apple Developer certificate. Please follow the installation instructions below.
 
 ![Screenshot of the application](Images/screenshot.jpg)
 
-Why do you need this app?
--------------------------
+---
 
-* The volume of Apple Music (previously iTunes) cannot be directly controlled from the keyboard. Volume keys only affect the global system volume.
-* You might desire to directly control Apple Music's volume from your keyboard, especially when listening to music on external speakers like AirPlay devices. The volume level of AirPlay devices depends on the volume controlled by Music, and not on the global volume. Unfortunately, Apple does not provide a way to adjust Music's volume from the keyboard. 
-* You might desire to hide the volume heads-up overlay from your screen, especially when watching movies. This app can be configured to hide it.
-* You might want to customize the step size when adjusting the volume.
+## Table of Contents
 
-How to get it installed?
-------------------------
+- [Features](#features)
+- [Why Use This App?](#why-use-this-app)
+- [Installation](#installation)
+- [macOS Security Notes](#macos-security-notes)
+  - [Allow Apps from Anywhere (macOS Sequoia & Ventura)](#allow-apps-from-anywhere-macos-sequoia--ventura)
+  - [Apple Silicon (M1/M2) Devices](#apple-silicon-m1m2-devices)
+- [Permissions](#permissions)
+- [Troubleshooting](#troubleshooting)
+- [Requirements](#requirements)
+- [Credits](#credits)
+- [Donations](#donations)
+- [Author](#author)
+- [Versions](#versions)
 
-* Download the [zip file](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
-* Decompress it.
-* Drag the *Volume Control* app into your *Application* folder, or any other folder of your choice.
-* The first time you start the app, you will get an error message because the app is not signed.
+---
+
+## Features
+
+- Control the volume of Apple Music, Spotify, and Doppler using the `volume up` and `volume down` keys.
+- Especially useful when using AirPlay devices or external speakers.
+- Customize the volume step size.
+- Option to hide the volume bezel overlay (HUD).
+- When Music or Spotify is playing, volume keys affect their volume; otherwise, they adjust system volume.
+- Holding `⌘` (Command) key inverts this behavior.
+- Toggle behavior with the "Use ⌘ modifier" option.
+
+---
+
+## Why Use This App?
+
+- macOS does **not** allow controlling Apple Music's volume via keyboard keys — only the system volume.
+- AirPlay speakers depend on **app-specific** volume, not system volume.
+- This app restores fine-grained volume control directly from your keyboard.
+- Avoid the intrusive volume HUD overlay when watching movies.
+- Works seamlessly with Spotify and Doppler, too.
+
+---
+
+## Installation
+
+1. **Download** the [latest release](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
+2. **Unzip** the archive.
+3. **Drag** the app into your `Applications` folder (or anywhere you like).
+4. **Launch** the app.
+
+The first time you start the app, macOS will likely block it because it's from an **unidentified developer**.
+
 ![Unknown developer](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Unknown_developer.png)
-<br/>Sorry, I don't have the costly Apple Developer Subscription, which would allow me to sign the app as a certified developer.
-* To circumvent the problem, from *Security & Privacy* of the *System Preferences*, click on the button *Open anyway*
-![Open anyway panel](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Open_anyway_panel.png)
-* Run the *Volume Control* app. You should see the symbol of a "music note" appearing in your status bar, as shown in the screenshot above.
-* The first time you launch the app, you should also authorize it through the *General* panel of *Security & Privacy* of the *System Preferences*, as shown in the screenshot below. For more information, see [below](#enabling_permissions).
-* If you have an M1 Apple computer, you also need to sign the application with an ad-hoc signature. Follow the procedure explaiend [below](#M1_note).
-* Enjoy listening to your favorite music with better volume control.
 
-<a name="note_codesign"></a>
-Running with newer Apple M1/M2 computers (Apple Silicon ARM64)
---------------------------------------------------------------------------
+> 💡 Open *System Settings → Privacy & Security*, and click **Open Anyway** next to *Volume Control*.
 
-If you own an Apple Silicon computer (Apple M1 or M2), you cannot run the application without signinig it. This is a security change introduce first with Big Sur. For more details, check the [link](https://wiki.lazarus.freepascal.org/Code_Signing_for_macOS), where it is explained that all native ARM64 code must be signed or the operating system prevents its execution. In order to sign the application, follow these steps:
+If you're on Apple Silicon (M1/M2) or running macOS Ventura/Sequoia, follow the [macOS Security Notes](#macos-security-notes).
 
-* Open the command line (i.e., launch the terminal app)
-* Assuming that the application *Volume Control* is in the application folder, type the following command:
-	``codesign --force --deep -s - /Applications/Volume\ Control.app``
+---
 
+## macOS Security Notes
 
-<a name="ventura"></a>
-Running with Macos Ventura
---------------------------------------------------
-Many people reported problems in launching the application after a recent upgrade of Macos Ventura. This is a security feature of Macos Ventura. To overcome it, you need to compile the application by yourself using [Xcode](https://developer.apple.com/xcode/), which is provided by Apple on the App store for free. Aside from this security block, the application is fully compatible with Macos Ventrura.
+### Allow Apps from Anywhere (macOS Sequoia & Ventura)
 
-The alternative option, which is for now excluded, is to have this app being certified by Apple. This is expensive and time consuming. Also, since the App 
-is using undocumented functions of Macos, I suspect that Apple would not even grant an authorization to sell the app on the App store.
+Some macOS versions (especially Sequoia and Ventura) restrict apps from unidentified developers. You can temporarily relax this:
 
-<a name="enabling_permissions"></a>
-Permission to control Music's and Spotify's volume
---------------------------------------------------
+#### Option 1: Use the UI
 
-The System Integrity Protection of macOS requires you to grant *Volume Control* access to Music and Spotify. The first time the application attempts to control their volume, you will be asked with a dialog window to grant access, as shown in the screenshot below. If you experience problems, remove the entry ``Volume Control`` from the Accessibility list and repeat the procedure.
-![Security and Privacy Accessibility](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAccessibility.png)
+1. Go to **System Settings → Privacy & Security**.
+2. Scroll to the "Security" section.
+3. Click **Open Anyway** next to *Volume Control*.
 
-Troubleshooting
----------------
+#### Option 2: Enable "Allow apps from anywhere" (advanced)
 
-* If you experience problems with permissions, especially if you upgrade from an old version, go to the *Accessibility* panel of *Security & Privacy* of the *System Preferences* (see screenshot below), and remove the entry "Volume Control". Make sure to close the app before you remove any permissions, or else you might end up being unable to use the keyboard until you reboot the machine. Once you open the app again, you will then be asked to authorize the application again.
-* Verify that the app is authorized to control Music and Spotify, inspecting the panel *Automation* of *Security & Privacy* of the *System Preferences*. It could be helpful to disable and reenable the checkboxes for Music and Spotify shown in the screenshot below.
-	![Security and Privacy Automation](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAutomation.png)
+```sh
+sudo spctl --master-disable
+```
 
-Requirements
-------------
+Then go to **System Settings → Privacy & Security** and select **Allow apps downloaded from: Anywhere**.
 
-Compatible with macOS Big Sur and subsequent versions.
+You can re-enable strict protection later with:
 
+```sh
+sudo spctl --master-enable
+```
 
-Credits
--------
+---
 
-This app has been inspired by *Volume for iTunes* by Yogi Patel. The icon has been designed by Alexandro Rei. The apple remote control has been adapted from `iremotepipe` by Steven Wittens. The utilization of MacOS native HUD is based on code written by Benno Krauss and on reverse engineering of */System/Library/CoreServices/OSDUIHelper.app/Contents/MacOS/OSDUIHelper*. Support for 
-Doppler Music Player has been provided by Ed Wellbrook.
+### Apple Silicon (M1/M2) Devices
 
+Due to macOS security on ARM64 systems, unsigned apps must be manually codesigned. Run this in Terminal:
 
-Donations
----------
+```sh
+codesign --force --deep -s - /Applications/Volume\ Control.app
+```
 
-I would be grateful for any donation to support the development of this plugin.
+More details: [Lazarus Wiki – Code Signing](https://wiki.lazarus.freepascal.org/Code_Signing_for_macOS)
+
+---
+
+## Permissions
+
+The app requires Accessibility and Automation permissions to control other apps' volumes.
+
+1. When prompted, allow access to control **Music** and **Spotify**.
+2. If you missed it or need to reset:
+   - Go to **System Settings → Privacy & Security → Accessibility**
+   - Remove and re-add *Volume Control*.
+   - Also check **Automation** and ensure both Music and Spotify are enabled.
+
+![Accessibility Permissions](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAccessibility.png)
+
+![Automation Permissions](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAutomation.png)
+
+---
+
+## Troubleshooting
+
+- If keyboard input is unresponsive after removing permissions, **reboot** your Mac.
+- If the app stops adjusting volume after an update:
+  - Quit the app.
+  - Remove it from **Accessibility** and **Automation** permissions.
+  - Reopen the app and re-authorize when prompted.
+- Still blocked from launching? Try re-downloading or compiling it yourself (see below).
+
+---
+
+## Requirements
+
+- macOS **Big Sur** or later (Monterey, Ventura, Sequoia)
+- Intel or Apple Silicon (M1/M2) Macs
+- Accessibility and Automation permissions granted
+
+---
+
+## Building from Source
+
+If you prefer or need to compile the app yourself using Xcode, see the instructions here:
+
+👉 [docs/compile.md](docs/compile.md)
+
+---
+
+## Credits
+
+- Inspired by *Volume for iTunes* by **Yogi Patel**
+- Icon design by **Alexandro Rei**
+- Apple Remote integration adapted from `iremotepipe` by **Steven Wittens**
+- Native HUD overlay by **Benno Krauss** and reverse-engineered use of `OSDUIHelper`
+- Doppler support by **Ed Wellbrook**
+
+---
+
+## Donations
+
+If this app improves your workflow, consider supporting development:
 
 [<img src="Images/buy_me_coffee.png" width=300 alt="Buy Me a Coffee QR Code"/>](https://buymeacoffee.com/alberti)
 
-Author
-------
+Or click here: [![Buy Me a Coffee](https://img.shields.io/badge/Donate-Buy%20Me%20a%20Coffee-orange)](https://buymeacoffee.com/alberti)
 
-- **Author:** Andrea Alberti
-- **GitHub Profile:** [alberti42](https://github.com/alberti42)
-- **Donations:** [![Buy Me a Coffee](https://img.shields.io/badge/Donate-Buy%20Me%20a%20Coffee-orange)](https://buymeacoffee.com/alberti)
+---
 
-Feel free to contribute to the development of this plugin or report any issues in the [GitHub repository](https://github.com/alberti42/Volume-Control/issues).
+## Author
 
-Versions
---------
+**Andrea Alberti**  
+GitHub: [@alberti42](https://github.com/alberti42)
 
-Note: you can download old versions by clicking on the links appearing down below.
+---
+
+## Versions
+
+You can download older versions here:
 
 * [1.7.7](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v1.7.7.zip): Added option for locking system and player volumes together.
 * [1.7.6](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v1.7.6.zip): Fixes some bugs with the volume not reaching zero.
@@ -149,3 +216,7 @@ Note: you can download old versions by clicking on the links appearing down belo
 * 1.2: Added options, load at login, use CMD modifier.
 * 1.1: Controlling iTunes volume using Apple Remote.
 * 1.0: Controlling iTunes volume using keyboard "volume up"/"volume down".
+
+---
+
+> 💡 Found a bug or want to contribute? Open an [issue](https://github.com/alberti42/Volume-Control/issues) or submit a pull request!
