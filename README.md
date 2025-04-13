@@ -6,7 +6,7 @@ This app is the spiritual successor to *iTunes Volume Control*, offering a simpl
 
 > ⚠️ Due to macOS security restrictions, the app is not signed with an official Apple Developer certificate. Please follow the installation instructions below.
 
-![Screenshot of the application](Images/screenshot.jpg)
+<img src="Images/screenshot.jpg" alt="Screenshot of the application" width="25%">
 
 ---
 
