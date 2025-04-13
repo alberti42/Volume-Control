@@ -117,9 +117,9 @@ The app requires Accessibility and Automation permissions to control other apps'
    - Remove and re-add *Volume Control*.
    - Also check **Automation** and ensure both Music and Spotify are enabled.
 
-![Accessibility Permissions](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAccessibility.png)
+![Accessibility Permissions](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Accessability_dark_2x.png)
 
-![Automation Permissions](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/SecurityPrivacyAutomation.png)
+![Automation Permissions](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/Automation.jpg)
 
 ---
 
@@ -146,7 +146,7 @@ The app requires Accessibility and Automation permissions to control other apps'
 
 If you prefer or need to compile the app yourself using Xcode, see the instructions here:
 
-👉 [docs/compile.md](docs/compile.md)
+👉 [docs/compile.md](Docs/Compile.md)
 
 ---
 
