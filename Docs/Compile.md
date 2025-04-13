@@ -1,6 +1,6 @@
 # Compiling Volume Control from Source (Xcode Guide)
 
-**Introduction:** Recent macOS versions like Ventura (13) and the upcoming “Sequoia” have introduced stricter security measures that can prevent unsigned apps from launching. Volume Control is currently *not signed* with an official Apple Developer certificate, which means macOS might block it or show no “Open Anyway” option. Additionally, if the app’s bundle identifier doesn’t match the expected value (for example, after an update), Gatekeeper may still refuse to run it. In these cases, **compiling the app from source** with your own Apple ID and code signature is a reliable solution. This guide provides step-by-step instructions to build Volume Control on your Mac using Xcode, so you can run it without security warnings.
+**Introduction:** Recent macOS versions like Ventura (13) and the upcoming “Sequoia” have introduced stricter security measures that can prevent unsigned apps from launching. Volume Control is currently *not signed* with an official Apple Developer certificate, which means macOS might block it or show no “Open Anyway” option. Additionally, if the app’s bundle identifier doesn’t match the expected value (for example, after an update), [Gatekeeper](https://en.wikipedia.org/wiki/Gatekeeper_(macOS)) may still refuse to run it. In these cases, **compiling the app from source** with your own Apple ID and code signature is a reliable solution. This guide provides step-by-step instructions to build Volume Control on your Mac using Xcode, so you can run it without security warnings.
 
 ## Prerequisites
 
@@ -58,8 +58,3 @@
   - Selected your Personal Team.
   - Changed the bundle ID to something unique.
 - **Archive grayed out?** Ensure your scheme is selected and the destination is “My Mac”.
-- **Still blocked by macOS?** Right-click → Open to bypass Gatekeeper.
-
-For additional help, refer to:
-- [StackOverflow: Xcode signing issues](https://stackoverflow.com/questions/40113291/xcode-8-xcodebuild-how-to-trigger-update-signing-from-command-line)
-- Apple Developer Forums
