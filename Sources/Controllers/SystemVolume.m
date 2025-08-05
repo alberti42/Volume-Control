@@ -38,27 +38,55 @@
     return defaultOutputDeviceID;
 }
 
-- (void) setCurrentVolume:(double)currentVolume
+- (void)setCurrentVolume:(double)currentVolume
 {
     AudioDeviceID defaultOutputDeviceID = [self getDefaultOutputDevice];
-    
+
     AudioObjectPropertyAddress volumePropertyAddress = {
-        kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
+        kAudioHardwareServiceDeviceProperty_VirtualMainVolume,
         kAudioDevicePropertyScopeOutput,
         kAudioObjectPropertyElementMaster
     };
-    
-    Float32 volume = (Float32)(currentVolume/100.);
-    UInt32 volumedataSize = sizeof(volume);
-    
-    OSStatus result = AudioObjectSetPropertyData(defaultOutputDeviceID,
-                                        &volumePropertyAddress,
-                                        0, NULL,
-                                        volumedataSize, &volume);
-    
-    if (result != kAudioHardwareNoError) {
-        NSLog(@"No volume set for device 0x%0x", defaultOutputDeviceID);
-    }        
+
+    AudioObjectPropertyAddress mutePropertyAddress = {
+        kAudioDevicePropertyMute,
+        kAudioDevicePropertyScopeOutput,
+        kAudioObjectPropertyElementMaster
+    };
+
+    Float32 volume = (Float32)(currentVolume / 100.);
+    UInt32 dataSize;
+
+    if (volume == 0) {
+        // Mute the device
+        UInt32 mute = 1;
+        dataSize = sizeof(mute);
+        OSStatus result = AudioObjectSetPropertyData(defaultOutputDeviceID,
+                                                     &mutePropertyAddress,
+                                                     0, NULL,
+                                                     dataSize, &mute);
+        if (result != noErr) {
+            NSLog(@"Failed to mute device 0x%0x", defaultOutputDeviceID);
+        }
+    } else {
+        // Unmute the device
+        UInt32 mute = 0;
+        dataSize = sizeof(mute);
+        AudioObjectSetPropertyData(defaultOutputDeviceID,
+                                   &mutePropertyAddress,
+                                   0, NULL,
+                                   dataSize, &mute);
+
+        // Set the volume
+        dataSize = sizeof(volume);
+        OSStatus result = AudioObjectSetPropertyData(defaultOutputDeviceID,
+                                                     &volumePropertyAddress,
+                                                     0, NULL,
+                                                     dataSize, &volume);
+        if (result != noErr) {
+            NSLog(@"Failed to set volume for device 0x%0x", defaultOutputDeviceID);
+        }
+    }
 }
 
 - (bool) isMuted
@@ -91,7 +119,7 @@
     AudioDeviceID defaultOutputDeviceID = [self getDefaultOutputDevice];
     
     AudioObjectPropertyAddress volumePropertyAddress = {
-        kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
+        kAudioHardwareServiceDeviceProperty_VirtualMainVolume,
         kAudioDevicePropertyScopeOutput,
         kAudioObjectPropertyElementMaster
     };
