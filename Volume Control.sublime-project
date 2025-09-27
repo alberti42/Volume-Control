@@ -1,0 +1,42 @@
+{
+    "folders":
+    [
+        {
+            "path": ".",
+            "folder_exclude_patterns": [
+                "build",
+                "DerivedData",
+                ".git",
+                ".svn"
+            ],
+            "file_exclude_patterns": [
+                "*.o",
+                "*.pyc",
+                "*.swp",
+                "*.DS_Store",
+                "*.hop",
+                "*.zip"
+            ]
+        }
+    ],
+    "build_systems":
+    [
+        {
+            "name": "Build with xcodebuild",
+            "shell_cmd": "xcodebuild -project VolumeControl.xcodeproj -scheme VolumeControl -configuration Debug build",
+            "working_dir": "${project_path}"
+        },
+        {
+            "name": "Run App (Simulator)",
+            "shell_cmd": "xcrun simctl install booted ${project_path}/build/Debug-iphonesimulator/VolumeControl.app && xcrun simctl launch booted com.example.VolumeControl",
+            "working_dir": "${project_path}"
+        }
+    ],
+    "settings": {
+        "tab_size": 4,
+        "translate_tabs_to_spaces": true,
+        "trim_trailing_white_space_on_save": true,
+        "ensure_newline_at_eof_on_save": true
+    }
+}
+

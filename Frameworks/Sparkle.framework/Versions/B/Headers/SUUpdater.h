@@ -9,18 +9,23 @@
 #ifndef SUUPDATER_H
 #define SUUPDATER_H
 
-#if __has_feature(modules)
-#if __has_warning("-Watimport-in-framework-header")
-#pragma clang diagnostic ignored "-Watimport-in-framework-header"
-#endif
-@import Foundation;
-#else
 #import <Foundation/Foundation.h>
-#endif
+
+#if defined(BUILDING_SPARKLE_SOURCES_EXTERNALLY)
+// Ignore incorrect warning
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wquoted-include-in-framework-header"
+#import "SUExport.h"
+#import "SUVersionComparisonProtocol.h"
+#import "SUVersionDisplayProtocol.h"
+#import "SUUpdaterDelegate.h"
+#pragma clang diagnostic pop
+#else
 #import <Sparkle/SUExport.h>
 #import <Sparkle/SUVersionComparisonProtocol.h>
 #import <Sparkle/SUVersionDisplayProtocol.h>
 #import <Sparkle/SUUpdaterDelegate.h>
+#endif
 
 @class SUAppcastItem, SUAppcast, NSMenuItem;
 
@@ -78,7 +83,7 @@ SU_EXPORT @interface SUUpdater : NSObject
 /*!
  Checks for updates, but does not display any UI unless an update is found.
 
- This is meant for programmatically initating a check for updates. That is,
+ This is meant for programmatically initiating a check for updates. That is,
  it will display no UI unless it actually finds an update, in which case it
  proceeds as usual.
 
@@ -155,7 +160,7 @@ SU_EXPORT @interface SUUpdater : NSObject
 /*!
  The user agent used when checking for and downloading updates.
 
- The default implementation can be overrided.
+ The default implementation can be overridden.
  */
 @property (nonatomic, copy) NSString *userAgentString;
 
@@ -164,7 +169,7 @@ SU_EXPORT @interface SUUpdater : NSObject
 
  The keys of this dictionary are HTTP header fields (NSString) and values are corresponding values (NSString)
  */
-@property (copy) NSDictionary<NSString *, NSString *> *httpHeaders;
+@property (copy, nonatomic) NSDictionary<NSString *, NSString *> *httpHeaders;
 
 /*!
  A property indicating whether or not the user's system profile information is sent when checking for updates.

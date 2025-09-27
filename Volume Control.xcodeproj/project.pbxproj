@@ -3,12 +3,10 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		654864A827480DE600F78F99 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 654864A627480DCC00F78F99 /* Sparkle.framework */; };
-		654864A927480DE600F78F99 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 654864A627480DCC00F78F99 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
 		65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0F267EAD240080A9A5 /* CoreAudio.framework */; };
@@ -24,18 +22,41 @@
 		65996E09267EB0FF0080A9A5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E08267EB0FF0080A9A5 /* main.m */; };
 		65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E13267EB14F0080A9A5 /* AppDelegate.m */; };
 		65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E16267EB14F0080A9A5 /* SystemVolume.m */; };
+		65EF8F5A2E888C9500AAE7B7 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; };
+		65EF8F5B2E888C9500AAE7B7 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		65EF8F5F2E8896B800AAE7B7 /* VolumeControlHelper in Embed Login Items */ = {isa = PBXBuildFile; fileRef = 65EF8F4D2E88769F00AAE7B7 /* VolumeControlHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		65240F052697021A007ABB5F /* Embed Frameworks */ = {
+		65EF8F4B2E88769F00AAE7B7 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		65EF8F5C2E888C9500AAE7B7 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				654864A927480DE600F78F99 /* Sparkle.framework in Embed Frameworks */,
+				65EF8F5B2E888C9500AAE7B7 /* Sparkle.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		65EF8F5E2E88969C00AAE7B7 /* Embed Login Items */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LoginItems;
+			dstSubfolderSpec = 1;
+			files = (
+				65EF8F5F2E8896B800AAE7B7 /* VolumeControlHelper in Embed Login Items */,
+			);
+			name = "Embed Login Items";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -43,7 +64,6 @@
 /* Begin PBXFileReference section */
 		65220C75267F49CB007BE316 /* generate_keys.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = generate_keys.rb; sourceTree = "<group>"; };
 		65220C76267F49D4007BE316 /* sign_update.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = sign_update.rb; sourceTree = "<group>"; };
-		654864A627480DCC00F78F99 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		65533216267F5D86004231D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		65996C55267EA86A0080A9A5 /* Volume Control.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65996CDF267EAB660080A9A5 /* keyboard.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = keyboard.png; sourceTree = "<group>"; };
@@ -108,8 +128,14 @@
 		65996E16267EB14F0080A9A5 /* SystemVolume.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemVolume.m; sourceTree = "<group>"; };
 		65996E17267EB14F0080A9A5 /* ISSoundAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISSoundAdditions.h; sourceTree = "<group>"; };
 		65996E1C267EB3030080A9A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = VolumeControl/Info.plist; sourceTree = "<group>"; };
+		65EF8F4D2E88769F00AAE7B7 /* VolumeControlHelper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VolumeControlHelper; sourceTree = BUILT_PRODUCTS_DIR; };
+		65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		BC20FAA128902EF500CF5CAF /* Doppler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Doppler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		65EF8F4E2E88769F00AAE7B7 /* VolumeControlHelper */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VolumeControlHelper; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		65996C52267EA86A0080A9A5 /* Frameworks */ = {
@@ -117,11 +143,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				65996D18267EAD470080A9A5 /* Cocoa.framework in Frameworks */,
-				654864A827480DE600F78F99 /* Sparkle.framework in Frameworks */,
+				65EF8F5A2E888C9500AAE7B7 /* Sparkle.framework in Frameworks */,
 				65996D16267EAD410080A9A5 /* QuartzCore.framework in Frameworks */,
 				65996D14267EAD390080A9A5 /* IOKit.framework in Frameworks */,
 				65996D12267EAD310080A9A5 /* ScriptingBridge.framework in Frameworks */,
 				65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		65EF8F4A2E88769F00AAE7B7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,6 +169,7 @@
 				65996D1C267EADAA0080A9A5 /* Resources */,
 				65996E1C267EB3030080A9A5 /* Info.plist */,
 				65996D0C267EACE30080A9A5 /* Frameworks */,
+				65EF8F4E2E88769F00AAE7B7 /* VolumeControlHelper */,
 				65996C56267EA86A0080A9A5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -144,6 +178,7 @@
 			isa = PBXGroup;
 			children = (
 				65996C55267EA86A0080A9A5 /* Volume Control.app */,
+				65EF8F4D2E88769F00AAE7B7 /* VolumeControlHelper */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -282,7 +317,7 @@
 		65996D0C267EACE30080A9A5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				654864A627480DCC00F78F99 /* Sparkle.framework */,
+				65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */,
 				65996D17267EAD470080A9A5 /* Cocoa.framework */,
 				65996D15267EAD410080A9A5 /* QuartzCore.framework */,
 				65996D13267EAD390080A9A5 /* IOKit.framework */,
@@ -332,7 +367,8 @@
 				65996C51267EA86A0080A9A5 /* Sources */,
 				65996C52267EA86A0080A9A5 /* Frameworks */,
 				65996C53267EA86A0080A9A5 /* Resources */,
-				65240F052697021A007ABB5F /* Embed Frameworks */,
+				65EF8F5C2E888C9500AAE7B7 /* Embed Frameworks */,
+				65EF8F5E2E88969C00AAE7B7 /* Embed Login Items */,
 			);
 			buildRules = (
 			);
@@ -342,6 +378,28 @@
 			productName = VolumeControl;
 			productReference = 65996C55267EA86A0080A9A5 /* Volume Control.app */;
 			productType = "com.apple.product-type.application";
+		};
+		65EF8F4C2E88769F00AAE7B7 /* VolumeControlHelper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 65EF8F532E88769F00AAE7B7 /* Build configuration list for PBXNativeTarget "VolumeControlHelper" */;
+			buildPhases = (
+				65EF8F492E88769F00AAE7B7 /* Sources */,
+				65EF8F4A2E88769F00AAE7B7 /* Frameworks */,
+				65EF8F4B2E88769F00AAE7B7 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				65EF8F4E2E88769F00AAE7B7 /* VolumeControlHelper */,
+			);
+			name = VolumeControlHelper;
+			packageProductDependencies = (
+			);
+			productName = VolumeControlHelper;
+			productReference = 65EF8F4D2E88769F00AAE7B7 /* VolumeControlHelper */;
+			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
@@ -354,6 +412,9 @@
 				TargetAttributes = {
 					65996C54267EA86A0080A9A5 = {
 						CreatedOnToolsVersion = 12.5;
+					};
+					65EF8F4C2E88769F00AAE7B7 = {
+						CreatedOnToolsVersion = 26.0;
 					};
 				};
 			};
@@ -371,6 +432,7 @@
 			projectRoot = "";
 			targets = (
 				65996C54267EA86A0080A9A5 /* Volume Control */,
+				65EF8F4C2E88769F00AAE7B7 /* VolumeControlHelper */,
 			);
 		};
 /* End PBXProject section */
@@ -400,6 +462,13 @@
 				65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */,
 				65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */,
 				65996E09267EB0FF0080A9A5 /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		65EF8F492E88769F00AAE7B7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -540,12 +609,13 @@
 					"$(PROJECT_DIR)/Frameworks",
 				);
 				INFOPLIST_FILE = VolumeControl/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Volume Control";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
-					"@loader_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
 				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -569,15 +639,52 @@
 					"$(PROJECT_DIR)/Frameworks",
 				);
 				INFOPLIST_FILE = VolumeControl/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Volume Control";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
-					"@loader_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
 				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+			};
+			name = Release;
+		};
+		65EF8F512E88769F00AAE7B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9V3X7C8VCK;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				INSTALL_PATH = "";
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControlHelper;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = NO;
+			};
+			name = Debug;
+		};
+		65EF8F522E88769F00AAE7B7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9V3X7C8VCK;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				INSTALL_PATH = "";
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControlHelper;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = NO;
 			};
 			name = Release;
 		};
@@ -598,6 +705,15 @@
 			buildConfigurations = (
 				65996C67267EA86B0080A9A5 /* Debug */,
 				65996C68267EA86B0080A9A5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		65EF8F532E88769F00AAE7B7 /* Build configuration list for PBXNativeTarget "VolumeControlHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				65EF8F512E88769F00AAE7B7 /* Debug */,
+				65EF8F522E88769F00AAE7B7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23504" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="24127" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24127"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -28,7 +27,12 @@
                 <outlet property="volumeIncrementsSlider" destination="99" id="196"/>
             </connections>
         </customObject>
-        <customObject id="4" userLabel="Sparkle updater" customClass="SPUStandardUpdaterController"/>
+        <customObject id="4" userLabel="Sparkle updater" customClass="SPUStandardUpdaterController">
+            <connections>
+                <outlet property="updaterDelegate" destination="3" id="jb1-iV-1uy"/>
+                <outlet property="userDriverDelegate" destination="3" id="9fg-un-Y98"/>
+            </connections>
+        </customObject>
         <menu id="5" userLabel="Status Menu">
             <items>
                 <menuItem title="Enabled" state="on" tag="1" id="6" userLabel="Enabled">

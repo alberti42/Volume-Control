@@ -18,7 +18,7 @@
 
 @class IntroWindowController, AccessibilityDialog, StatusBarItem, PlayerApplication, SystemApplication;
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuItemValidation> {
+@interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuItemValidation, SPUUpdaterDelegate, SPUStandardUserDriverDelegate> {
     CALayer *mainLayer;
     CALayer *volumeImageLayer;
     CALayer *iconLayer;

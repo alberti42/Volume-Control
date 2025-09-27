@@ -6,19 +6,24 @@
 //  Copyright © 2016 Sparkle Project. All rights reserved.
 //
 
-#if __has_feature(modules)
-#if __has_warning("-Watimport-in-framework-header")
-#pragma clang diagnostic ignored "-Watimport-in-framework-header"
-#endif
-@import Foundation;
-#else
 #import <Foundation/Foundation.h>
-#endif
+
+#if defined(BUILDING_SPARKLE_SOURCES_EXTERNALLY)
+// Ignore incorrect warning
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wquoted-include-in-framework-header"
+#import "SUExport.h"
+#import "SPUUpdateCheck.h"
+#import "SPUUserUpdateState.h"
+#pragma clang diagnostic pop
+#else
 #import <Sparkle/SUExport.h>
 #import <Sparkle/SPUUpdateCheck.h>
+#import <Sparkle/SPUUserUpdateState.h>
+#endif
 
 @protocol SUVersionComparison;
-@class SPUUpdater, SUAppcast, SUAppcastItem;
+@class SPUUpdater, SUAppcast, SUAppcastItem, SPUUserUpdateState;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -103,7 +108,7 @@ SU_EXPORT extern NSString *const SUSystemProfilerPreferredLanguageKey;
  This feature was added in Sparkle 2.
  
  @return The set of channel names the updater is allowed to find new updates in. An empty set is the default behavior,
-         which means the updater will only look for updates in the default channel.
+         which means the updater will only look for updates in the default channel. The default channel is always included in the allowed set.
  */
 - (NSSet<NSString *> *)allowedChannelsForUpdater:(SPUUpdater *)updater;
 
@@ -132,7 +137,11 @@ SU_EXPORT extern NSString *const SUSystemProfilerPreferredLanguageKey;
 /**
  Returns whether Sparkle should prompt the user about checking for new updates automatically.
  
- Use this to override the default behavior.
+ Use this to override the default behavior, which is to prompt for permission to check for updates on second app launch
+ (if SUEnableAutomaticChecks is not specified).
+ 
+ This method is not called if SUEnableAutomaticChecks is defined in Info.plist or
+ if the user has responded to a permission prompt before.
  
  @param updater The updater instance.
  @return @c YES if the updater should prompt for permission to check for new updates automatically, otherwise @c NO
@@ -243,12 +252,23 @@ SU_EXPORT extern NSString *const SUSystemProfilerPreferredLanguageKey;
 - (BOOL)updater:(SPUUpdater *)updater shouldProceedWithUpdate:(SUAppcastItem *)updateItem updateCheck:(SPUUpdateCheck)updateCheck error:(NSError * __autoreleasing *)error;
 
 /**
- Called when an update is skipped by the user.
+ Called when a user makes a choice to install, dismiss, or skip an update.
+ 
+ If the @c choice is `SPUUserUpdateChoiceDismiss` and @c state.stage is `SPUUserUpdateStageDownloaded` the downloaded update is kept
+ around until the next time Sparkle reminds the user of the update.
+ 
+ If the @c choice is `SPUUserUpdateChoiceDismiss` and  @c state.stage is `SPUUserUpdateStageInstalling` the update is still set to install on application termination.
+ 
+ If the @c choice is `SPUUserUpdateChoiceSkip` the user will not be reminded in the future for this update unless they initiate an update check themselves.
+ 
+ If @c updateItem.isInformationOnlyUpdate is @c YES the @c choice cannot be `SPUUserUpdateChoiceInstall`.
  
  @param updater The updater instance.
- @param item The appcast item corresponding to the update that the user skipped.
+ @param choice The choice (install, dismiss, or skip) the user made for this @c updateItem
+ @param updateItem The appcast item corresponding to the update that the user made a choice on.
+ @param state The current state for the update which includes if the update has already been downloaded or already installing.
  */
-- (void)updater:(SPUUpdater *)updater userDidSkipThisVersion:(SUAppcastItem *)item;
+- (void)updater:(SPUUpdater *)updater userDidMakeChoice:(SPUUserUpdateChoice)choice forUpdate:(SUAppcastItem *)updateItem state:(SPUUserUpdateState *)state;
 
 /**
  Returns whether the release notes (if available) should be downloaded after an update is found and shown.
@@ -272,7 +292,7 @@ SU_EXPORT extern NSString *const SUSystemProfilerPreferredLanguageKey;
 - (void)updater:(SPUUpdater *)updater willDownloadUpdate:(SUAppcastItem *)item withRequest:(NSMutableURLRequest *)request;
 
 /**
- Called immediately after succesfull download of the specified update.
+ Called immediately after successful download of the specified update.
  
  @param updater The SUUpdater instance.
  @param item The appcast item corresponding to the update that has been downloaded.
@@ -366,7 +386,7 @@ SU_EXPORT extern NSString *const SUSystemProfilerPreferredLanguageKey;
  @param updater The updater instance.
  @return The custom version comparator or @c nil if you don't want to be delegated this task.
  */
-- (nullable id<SUVersionComparison>)versionComparatorForUpdater:(SPUUpdater *)updater;
+- (nullable id<SUVersionComparison>)versionComparatorForUpdater:(SPUUpdater *)updater __deprecated_msg("Custom version comparators are deprecated because they are incompatible with how the system compares different versions of an app.");
 
 /**
  Called when a background update will be scheduled after a delay.
@@ -409,7 +429,7 @@ SU_EXPORT extern NSString *const SUSystemProfilerPreferredLanguageKey;
  
  @param updater The updater instance.
  @param item The appcast item corresponding to the update that is proposed to be installed.
- @param immediateInstallHandler The install handler to immediately install the update. No UI interaction will be shown and the application will be relaunched after installation.
+ @param immediateInstallHandler The install handler for the delegate to immediately install the update. No UI interaction will be shown and the application will be relaunched after installation. This handler can only be used if @c YES is returned and the delegate handles installing the update. For Sparkle 2.3 onwards, this handler can be invoked multiple times in case the application cancels the termination request.
  @return @c YES if the delegate will handle installing the update or @c NO if the updater should be given responsibility.
  */
 - (BOOL)updater:(SPUUpdater *)updater willInstallUpdateOnQuit:(SUAppcastItem *)item immediateInstallationBlock:(void (^)(void))immediateInstallHandler;
@@ -452,6 +472,8 @@ SU_EXPORT extern NSString *const SUSystemProfilerPreferredLanguageKey;
 /* Deprecated methods */
 
 - (BOOL)updaterMayCheckForUpdates:(SPUUpdater *)updater __deprecated_msg("Please use -[SPUUpdaterDelegate updater:mayPerformUpdateCheck:error:] instead.");
+
+- (void)updater:(SPUUpdater *)updater userDidSkipThisVersion:(SUAppcastItem *)item __deprecated_msg("Please use -[SPUUpdaterDelegate updater:userDidMakeChoice:forUpdate:state:] instead.");
 
 @end
 

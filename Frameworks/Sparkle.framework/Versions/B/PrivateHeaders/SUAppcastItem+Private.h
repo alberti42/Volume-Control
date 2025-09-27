@@ -9,19 +9,14 @@
 #ifndef SUAppcastItem_Private_h
 #define SUAppcastItem_Private_h
 
-#if __has_feature(modules)
-#if __has_warning("-Watimport-in-framework-header")
-#pragma clang diagnostic ignored "-Watimport-in-framework-header"
-#endif
-@import Foundation;
-#else
 #import <Foundation/Foundation.h>
-#endif
+#import <Sparkle/SUAppcastItem.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 // Available in SPUAppcastItemStateResolver.h (a private exposed header)
 @class SPUAppcastItemStateResolver;
+@class SUSignatures;
 
 @interface SUAppcastItem (Private) <NSSecureCoding>
 
@@ -34,9 +29,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initWithDictionary:(NSDictionary *)dict relativeToURL:(NSURL * _Nullable)appcastURL stateResolver:(SPUAppcastItemStateResolver *)stateResolver failureReason:(NSString * _Nullable __autoreleasing *_Nullable)error;
 
 /**
- The DSA and EdDSA signatures along with their statuses.
+ The EdDSA and DSA signatures along with their statuses.
  */
-@property (readonly, nullable) SUSignatures *signatures;
+@property (readonly, nonatomic, nullable) SUSignatures *signatures;
 
 @end
 

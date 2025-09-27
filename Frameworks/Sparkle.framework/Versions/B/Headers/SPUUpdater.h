@@ -6,16 +6,19 @@
 //  Copyright 2006 Andy Matuschak. All rights reserved.
 //
 
-#if __has_feature(modules)
-#if __has_warning("-Watimport-in-framework-header")
-#pragma clang diagnostic ignored "-Watimport-in-framework-header"
-#endif
-@import Foundation;
-#else
 #import <Foundation/Foundation.h>
-#endif
+
+#if defined(BUILDING_SPARKLE_SOURCES_EXTERNALLY)
+// Ignore incorrect warning
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wquoted-include-in-framework-header"
+#import "SUExport.h"
+#import "SPUUserDriver.h"
+#pragma clang diagnostic pop
+#else
 #import <Sparkle/SUExport.h>
 #import <Sparkle/SPUUserDriver.h>
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -32,13 +35,15 @@ NS_ASSUME_NONNULL_BEGIN
  
  Prefer to set initial properties in your bundle's Info.plist as described in [Customizing Sparkle](https://sparkle-project.org/documentation/customization/).
  
- Otherwise only if you need dynamic behavior (eg. for user preferences) should you set properties on the updater such as:
+ Otherwise only if you need dynamic behavior for user settings should you set properties on the updater such as:
  - `automaticallyChecksForUpdates`
  - `updateCheckInterval`
  - `automaticallyDownloadsUpdates`
  - `feedURL`
  
  Please view the documentation on each of these properties for more detail if you are to configure them dynamically.
+ 
+ This class must be used on the main thread.
  */
 SU_EXPORT @interface SPUUpdater : NSObject
 
@@ -49,7 +54,7 @@ SU_EXPORT @interface SPUUpdater : NSObject
  
  Related: See `SPUStandardUpdaterController` which wraps a `SPUUpdater` instance and is suitable for instantiating inside of nib files.
  
- @param hostBundle The bundle that should be targetted for updating.
+ @param hostBundle The bundle that should be targeted for updating.
  @param applicationBundle The application bundle that should be waited for termination and relaunched (unless overridden). Usually this can be the same as hostBundle. This may differ when updating a plug-in or other non-application bundle.
  @param userDriver The user driver that Sparkle uses for user update interaction.
  @param delegate The delegate for `SPUUpdater`.
@@ -93,29 +98,40 @@ SU_EXPORT @interface SPUUpdater : NSObject
  
  If an update hasn't started, the user may be shown that a new check for updates is occurring.
  If an update has already been downloaded or begun installing from a previous session, the user may be presented to install that update.
- If the user is already being presented with an update, that update will be shown to the user in active focus.
+ If the user is already being presented with an update or update permission prompt, that notice may be shown to the user in active focus
+ (as long as the user driver is the standard `SPUStandardUserDriver` or if it implements `-[SPUUserDriver showUpdateInFocus]`).
  
  This will find updates that the user has previously opted into skipping.
- 
  See `canCheckForUpdates` property which can determine when this method may be invoked.
+
+ This must be called on the main thread.
  */
 - (void)checkForUpdates;
 
 /**
- Checks for updates, but does not display any UI unless an update is found.
+ Checks for updates, but does not show any UI unless an update is found.
  
  You usually do not need to call this method directly. If `automaticallyChecksForUpdates` is @c YES,
  Sparkle calls this method automatically according to its update schedule using the `updateCheckInterval`
- and the `lastUpdateCheckDate`.
+ and the `lastUpdateCheckDate`. Therefore, you should typically only consider calling this method directly if you
+ opt out of automatic update checks. Calling this method when updating your own bundle is invalid if Sparkle is configured
+ to ask the user's permission to check for updates automatically and `automaticallyChecksForUpdates` is `NO`.
+ If you want to reset the updater's cycle after an updater setting change, see `resetUpdateCycle` or `resetUpdateCycleAfterShortDelay` instead.
  
- This is meant for programmatically initating a check for updates.
- That is, it will display no UI unless it finds an update, in which case it proceeds as usual.
+ This is meant for programmatically initiating a check for updates in the background without the user initiating it.
+ This check will not show UI if no new updates are found.
+ 
+ If a new update is found, the updater's user driver may handle showing it at an appropriate (but not necessarily immediate) time.
+ If you want control over when and how a new update is shown, please see https://sparkle-project.org/documentation/gentle-reminders/
+ 
+ Note if automated downloading/installing is turned on, either a new update may be downloaded in the background to be installed silently,
+ or an already downloaded update may be shown.
+ 
  This will not find updates that the user has opted into skipping.
  
- Note if there is no resumable update found, and automated updating is turned on,
- the update will be downloaded in the background without disrupting the user.
- 
  This method does not do anything if there is a `sessionInProgress`.
+
+ This must be called on the main thread.
  */
 - (void)checkForUpdatesInBackground;
 
@@ -134,13 +150,18 @@ SU_EXPORT @interface SPUUpdater : NSObject
  Updates that have been skipped by the user will not be found.
  
  This method does not do anything if there is a `sessionInProgress`.
+
+ This must be called on the main thread.
  */
 - (void)checkForUpdateInformation;
 
 /**
  A property indicating whether or not updates can be checked by the user.
  
- An update check can be made by the user when an update session isn't in progress, or when an update or its progress is being shown to the user.
+ An update check can be made by the user when an update session isn't in progress.
+ An update check can also be made when an update or its progress is being shown to the user
+ (as long as the user driver is the standard `SPUStandardUserDriver` or if it implements `-[SPUUserDriver showUpdateInFocus]`).
+ 
  A user cannot check for updates when data (such as the feed or an update) is still being downloaded automatically in the background.
  
  This property is suitable to use for menu item validation for seeing if `-checkForUpdates` can be invoked.
@@ -177,21 +198,33 @@ SU_EXPORT @interface SPUUpdater : NSObject
  this permission request is not performed however.
  
  Setting this property will persist in the host bundle's user defaults.
+ Hence developers shouldn't maintain an additional user default for this property.
+ Only set this property if the user wants to change the default via a user settings option.
+ Do not always set it on launch unless you want to ignore the user's preference.
+ For testing environments, you can disable update checks by passing `-SUEnableAutomaticChecks NO`
+ to your app's command line arguments instead of setting this property.
  
  The update schedule cycle will be reset in a short delay after the property's new value is set.
- This is to allow reverting this property without kicking off a schedule change immediately
+ This is to allow reverting this property without kicking off a schedule change immediately.
+ 
+ This property is KVO compliant. This property must be called on the main thread.
  */
 @property (nonatomic) BOOL automaticallyChecksForUpdates;
 
 /**
  A property indicating the current automatic update check interval in seconds.
  
+ Prefer to set SUScheduledCheckInterval directly in your Info.plist for setting the initial value.
+ 
  Setting this property will persist in the host bundle's user defaults.
- For this reason, only set this property if you need dynamic behavior (eg user preferences).
- Otherwise prefer to set SUScheduledCheckInterval directly in your Info.plist.
+ Hence developers shouldn't maintain an additional user default for this property.
+ Only set this property if the user wants to change the default via a user settings option.
+ Do not always set it on launch unless you want to ignore the user's preference.
  
  The update schedule cycle will be reset in a short delay after the property's new value is set.
- This is to allow reverting this property without kicking off a schedule change immediately
+ This is to allow reverting this property without kicking off a schedule change immediately.
+ 
+ This property is KVO compliant. This property must be called on the main thread.
  */
 @property (nonatomic) NSTimeInterval updateCheckInterval;
 
@@ -200,12 +233,21 @@ SU_EXPORT @interface SPUUpdater : NSObject
  
  By default, updates are not automatically downloaded.
  
- Note that the developer can disallow automatic downloading of updates from being enabled.
+ By default starting from Sparkle 2.4, users are provided an option to opt in to automatically downloading and installing updates when they are asked if they want automatic update checks enabled.
+ The default value for this option is based on what the developer sets `SUAutomaticallyUpdate` in their Info.plist.
+ This is not done if `SUEnableAutomaticChecks` is set in the Info.plist however. Please check `automaticallyChecksForUpdates` property for more details.
+ 
+ Note that the developer can disallow automatic downloading of updates from being enabled (via `SUAllowsAutomaticUpdates` Info.plist key).
  In this case, this property will return NO regardless of how this property is set.
  
+ Prefer to set `SUAutomaticallyUpdate` directly in your Info.plist for setting the initial value.
+ 
  Setting this property will persist in the host bundle's user defaults.
- For this reason, only set this property if you need dynamic behavior (eg user preferences).
- Otherwise prefer to set SUAutomaticallyUpdate directly in your Info.plist.
+ Hence developers shouldn't maintain an additional user default for this property.
+ Only set this property if the user wants to change the default via a user settings option.
+ Do not always set it on launch unless you want to ignore the user's preference.
+ 
+ This property is KVO compliant. This property must be called on the main thread.
  */
 @property (nonatomic) BOOL automaticallyDownloadsUpdates;
 
@@ -213,29 +255,59 @@ SU_EXPORT @interface SPUUpdater : NSObject
  The URL of the appcast used to download update information.
  
  If the updater's delegate implements `-[SPUUpdaterDelegate feedURLStringForUpdater:]`, this will return that feed URL.
- Otherwise if the feed URL has been set before, the feed URL returned will be retrieved from the host bundle's user defaults.
+ Otherwise if the feed URL has been set before using `-[SPUUpdater setFeedURL:]`, the feed URL returned will be retrieved from the host bundle's user defaults.
  Otherwise the feed URL in the host bundle's Info.plist will be returned.
  If no feed URL can be retrieved, returns nil.
+ 
+ For setting a primary feed URL, please set the `SUFeedURL` property in your Info.plist.
+ For setting an alternative feed URL, please prefer `-[SPUUpdaterDelegate feedURLStringForUpdater:]` over `-setFeedURL:`.
+ Please see the documentation for `-setFeedURL:` for migrating away from that API.
  
  This property must be called on the main thread; calls from background threads will return nil.
  */
 @property (nonatomic, readonly, nullable) NSURL *feedURL;
 
 /**
- Set the URL of the appcast used to download update information. Using this method is discouraged.
+ Set the URL of the appcast used to download update information. This method is deprecated.
  
  Setting this property will persist in the host bundle's user defaults.
- To avoid this, you should consider implementing
+ To avoid this undesirable behavior, please consider implementing
  `-[SPUUpdaterDelegate feedURLStringForUpdater:]` instead of using this method.
  
- Passing nil will remove any feed URL that has been set in the host bundle's user defaults.
+ Calling `-clearFeedURLFromUserDefaults` will remove any feed URL that has been set in the host bundle's user defaults.
+ Passing nil to this method can also do this, but using `-clearFeedURLFromUserDefaults` is preferred.
+ To migrate away from using this API, you must clear and remove any feed URLs set in the user defaults through this API.
+ 
  If you do not need to alternate between multiple feeds, set the SUFeedURL in your Info.plist instead of invoking this method.
  
  For beta updates, you may consider migrating to `-[SPUUpdaterDelegate allowedChannelsForUpdater:]` in the future.
  
+ Updaters that update other developer's bundles should not call this method.
+ 
  This method must be called on the main thread; calls from background threads will have no effect.
  */
-- (void)setFeedURL:(nullable NSURL *)feedURL;
+- (void)setFeedURL:(nullable NSURL *)feedURL __deprecated_msg("Please call -[SPUUpdater clearFeedURLFromUserDefaults] to migrate away from using this API and transition to either specifying the feed URL in your Info.plist, using channels in Sparkle 2, or using -[SPUUpdaterDelegate feedURLStringForUpdater:] to specify the dynamic feed URL at runtime");
+
+/**
+ Clears any feed URL from the host bundle's user defaults that was set via `-setFeedURL:`
+ 
+ You should call this method if you have used `-setFeedURL:` in the past and want to stop using that API.
+ Otherwise for compatibility Sparkle will prefer to use the feed URL that was set in the user defaults over the one that was specified in the host bundle's Info.plist,
+ which is often undesirable (except for testing purposes).
+ 
+ If a feed URL is found stored in the host bundle's user defaults (from calling `-setFeedURL:`) before it gets cleared,
+ then that previously set URL is returned from this method.
+ 
+ This method should be called as soon as possible, after your application finished launching or right after the updater has been started
+ if you manually manage starting the updater.
+ 
+ Updaters that update other developer's bundles should not call this method.
+ 
+ This method must be called on the main thread.
+ 
+ @return A previously set feed URL in the host bundle's user defaults, if available, otherwise this returns `nil`
+ */
+- (nullable NSURL *)clearFeedURLFromUserDefaults;
 
 /**
  The host bundle that is being updated.
@@ -246,13 +318,13 @@ SU_EXPORT @interface SPUUpdater : NSObject
  The user agent used when checking for updates.
  
  By default the user agent string returned is in the format:
- $(BundleDisplayName)/$(BundleDisplayVersion) Sparkle/$(SparkleDisplayVersion)
+ `$(BundleDisplayName)/$(BundleDisplayVersion) Sparkle/$(SparkleDisplayVersion)`
  
  BundleDisplayVersion is derived from the main application's Info.plist's CFBundleShortVersionString.
  
  Note if Sparkle is being used to update another application, the bundle information retrieved is from the main application performing the updating.
  
- This default implementation can be overrided.
+ This default implementation can be overridden.
  */
 @property (nonatomic, copy) NSString *userAgentString;
 
@@ -267,6 +339,8 @@ SU_EXPORT @interface SPUUpdater : NSObject
  A property indicating whether or not the user's system profile information is sent when checking for updates.
 
  Setting this property will persist in the host bundle's user defaults.
+ 
+ This property is KVO compliant. This property must be called on the main thread.
  */
 @property (nonatomic) BOOL sendsSystemProfile;
 
@@ -276,19 +350,38 @@ SU_EXPORT @interface SPUUpdater : NSObject
  For testing purposes, the last update check is stored in the `SULastCheckTime` key in the host bundle's user defaults.
  For example, `defaults delete my-bundle-id SULastCheckTime` can be invoked to clear the last update check time and test
  if update checks are automatically scheduled.
+ 
+ This property must be called on the main thread.
  */
 @property (nonatomic, readonly, copy, nullable) NSDate *lastUpdateCheckDate;
 
 /**
- Appropriately schedules or cancels the update checking timer according to the preferences for time interval and automatic checks.
-
- If you change the `updateCheckInterval` or `automaticallyChecksForUpdates` properties, the update cycle will be reset automatically after a short delay.
- The update cycle is also started automatically after the updater is started. In all these cases, this method should not be called directly.
+ Appropriately re-schedules the update checking timer according to the current updater settings.
  
- This call does not change the date of the next check, but only the internal timer.
+ This method should only be called in response to a user changing updater settings. This method may trigger a new update check to occur in the background if an updater setting such as the updater's feed or allowed channels has changed.
+ 
+ If the `updateCheckInterval` or `automaticallyChecksForUpdates` properties are changed, this method is automatically invoked after a short delay using `-resetUpdateCycleAfterShortDelay`. In these cases, manually resetting the update cycle is not necessary.
+ 
+ See also `-resetUpdateCycleAfterShortDelay` which gives the user a short delay before triggering a cycle reset.
+ 
+ This must be called on the main thread.
  */
 - (void)resetUpdateCycle;
 
+/**
+ Appropriately re-schedules the update checking timer according to the current updater settings after a short cancellable delay.
+ 
+ This method calls `resetUpdateCycle` after a short delay to give the user a short amount of time to cancel changing an updater setting.
+ If this method is called again, any previous reset request that is still inflight will be cancelled.
+ 
+ For example, if the user changes the `automaticallyChecksForUpdates` setting to `YES`, but quickly undoes their change then
+ no cycle reset will be done.
+ 
+ If the `updateCheckInterval` or `automaticallyChecksForUpdates` properties are changed, this method is automatically invoked. In these cases, manually resetting the update cycle is not necessary.
+ 
+ This must be called on the main thread.
+ */
+- (void)resetUpdateCycleAfterShortDelay;
 
 /**
  The system profile information that is sent when checking for updates.

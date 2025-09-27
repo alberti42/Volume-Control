@@ -9,15 +9,16 @@
 #ifndef SUAPPCAST_H
 #define SUAPPCAST_H
 
-#if __has_feature(modules)
-#if __has_warning("-Watimport-in-framework-header")
-#pragma clang diagnostic ignored "-Watimport-in-framework-header"
-#endif
-@import Foundation;
-#else
 #import <Foundation/Foundation.h>
-#endif
+#if defined(BUILDING_SPARKLE_SOURCES_EXTERNALLY)
+// Ignore incorrect warning
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wquoted-include-in-framework-header"
+#import "SUExport.h"
+#pragma clang diagnostic pop
+#else
 #import <Sparkle/SUExport.h>
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -35,7 +36,7 @@ SU_EXPORT @interface SUAppcast : NSObject
  
  These `SUAppcastItem` items are in the same order as specified in the appcast XML feed and are thus not sorted by version.
  */
-@property (readonly, copy) NSArray<SUAppcastItem *> *items;
+@property (readonly, nonatomic, copy) NSArray<SUAppcastItem *> *items;
 
 @end
 

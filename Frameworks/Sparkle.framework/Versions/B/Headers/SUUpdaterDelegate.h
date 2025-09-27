@@ -6,15 +6,17 @@
 //  Copyright © 2016 Sparkle Project. All rights reserved.
 //
 
-#if __has_feature(modules)
-#if __has_warning("-Watimport-in-framework-header")
-#pragma clang diagnostic ignored "-Watimport-in-framework-header"
-#endif
-@import Foundation;
-#else
 #import <Foundation/Foundation.h>
-#endif
+
+#if defined(BUILDING_SPARKLE_SOURCES_EXTERNALLY)
+// Ignore incorrect warning
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wquoted-include-in-framework-header"
+#import "SUExport.h"
+#pragma clang diagnostic pop
+#else
 #import <Sparkle/SUExport.h>
+#endif
 
 @protocol SUVersionComparison, SUVersionDisplay;
 @class SUUpdater, SUAppcast, SUAppcastItem;
@@ -128,6 +130,23 @@ __deprecated_msg("Deprecated in Sparkle 2. See SPUUpdaterDelegate instead")
 - (void)updaterDidNotFindUpdate:(SUUpdater *)updater;
 
 /*!
+  Called just before the scheduled update driver prompts the user to install an update.
+
+  \param updater The SUUpdater instance.
+
+  \return YES to allow the update prompt to be shown (the default behavior), or NO to suppress it.
+  */
+ - (BOOL)updaterShouldShowUpdateAlertForScheduledUpdate:(SUUpdater *)updater forItem:(SUAppcastItem *)item;
+
+ /*!
+  Called after the user dismisses the update alert.
+
+  \param updater The SUUpdater instance.
+  \param permanently YES if the alert will not appear again for this update; NO if it may reappear.
+  */
+ - (void)updater:(SUUpdater *)updater didDismissUpdateAlertPermanently:(BOOL)permanently forItem:(SUAppcastItem *)item;
+
+/*!
  Called immediately before downloading the specified update.
  
  \param updater The SUUpdater instance.
@@ -137,7 +156,7 @@ __deprecated_msg("Deprecated in Sparkle 2. See SPUUpdaterDelegate instead")
 - (void)updater:(SUUpdater *)updater willDownloadUpdate:(SUAppcastItem *)item withRequest:(NSMutableURLRequest *)request;
 
 /*!
- Called immediately after succesfull download of the specified update.
+ Called immediately after successful download of the specified update.
  
  \param updater The SUUpdater instance.
  \param item The appcast item corresponding to the update that has been downloaded.
