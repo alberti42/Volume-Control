@@ -13,11 +13,10 @@
 @interface SystemApplication : NSObject{
     
 @private
-    
-    NSInteger osxVersion;
+
 }
 
--(id)initWithVersion:(NSInteger)osxVersion;
+-(id)init;
 -(bool)isMuted;
     
 @property (assign, nonatomic) double currentVolume;  // The sound output volume (0 = minimum, 100 = maximum)

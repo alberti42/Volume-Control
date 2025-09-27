@@ -142,10 +142,9 @@
 {
 }
 
--(id)initWithVersion:(NSInteger)osxVersion{
+-(id)init{
     if (self = [super init])  {
         [self setOldVolume:[self currentVolume]];
-        self->osxVersion = osxVersion;
     }
     return self;
 }

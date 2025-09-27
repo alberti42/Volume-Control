@@ -11,8 +11,9 @@
 #import "AccessibilityDialog.h"
 
 #import <IOKit/hidsystem/ev_keymap.h>
+#import <ServiceManagement/ServiceManagement.h>
 
-#import "OSD.h"
+//#import "OSD.h"
 
 //This will handle signals for us, specifically SIGTERM.
 void handleSIGTERM(int sig) {
@@ -276,49 +277,67 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [NSApp terminate:nil];
 }
 
-- (bool) StartAtLogin
+- (bool)StartAtLogin
 {
-    NSURL *appURL=[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]];
-    
-    LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
-    
-    bool found=false;
-    
-    if (loginItems) {
+    if (@available(macOS 13.0, *)) {
+        // On macOS 13+, the status can be checked directly.
+        return [SMAppService mainAppService].status == SMAppServiceStatusEnabled;
+    } else {
+        // For older systems, we have to fall back to the deprecated check.
+        // This is okay for now as it provides backward compatibility.
+        NSURL *appURL = [NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]];
+        bool found = false;
+        
+        LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
+        if (!loginItems) return NO;
+
         UInt32 seedValue;
-        //Retrieve the list of Login Items and cast them to a NSArray so that it will be easier to iterate.
-        NSArray  *loginItemsArray = (__bridge NSArray *)LSSharedFileListCopySnapshot(loginItems, &seedValue);
-        
-        for(int i=0; i<[loginItemsArray count]; i++)
-        {
-            LSSharedFileListItemRef itemRef = (__bridge LSSharedFileListItemRef)[loginItemsArray objectAtIndex:i];
-            //Resolve the item with URL
-            CFURLRef url = NULL;
-            
-            // LSSharedFileListItemResolve is deprecated in Mac OS X 10.10
-            // Switch to LSSharedFileListItemCopyResolvedURL if possible
-#if MAC_OS_X_VERSION_MIN_REQUIRED < 101000 // MAC_OS_X_VERSION_10_10
-            LSSharedFileListItemResolve(itemRef, 0, &url, NULL);
-#else
-            url = LSSharedFileListItemCopyResolvedURL(itemRef, 0, NULL);
-#endif
-            
-            if ( url ) {
-                if ( CFEqual(url, (__bridge CFTypeRef)(appURL)) ) // found it
-                {
-                    found=true;
-                }
+        NSArray *loginItemsArray = (__bridge_transfer NSArray *)LSSharedFileListCopySnapshot(loginItems, &seedValue);
+
+        for (id item in loginItemsArray) {
+            LSSharedFileListItemRef itemRef = (__bridge LSSharedFileListItemRef)item;
+            CFURLRef url = LSSharedFileListItemCopyResolvedURL(itemRef, 0, NULL);
+            if (url && [(__bridge NSURL *)url isEqual:appURL]) {
+                found = true;
                 CFRelease(url);
+                break;
             }
-            
-            if(found)break;
+            if (url) CFRelease(url);
         }
-        
-        CFRelease((__bridge CFTypeRef)(loginItemsArray));
         CFRelease(loginItems);
+        return found;
     }
-    
-    return found;
+}
+
+- (void)setStartAtLogin:(bool)enabled savePreferences:(bool)savePreferences
+{
+    NSMenuItem* menuItem=[_statusMenu itemWithTag:START_AT_LOGIN_ID];
+    [menuItem setState:enabled];
+
+    if (savePreferences) {
+        if (@available(macOS 13.0, *)) {
+            SMAppService *service = [SMAppService mainAppService];
+            NSError *error = nil;
+            if (enabled) {
+                // Register the app to start at login if it's not already registered.
+                if (service.status == SMAppServiceStatusNotRegistered) {
+                    [service registerAndReturnError:&error];
+                }
+            } else {
+                // Unregister the app from starting at login.
+                [service unregisterAndReturnError:&error];
+            }
+            if (error) {
+                NSLog(@"[SMAppService] Error modifying login item: %@", error.localizedDescription);
+            }
+        } else {
+            // Fallback for macOS versions before 13.0
+            NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+            if (!SMLoginItemSetEnabled((__bridge CFStringRef)bundleIdentifier, enabled)) {
+                NSLog(@"[SMLoginItemSetEnabled] Failed to update login item.");
+            }
+        }
+    }
 }
 
 - (void)wasAuthorized
@@ -327,66 +346,6 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     accessibilityDialog = nil;
     
     [self completeInitialization];
-}
-
-- (void)setStartAtLogin:(bool)enabled savePreferences:(bool)savePreferences
-{
-    NSMenuItem* menuItem=[_statusMenu itemWithTag:START_AT_LOGIN_ID];
-    [menuItem setState:enabled];
-    
-    if(savePreferences)
-    {
-        NSURL *appURL=[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]];
-        
-        LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
-        
-        if (loginItems) {
-            if(enabled)
-            {
-                // Insert the item at the bottom of Login Items list.
-                LSSharedFileListItemRef loginItemRef = LSSharedFileListInsertItemURL(loginItems,
-                                                                                     kLSSharedFileListItemLast,
-                                                                                     NULL,
-                                                                                     NULL,
-                                                                                     (__bridge CFURLRef)appURL,
-                                                                                     NULL,
-                                                                                     NULL);
-                if (loginItemRef) {
-                    CFRelease(loginItemRef);
-                }
-            }
-            else
-            {
-                UInt32 seedValue;
-                //Retrieve the list of Login Items and cast them to a NSArray so that it will be easier to iterate.
-                NSArray  *loginItemsArray = (__bridge NSArray *)LSSharedFileListCopySnapshot(loginItems, &seedValue);
-                for(int i=0; i<[loginItemsArray count]; i++)
-                {
-                    LSSharedFileListItemRef itemRef = (__bridge LSSharedFileListItemRef)[loginItemsArray objectAtIndex:i];
-                    //Resolve the item with URL
-                    CFURLRef URL = NULL;
-                    
-                    // LSSharedFileListItemResolve is deprecated in Mac OS X 10.10
-                    // Switch to LSSharedFileListItemCopyResolvedURL if possible
-#if MAC_OS_X_VERSION_MIN_REQUIRED < 101000 // MAC_OS_X_VERSION_10_10
-                    LSSharedFileListItemResolve(itemRef, 0, &URL, NULL);
-#else
-                    URL = LSSharedFileListItemCopyResolvedURL(itemRef, 0, NULL);
-#endif
-                    
-                    if ( URL ) {
-                        if ( CFEqual(URL, (__bridge CFTypeRef)(appURL)) ) // found it
-                        {
-                            LSSharedFileListItemRemove(loginItems,itemRef);
-                        }
-                        CFRelease(URL);
-                    }
-                }
-                CFRelease((__bridge CFTypeRef)(loginItemsArray));
-            }
-            CFRelease(loginItems);
-        }
-    }
 }
 
 - (void)stopVolumeRampTimer
@@ -478,7 +437,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             }
             
             if(!_hideVolumeWindow)
-                [[self->OSDManager sharedManager] showImage:OSDGraphicSpeakerMute onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:0 totalChiclets:(unsigned int)100 locked:NO];
+            {}
+                // [[self->OSDManager sharedManager] showImage:OSDGraphicSpeakerMute onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:0 totalChiclets:(unsigned int)100 locked:NO];
             
         }
         else
@@ -490,7 +450,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             }
             
             if(!_hideVolumeWindow)
-                [[self->OSDManager sharedManager] showImage:OSDGraphicSpeaker onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)[runningPlayerPtr oldVolume] totalChiclets:(unsigned int)100 locked:NO];
+            {}
+                // [[self->OSDManager sharedManager] showImage:OSDGraphicSpeaker onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)[runningPlayerPtr oldVolume] totalChiclets:(unsigned int)100 locked:NO];
             
             [runningPlayerPtr setOldVolume:-1];
         }
@@ -547,44 +508,6 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     if(self)
     {
         self->eventTap = nil;
-                
-        if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_6) {
-            //10.6.x or earlier systems
-            osxVersion = 106;
-        } else if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_7) {
-            /* On a 10.7 - 10.7.x system */
-            osxVersion = 107;
-        } else if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_8) {
-            /* On a 10.8 - 10.8.x system */
-            osxVersion = 108;
-        } else if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_9) {
-            /* On a 10.9 - 10.9.x system */
-            osxVersion = 109;
-        } else if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_10) {
-            /* On a 10.10 - 10.10.x system */
-            osxVersion = 110;
-        } else if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_11) {
-            /* On a 10.11 - 10.11.x system */
-            osxVersion = 111;
-        } else if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_12) {
-            /* On a 10.12 - 10.12.x system */
-            osxVersion = 112;
-        } else if (floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_13) {
-            /* On a 10.13 - 10.13.x system */
-            osxVersion = 113;
-        } else if (floor(NSAppKitVersionNumber) <= 1671) {
-            /* On a 10.14 - 10.14.x system */
-            osxVersion = 114;
-        }
-        else if (floor(NSAppKitVersionNumber) <= 1894) {
-            /* On a 10.15 - 10.15.x system */
-            osxVersion = 115;
-        }
-        else
-        {
-            osxVersion = 115;
-        }
-        
         menuIsVisible=false;
         currentPlayer=nil;
         
@@ -618,15 +541,16 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     
     // [self _loadBezelServices]; // El Capitan and probably older systems
     [[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/OSD.framework"] load];
-    self->OSDManager = NSClassFromString(@"OSDManager");
+    // self->OSDManager = NSClassFromString(@"OSDManager");
     
     //[self checkSIPforAppIdentifier:@"com.apple.iTunes" promptIfNeeded:YES];
     //[self checkSIPforAppIdentifier:@"com.spotify.client" promptIfNeeded:YES];
     
-    if(osxVersion >= 115)
+    if (@available(macOS 10.15, *)) {
         iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.Music"];
-    else
+    } else {
         iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.iTunes"];
+    }
     
     spotify = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.spotify.client"];
 
@@ -640,7 +564,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     if([doppler isRunning])
         [doppler currentVolume];
     
-    systemAudio = [[SystemApplication alloc] initWithVersion:osxVersion];
+    systemAudio = [[SystemApplication alloc] init];
     
     [self showInStatusBar];   // Install icon into the menu bar
     
@@ -767,8 +691,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [self setHideFromStatusBar:[preferences boolForKey:    @"hideFromStatusBarPreference"]];
     [self setHideVolumeWindow:[preferences boolForKey:     @"hideVolumeWindowPreference"]];
     [[self iTunesBtn] setState:[preferences boolForKey:    @"iTunesControl"]];
-    if(osxVersion >= 115)
-    {
+    if (@available(macOS 10.15, *)) {
         [[self iTunesBtn] setTitle:@"Music"];
     }
     [[self iTunesBtn] setState:[preferences boolForKey:    @"iTunesControl"]];
@@ -1043,7 +966,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         if (volume<0) volume=0;
         if (volume>100) volume=100;
         
-        OSDGraphic image = (volume > 0)? OSDGraphicSpeaker : OSDGraphicSpeakerMute;
+        // OSDGraphic image = (volume > 0)? OSDGraphicSpeaker : OSDGraphicSpeakerMute;
         
         NSInteger numFullBlks = floor(volume/6.25);
         NSInteger numQrtsBlks = round((volume-(double)numFullBlks*6.25)/1.5625);
@@ -1051,7 +974,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         //NSLog(@"%d %d",(int)numFullBlks,(int)numQrtsBlks);
         
         if(!_hideVolumeWindow)
-            [[self->OSDManager sharedManager] showImage:image onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)(round(((numFullBlks*4+numQrtsBlks)*1.5625)*100)) totalChiclets:(unsigned int)10000 locked:NO];
+        {}
+            // [[self->OSDManager sharedManager] showImage:image onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)(round(((numFullBlks*4+numQrtsBlks)*1.5625)*100)) totalChiclets:(unsigned int)10000 locked:NO];
         
         [runningPlayerPtr setCurrentVolume:volume];
         if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {

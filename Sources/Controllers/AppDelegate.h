@@ -45,7 +45,7 @@
     
     id currentPlayer;
     
-    Class OSDManager;
+    // Class OSDManager;
     
     NSSound* volumeSound;
     
