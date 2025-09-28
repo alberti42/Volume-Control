@@ -238,6 +238,12 @@ static NSTimeInterval checkPlayerTimeout=0.3f;
 //static NSTimeInterval volumeLockSyncInterval=1.0f;
 static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
+static NSString * const kHelperBundleIDSuffix = @"Helper";
+
+- (NSString *)helperBundleID {
+    return [[[NSBundle mainBundle] bundleIdentifier] stringByAppendingString:kHelperBundleIDSuffix];
+}
+
 - (IBAction)terminate:(id)sender
 {
 	if(CFMachPortIsValid(eventTap)) {
