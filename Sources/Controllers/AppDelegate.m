@@ -363,6 +363,34 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [self setVolumeUp:false];
 }
 
+- (BOOL)tryCreateEventTap {
+    // Key must be a CFStringRef (no need to retain/release since it's a constant)
+    const void *keys[]   = { kAXTrustedCheckOptionPrompt };
+    // Value must be a CFBooleanRef
+    const void *values[] = { kCFBooleanFalse };
+
+    CFDictionaryRef options = CFDictionaryCreate(
+        kCFAllocatorDefault,   // allocator
+        keys,                  // keys
+        values,                // values
+        1,                     // number of keys/values
+        &kCFTypeDictionaryKeyCallBacks,    // standard key callbacks
+        &kCFTypeDictionaryValueCallBacks   // standard value callbacks
+    );
+    
+    BOOL trusted = AXIsProcessTrustedWithOptions(options);
+    CFRelease(options);
+
+    // BOOL trusted = AXIsProcessTrusted();
+            
+    if (trusted) {
+        if ([self createEventTap]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
 - (bool)createEventTap
 {
     if(eventTap != nil && CFMachPortIsValid(eventTap)) {
@@ -602,19 +630,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
     signal(SIGTERM, handleSIGTERM);
 
-    extern CFStringRef kAXTrustedCheckOptionPrompt;
-
-    NSDictionary *options = @{(__bridge NSString *)kAXTrustedCheckOptionPrompt: @NO};
-    BOOL trusted = AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
-    BOOL eventTapCreated = false;
-    if(trusted) {
-        eventTapCreated = [self createEventTap];
-    }
-    
-    if (trusted && eventTapCreated) {
-        // If we successfully create the event tap, continue
+    if ([self tryCreateEventTap]) {
         [self completeInitialization];
-    } else if (!trusted) {
+        //accessibilityDialog = [[AccessibilityDialog alloc] initWithWindowNibName:@"AccessibilityDialog"];
+        //[accessibilityDialog showWindow:self];
+    } else {
         // Not yet trusted, show helper dialog
         accessibilityDialog = [[AccessibilityDialog alloc] initWithWindowNibName:@"AccessibilityDialog"];
         [accessibilityDialog showWindow:self];

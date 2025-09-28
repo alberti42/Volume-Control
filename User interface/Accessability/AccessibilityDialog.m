@@ -10,7 +10,6 @@
 #import "AppDelegate.h"
 
 @interface AccessibilityDialog ()
-
 @end
 
 @implementation AccessibilityDialog
@@ -106,14 +105,16 @@
     return self;
 }
 
--(void)awakeFromNib
-{
-    [screenshot setAppropriateImage];
-}
-
 @end
 
 @implementation ScreenshotView
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+//    [self ignorem]
+    //    self.ignoresMouseEvents = YES; // allow clicks to pass through
+    [self setAppropriateImage];
+}
 
 - (void) setAppropriateImage
 {

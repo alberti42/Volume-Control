@@ -18,46 +18,40 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <window title="Authorization required" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="F0z-JX-Cv5">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
-            <rect key="contentRect" x="1003" y="186" width="735" height="635"/>
+            <rect key="contentRect" x="1003" y="186" width="771" height="635"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
             <view key="contentView" id="se5-gp-TjO">
-                <rect key="frame" x="0.0" y="0.0" width="735" height="635"/>
-                <autoresizingMask key="autoresizingMask"/>
+                <rect key="frame" x="0.0" y="0.0" width="771" height="635"/>
+                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
-                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DhN-Mq-WeH">
-                        <rect key="frame" x="29" y="584" width="679" height="32"/>
+                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3x8-bD-4It" customClass="ScreenshotView">
+                        <rect key="frame" x="28" y="62" width="715" height="470"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" title="It appears that &quot;Volume Control&quot; is not authorized to respond upon events where the volume keys are pressed." id="C0n-fo-hqe">
+                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" image="SecurityPrivacyDark" id="hSz-3m-4Wa"/>
+                    </imageView>
+                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DhN-Mq-WeH">
+                        <rect key="frame" x="34" y="588" width="716" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" title="&quot;Volume Control&quot; is not authorized to respond to events triggered by pressing the volume keys." id="C0n-fo-hqe">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PIX-HH-DTm">
-                        <rect key="frame" x="29" y="535" width="686" height="48"/>
+                        <rect key="frame" x="34" y="545" width="721" height="48"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" id="VRb-Ek-uTW">
                             <font key="font" metaFont="system"/>
-                            <string key="title">Open the "System Preferences", go to "Privacy &amp; Security", and enable "Volume Control" in "Accessibility".
-If "Volume Control" appears to be already enabled, remove it from "Accessibility" and then restart
-"Volume Control", so as to force macOS to reconsider it.</string>
+                            <string key="title">Open "System Preferences," go to "Privacy &amp; Security," and enable "Volume Control" under "Accessibility."
+If "Volume Control" appears to be enabled already, remove it from "Accessibility," and then restart
+Volume Control to force macOS to reconsider it.</string>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6s5-2r-bkF">
-                        <rect key="frame" x="522" y="13" width="191" height="32"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <buttonCell key="cell" type="push" title="Go to Security &amp; Privacy" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Q50-SY-4K2">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="onOpenSecurityPrivacy:" target="-2" id="4Hl-oS-0tU"/>
-                        </connections>
-                    </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GgD-iV-iDG">
-                        <rect key="frame" x="292" y="13" width="116" height="32"/>
+                    <button horizontalHuggingPriority="249" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GgD-iV-iDG">
+                        <rect key="frame" x="338" y="20" width="100" height="24"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Exit" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="GSY-vs-oaw">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -67,8 +61,19 @@ If "Volume Control" appears to be already enabled, remove it from "Accessibility
                             <action selector="onExitButton:" target="-2" id="Mzp-uR-dqp"/>
                         </connections>
                     </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6s5-2r-bkF">
+                        <rect key="frame" x="565" y="20" width="171" height="24"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <buttonCell key="cell" type="push" title="Go to Security &amp; Privacy" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Q50-SY-4K2">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="onOpenSecurityPrivacy:" target="-2" id="4Hl-oS-0tU"/>
+                        </connections>
+                    </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BLf-Cv-fVC">
-                        <rect key="frame" x="408" y="13" width="116" height="32"/>
+                        <rect key="frame" x="451" y="20" width="100" height="24"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Restart" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xSN-4w-5fV">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -78,17 +83,12 @@ If "Volume Control" appears to be already enabled, remove it from "Accessibility
                             <action selector="onRestart:" target="-2" id="s5h-eu-qU6"/>
                         </connections>
                     </button>
-                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3x8-bD-4It" customClass="ScreenshotView">
-                        <rect key="frame" x="26" y="4" width="682" height="569"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="SecurityPrivacyDark" id="hSz-3m-4Wa"/>
-                    </imageView>
                 </subviews>
             </view>
             <connections>
                 <outlet property="delegate" destination="-2" id="0bl-1N-AYu"/>
             </connections>
-            <point key="canvasLocation" x="382" y="27"/>
+            <point key="canvasLocation" x="328.5" y="63.5"/>
         </window>
     </objects>
     <resources>

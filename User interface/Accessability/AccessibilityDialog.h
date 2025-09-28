@@ -28,10 +28,10 @@ NS_ASSUME_NONNULL_BEGIN
     BOOL authorized;
 }
 
-@property (nonatomic, assign) IBOutlet NSButton* exitBtn;
-@property (nonatomic, assign) IBOutlet NSButton* openSecurityPrivacyBtn;
-@property (nonatomic, assign) IBOutlet NSButton* restartBtn;
-@property (nonatomic, assign) IBOutlet ScreenshotView* screenshot;
+@property (nonatomic, weak) IBOutlet NSButton* exitBtn;
+@property (nonatomic, weak) IBOutlet NSButton* openSecurityPrivacyBtn;
+@property (nonatomic, weak) IBOutlet NSButton* restartBtn;
+@property (nonatomic, weak) IBOutlet ScreenshotView* screenshot;
 
 - (IBAction)onRestart:(id)sender;
 - (IBAction)onExitButton:(id)sender;
