@@ -602,16 +602,21 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
     signal(SIGTERM, handleSIGTERM);
 
-    extern CFStringRef kAXTrustedCheckOptionPrompt __attribute__((weak_import));
+    extern CFStringRef kAXTrustedCheckOptionPrompt;
 
-    if( AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)@{(__bridge id)kAXTrustedCheckOptionPrompt: @NO}) && [self createEventTap] )
-    {
-        [self completeInitialization];
+    NSDictionary *options = @{(__bridge NSString *)kAXTrustedCheckOptionPrompt: @NO};
+    BOOL trusted = AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
+    BOOL eventTapCreated = false;
+    if(trusted) {
+        eventTapCreated = [self createEventTap];
     }
-    else
-    {
+    
+    if (trusted && eventTapCreated) {
+        // If we successfully create the event tap, continue
+        [self completeInitialization];
+    } else if (!trusted) {
+        // Not yet trusted, show helper dialog
         accessibilityDialog = [[AccessibilityDialog alloc] initWithWindowNibName:@"AccessibilityDialog"];
-
         [accessibilityDialog showWindow:self];
     }
 }
