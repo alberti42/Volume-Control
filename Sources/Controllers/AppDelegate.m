@@ -233,7 +233,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 @synthesize statusMenu = _statusMenu;
 
 static NSTimeInterval volumeRampTimeInterval=0.01f;
-static NSTimeInterval statusBarHideDelay=10.0f;
+static NSTimeInterval statusBarHideDelay=3.0f;
 static NSTimeInterval checkPlayerTimeout=0.3f;
 static NSTimeInterval volumeLockSyncInterval=1.0f;
 static NSTimeInterval updateSystemVolumeInterval=0.1f;
@@ -580,11 +580,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     
     systemAudio = [[SystemApplication alloc] init];
     
-    // Defer status bar creation to next runloop
-    [self showInStatusBar]; // Install icon into the menu bar
-    //dispatch_async(dispatch_get_main_queue(), ^{
-    //    [self showInStatusBar]; // Install icon into the menu bar
-    //});
+    [self showInStatusBarWithCompletion:nil]; // Install icon into the menu bar
     
     // NSString* iTunesVersion = [[NSString alloc] initWithString:[iTunes version]];
     // NSString* spotifyVersion = [[NSString alloc] initWithString:[spotify version]];
@@ -625,9 +621,9 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(PlayPauseMusic:) name:@"PlayPauseMusic" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(NextTrackMusic:) name:@"NextTrackMusic" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(PreviousTrackMusic:) name:@"PreviousTrackMusic" object:nil];
-
+    
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self selector: @selector(receiveWakeNote:) name:NSWorkspaceDidWakeNotification object: NULL];
-
+    
     signal(SIGTERM, handleSIGTERM);
     
     if ([self tryCreateEventTap]) {
@@ -641,23 +637,24 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)sender hasVisibleWindows:(BOOL)flag
 {
-    if([self hideFromStatusBar]) {
-        // First show the icon in the status bar
-        [self showInStatusBar];
-        
-        // Initiate hiding it
-        [self setHideFromStatusBar: YES];
-        if ([self hideFromStatusBar])
-        {
+    if ([self hideFromStatusBar]) {
+        // First, tell the status bar to show itself.
+        [self showInStatusBarWithCompletion:^{
+            // This code will only run AFTER the icon has been created and is visible.
+            
+            // Initiate hiding it
+            NSLog(@"Started hiding from status bar");
+            [self setHideFromStatusBar:YES];
+            
             // Actively show the popover to make sure user notices
+            // Now it has a proper anchor and will appear in the right place.
             [self showHideFromStatusBarHintPopover];
-        }
+        }];
     }
-
     return false;
 }
 
-- (void)showInStatusBar
+- (void)showInStatusBarWithCompletion:(void (^)(void))completion
 {
     if (!self.statusBar) {
         // the status bar item needs a custom view so that we can show a NSPopover for the hide-from-status-bar hint
@@ -666,15 +663,27 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         self.statusBar.menu = self.statusMenu;
     }
     
-    // Always start by showing the status bar
-    [self showStatusBarItem];
-
-    NSImage *icon = [NSImage imageNamed:@"statusbar-icon"];
-    icon.template = YES;
-    
-    NSStatusBarButton *statusBarButton = self.statusBar.button;
-    statusBarButton.image = icon;
+    // Defer the button configuration to the next run loop cycle.
+    // This allows the system to create and place the status item
+    // before you try to modify its view hierarchy.
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // Show the status bar item first.
+        [self showStatusBarItem];
+        
+        NSImage *icon = [NSImage imageNamed:@"statusbar-icon"];
+        icon.template = YES;
+        
+        if (self.statusBar.button) {
+            self.statusBar.button.image = icon;
+        }
+        
+        // Now that the UI work is complete, call the completion handler.
+        if (completion) {
+            completion();
+        }
+    });
 }
+
 
 - (void)updateSystemVolume:(NSTimer*)theTimer
 {
@@ -702,7 +711,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
                           [NSNumber numberWithBool:true],  @"PlaySoundFeedback",
                           nil ]; // terminate the list
     [preferences registerDefaults:dict];
-
+    
     [self setTapping:[preferences boolForKey:              @"TappingEnabled"]];
     [self setUseAppleCMDModifier:[preferences boolForKey:  @"UseAppleCMDModifier"]];
     [self setLockSystemAndPlayerVolume:[preferences boolForKey:  @"LockSystemAndPlayerVolume"]];
@@ -720,10 +729,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [[self systemBtn] setState:true];  // hard coded always to true
     [[self systemBtn] setEnabled:false];
     [self setPlaySoundFeedback:[preferences boolForKey:     @"PlaySoundFeedback"]];
-
+    
     NSInteger volumeIncSetting = [preferences integerForKey:@"volumeIncrement"];
     [self setVolumeInc:volumeIncSetting];
-
+    
     [[self volumeIncrementsSlider] setIntegerValue: volumeIncSetting];
 }
 
@@ -736,12 +745,12 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 {
     NSMenuItem* menuItem=[_statusMenu itemWithTag:AUTOMATIC_UPDATES_ID];
     [menuItem setState:enabled];
-
+    
     [preferences setBool:enabled forKey:@"AutomaticUpdates"];
     [preferences synchronize];
-
+    
     _AutomaticUpdates=enabled;
-
+    
     [[[self sparkle_updater] updater] setAutomaticallyChecksForUpdates:enabled];
 }
 
@@ -754,10 +763,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 {
     [preferences setBool:enabled forKey:@"PlaySoundFeedback"];
     [preferences synchronize];
-
+    
     NSMenuItem* menuItem=[_statusMenu itemWithTag:PLAY_SOUND_FEEDBACK_ID];
     [menuItem setState:enabled];
-
+    
     _PlaySoundFeedback=enabled;
 }
 
@@ -767,7 +776,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     // Use a stored preference as the source of truth for the current state
     bool newState = ![[NSUserDefaults standardUserDefaults] boolForKey:@"StartAtLoginPreference"];
     [[NSUserDefaults standardUserDefaults] setBool:newState forKey:@"StartAtLoginPreference"];
-
+    
     // Now call the method to apply the change
     [self setStartAtLogin:newState savePreferences:true];
 }
@@ -794,48 +803,48 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 }
 
 /*
-- (void) syncSystemVolume:(NSTimer*)theTimer
-{
-    id runningPlayerPtr = [self runningPlayer];
-    
-    if (runningPlayerPtr != nil && runningPlayerPtr != systemAudio)
-    {
-        double systemVolume = [systemAudio currentVolume];
-        double volume = [runningPlayerPtr currentVolume];
-        double diff = systemVolume - volume;
-        if (diff<0) diff = -diff;
-        if( diff>1E-3 ) {
-            NSLog(@"EQUALIZING");
-            NSLog(@"Player volume: %1.5f",volume);
-            NSLog(@"Apple Music: %d",runningPlayerPtr == iTunes);
-            NSLog(@"System volume: %1.5f",systemVolume);
-            NSLog(@"Diff: %1.10f",diff);
-            [systemAudio setCurrentVolume:volume];
-            [self setSystemVolume:volume];
-        }
-    }
-}
-*/
+ - (void) syncSystemVolume:(NSTimer*)theTimer
+ {
+ id runningPlayerPtr = [self runningPlayer];
+ 
+ if (runningPlayerPtr != nil && runningPlayerPtr != systemAudio)
+ {
+ double systemVolume = [systemAudio currentVolume];
+ double volume = [runningPlayerPtr currentVolume];
+ double diff = systemVolume - volume;
+ if (diff<0) diff = -diff;
+ if( diff>1E-3 ) {
+ NSLog(@"EQUALIZING");
+ NSLog(@"Player volume: %1.5f",volume);
+ NSLog(@"Apple Music: %d",runningPlayerPtr == iTunes);
+ NSLog(@"System volume: %1.5f",systemVolume);
+ NSLog(@"Diff: %1.10f",diff);
+ [systemAudio setCurrentVolume:volume];
+ [self setSystemVolume:volume];
+ }
+ }
+ }
+ */
 
 - (void) setLockSystemAndPlayerVolume:(bool)enabled
 {
     NSMenuItem* menuItem=[_statusMenu itemWithTag:LOCK_SYSTEM_AND_PLAYER_VOLUME_ID];
     [menuItem setState:enabled];
-
+    
     [preferences setBool:enabled forKey:@"LockSystemAndPlayerVolume"];
     [preferences synchronize];
-
+    
     _LockSystemAndPlayerVolume=enabled;
     
     /*
-    if(_LockSystemAndPlayerVolume) {
-        volumeLockSyncTimer = [NSTimer timerWithTimeInterval:volumeLockSyncInterval target:self selector:@selector(syncSystemVolume:) userInfo:nil repeats:YES];
-        [[NSRunLoop mainRunLoop] addTimer:volumeLockSyncTimer forMode:NSRunLoopCommonModes];
-    } else {
-        [volumeLockSyncTimer invalidate];
-        volumeLockSyncTimer = nil;
-    }
-    */
+     if(_LockSystemAndPlayerVolume) {
+     volumeLockSyncTimer = [NSTimer timerWithTimeInterval:volumeLockSyncInterval target:self selector:@selector(syncSystemVolume:) userInfo:nil repeats:YES];
+     [[NSRunLoop mainRunLoop] addTimer:volumeLockSyncTimer forMode:NSRunLoopCommonModes];
+     } else {
+     [volumeLockSyncTimer invalidate];
+     volumeLockSyncTimer = nil;
+     }
+     */
 }
 
 - (void) setTapping:(bool)enabled
@@ -998,13 +1007,13 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         
         if(!_hideVolumeWindow)
         {}
-            // [[self->OSDManager sharedManager] showImage:image onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)(round(((numFullBlks*4+numQrtsBlks)*1.5625)*100)) totalChiclets:(unsigned int)10000 locked:NO];
+        // [[self->OSDManager sharedManager] showImage:image onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)(round(((numFullBlks*4+numQrtsBlks)*1.5625)*100)) totalChiclets:(unsigned int)10000 locked:NO];
         
         [runningPlayerPtr setCurrentVolume:volume];
         if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
             [systemAudio setCurrentVolume:volume];
         }
-    
+        
         if(self->volumeRampTimer == nil)
             [self emitAcousticFeedback:nil];
         
@@ -1080,7 +1089,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         [self setSpotifyVolume:[spotify currentVolume]];
     else
         [self setSpotifyVolume:-1];
-
+    
     if ([doppler isRunning])
         [self setDopplerVolume:[doppler currentVolume]];
     else
@@ -1152,7 +1161,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 - (void)setHideFromStatusBar:(bool)want_hide
 {
     // NSLog(@"Will it hide: %d",want_hide);
-
+    
     _hideFromStatusBar=want_hide;
     
     NSMenuItem* menuItem=[_statusMenu itemWithTag:HIDE_FROM_STATUS_BAR_ID];
@@ -1169,7 +1178,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             [self setHideFromStatusBarHintLabelWithSeconds:statusBarHideDelay];
             _statusBarHideTimer = [NSTimer timerWithTimeInterval:statusBarHideDelay target:self selector:@selector(doHideFromStatusBar:) userInfo:nil repeats:NO];
             [[NSRunLoop mainRunLoop] addTimer:_statusBarHideTimer forMode:NSRunLoopCommonModes];
-            _hideFromStatusBarHintPopoverUpdateTimer = [NSTimer timerWithTimeInterval:0.1 target:self selector:@selector(updateHideFromStatusBarHintPopover:) userInfo:nil repeats:YES];
+            _hideFromStatusBarHintPopoverUpdateTimer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(updateHideFromStatusBarHintPopover:) userInfo:nil repeats:YES];
             [[NSRunLoop mainRunLoop] addTimer:_hideFromStatusBarHintPopoverUpdateTimer forMode:NSRunLoopCommonModes];
         }
     }
@@ -1185,17 +1194,17 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 }
 
 -(void)hideStatusBarItem {
-   if (self.statusBar) {
-       self.statusBar.visible = NO;
-       // self.statusBar.length = 0; // collapses to zero width, however, some space remains allocated by macOS
-   }
+    if (self.statusBar) {
+        self.statusBar.visible = NO;
+        // self.statusBar.length = 0; // collapses to zero width, however, some space remains allocated by macOS
+    }
 }
 
 - (void)showStatusBarItem {
-   if (self.statusBar) {
-       self.statusBar.visible = YES;
-       // self.statusBar.length = NSSquareStatusItemLength;
-   }
+    if (self.statusBar) {
+        self.statusBar.visible = YES;
+        // self.statusBar.length = NSSquareStatusItemLength;
+    }
 }
 
 - (void)doHideFromStatusBar:(NSTimer*)aTimer
@@ -1203,10 +1212,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     // NSLog(@"doHideFromStatusBar");
     [_hideFromStatusBarHintPopoverUpdateTimer invalidate];
     _hideFromStatusBarHintPopoverUpdateTimer = nil;
-
+    
     [_statusBarHideTimer invalidate];
     _statusBarHideTimer = nil;
-
+    
     [_hideFromStatusBarHintPopover close];
     [self hideStatusBarItem];
     [self setHideFromStatusBar:true];
@@ -1215,6 +1224,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 - (void)showHideFromStatusBarHintPopover
 {
     if ([_hideFromStatusBarHintPopover isShown]) return;
+    
+    NSLog(@"Will show popover");
     
     if (! _hideFromStatusBarHintPopover)
     {
@@ -1242,6 +1253,17 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     }
     
     NSStatusBarButton *statusBarButton = [[self statusBar] button];
+    // --- Start of Debug Code ---
+    
+    // First, get the button's frame relative to its window.
+    NSRect buttonFrameInWindow = [statusBarButton frame];
+    
+    // Then, use the button's window to convert that frame to absolute screen coordinates.
+    NSRect rectOnScreen = [statusBarButton.window convertRectToScreen:buttonFrameInWindow];
+    
+    NSLog(@"[Popover Debug] Popover will be shown relative to TRUE screen rect: %@", NSStringFromRect(rectOnScreen));
+    
+    // --- End of Debug Code ---
     [_hideFromStatusBarHintPopover showRelativeToRect:[statusBarButton bounds] ofView:statusBarButton preferredEdge:NSMinYEdge];
 }
 
@@ -1251,7 +1273,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     NSTimeInterval remaining = [[_statusBarHideTimer fireDate] timeIntervalSinceDate:now];
     NSUInteger rounded = (NSUInteger)ceil(remaining);
     [self setHideFromStatusBarHintLabelWithSeconds:rounded];
-    // NSLog(@"Timer remaining: %.1f s", remaining);
+    NSLog(@"Timer remaining: %.1f s", remaining);
 }
 
 - (void)setHideFromStatusBarHintLabelWithSeconds:(NSUInteger)seconds
