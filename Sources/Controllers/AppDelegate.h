@@ -82,7 +82,7 @@
 
 @property (assign, nonatomic) IBOutlet SPUStandardUpdaterController* sparkle_updater;
 
-@property (nonatomic, readonly, strong) NSStatusItem* statusBar;
+@property (nonatomic, strong) NSStatusItem *statusBar;
 
 @property (assign, nonatomic) NSInteger volumeInc;
 @property (assign, nonatomic) bool AppleRemoteConnected;

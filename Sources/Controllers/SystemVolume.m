@@ -20,7 +20,7 @@
     AudioObjectPropertyAddress getDefaultOutputDevicePropertyAddress = {
         kAudioHardwarePropertyDefaultOutputDevice,
         kAudioObjectPropertyScopeGlobal,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMain
     };
     
     AudioDeviceID defaultOutputDeviceID;
@@ -45,13 +45,13 @@
     AudioObjectPropertyAddress volumePropertyAddress = {
         kAudioHardwareServiceDeviceProperty_VirtualMainVolume,
         kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMain
     };
 
     AudioObjectPropertyAddress mutePropertyAddress = {
         kAudioDevicePropertyMute,
         kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMain
     };
 
     Float32 volume = (Float32)(currentVolume / 100.);
@@ -96,7 +96,7 @@
     AudioObjectPropertyAddress volumePropertyAddress = {
         kAudioDevicePropertyMute,
         kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMain
     };
     
     UInt32 muteVal;
@@ -121,7 +121,7 @@
     AudioObjectPropertyAddress volumePropertyAddress = {
         kAudioHardwareServiceDeviceProperty_VirtualMainVolume,
         kAudioDevicePropertyScopeOutput,
-        kAudioObjectPropertyElementMaster
+        kAudioObjectPropertyElementMain
     };
     
     Float32 volume;

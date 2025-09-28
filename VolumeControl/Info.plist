@@ -38,5 +38,9 @@
 	<string>dsa_pub.pem</string>
 	<key>SUPublicEDKey</key>
 	<string>/Qr5lrMfJsU5UPvmXC7VnT4jHdTza3c663lSbA+4O94=</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+    </array>
 </dict>
 </plist>
