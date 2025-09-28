@@ -22,12 +22,23 @@
 		65996E09267EB0FF0080A9A5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E08267EB0FF0080A9A5 /* main.m */; };
 		65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E13267EB14F0080A9A5 /* AppDelegate.m */; };
 		65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E16267EB14F0080A9A5 /* SystemVolume.m */; };
-		65DBBEEF2E89E08100752329 /* Volume Control Helper.app in Embed Login Items */ = {isa = PBXBuildFile; fileRef = 65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		65DBBEF22E89EB6000752329 /* Volume Control Helper.app in Embed Login Helper */ = {isa = PBXBuildFile; fileRef = 65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		65EF8F5A2E888C9500AAE7B7 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; };
 		65EF8F5B2E888C9500AAE7B7 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		65DBBEF12E89EB4D00752329 /* Embed Login Helper */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LoginItems;
+			dstSubfolderSpec = 1;
+			files = (
+				65DBBEF22E89EB6000752329 /* Volume Control Helper.app in Embed Login Helper */,
+			);
+			name = "Embed Login Helper";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		65EF8F5C2E888C9500AAE7B7 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -37,17 +48,6 @@
 				65EF8F5B2E888C9500AAE7B7 /* Sparkle.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		65EF8F5E2E88969C00AAE7B7 /* Embed Login Items */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = Contents/Library/LoginItems;
-			dstSubfolderSpec = 1;
-			files = (
-				65DBBEEF2E89E08100752329 /* Volume Control Helper.app in Embed Login Items */,
-			);
-			name = "Embed Login Items";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -359,7 +359,7 @@
 				65996C52267EA86A0080A9A5 /* Frameworks */,
 				65996C53267EA86A0080A9A5 /* Resources */,
 				65EF8F5C2E888C9500AAE7B7 /* Embed Frameworks */,
-				65EF8F5E2E88969C00AAE7B7 /* Embed Login Items */,
+				65DBBEF12E89EB4D00752329 /* Embed Login Helper */,
 			);
 			buildRules = (
 			);

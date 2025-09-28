@@ -277,14 +277,16 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[NSApp terminate:nil];
 }
 
-// In AppDelegate.m -> setStartAtLogin:
-- (void)setStartAtLogin:(bool)enabled savePreferences:(bool)savePreferences
+- (void)updateStartAtLoginMenuItem
 {
+    BOOL enabled = [self StartAtLogin];
     NSMenuItem* menuItem = [self.statusMenu itemWithTag:START_AT_LOGIN_ID];
     [menuItem setState:enabled ? NSControlStateValueOn : NSControlStateValueOff];
+}
 
-    if (!savePreferences) return;
 
+- (void)setStartAtLogin:(BOOL)enabled savePreferences:(BOOL)savePreferences
+{
     NSString *helperBundleID = @"io.alberti42.VolumeControlHelper";
 
     if (@available(macOS 13.0, *)) {
@@ -294,33 +296,40 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         if (enabled) {
             if (service.status != SMAppServiceStatusEnabled) {
                 if (![service registerAndReturnError:&error]) {
-                    NSLog(@"[Volume Control] Error registering login item: %@", error.localizedDescription);
+                    NSLog(@"Error registering login item: %@", error.localizedDescription);
                 }
             }
         } else {
-            if (service.status == SMAppServiceStatusEnabled) {
+            if (service.status != SMAppServiceStatusNotRegistered) {
                 if (![service unregisterAndReturnError:&error]) {
-                    NSLog(@"[Volume Control] Error unregistering login item: %@", error.localizedDescription);
+                    NSLog(@"Error unregistering login item: %@", error.localizedDescription);
                 }
             }
         }
     } else {
-        // Legacy fallback
+       // Fallback
         NSLog(@"[Volume Control] loginItemServiceWithIdentifier not supported by this version of macOS.");
+        if (savePreferences) {
+            [preferences setBool:NO forKey:@"StartAtLoginPreference"];
+        }
     }
+
+    [self updateStartAtLoginMenuItem];
 }
 
 - (bool)StartAtLogin
 {
-    NSString *helperBundleID = @"io.alberti42.VolumeControl.VolumeControlHelper";
+    NSString *helperBundleID = @"io.alberti42.VolumeControlHelper";
 
     if (@available(macOS 13.0, *)) {
         SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
-        return service.status == SMAppServiceStatusEnabled;
+        return (service.status == SMAppServiceStatusEnabled ||
+                service.status == SMAppServiceStatusRequiresApproval);
     } else {
-        return [preferences boolForKey:@"StartAtLoginPreference"];
+        return NO;
     }
 }
+
 
 - (void)wasAuthorized
 {
@@ -766,15 +775,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	_PlaySoundFeedback=enabled;
 }
 
-// You will also need to update your toggle action method
 - (IBAction)toggleStartAtLogin:(id)sender
 {
-	// Use a stored preference as the source of truth for the current state
-	bool newState = ![[NSUserDefaults standardUserDefaults] boolForKey:@"StartAtLoginPreference"];
-	[[NSUserDefaults standardUserDefaults] setBool:newState forKey:@"StartAtLoginPreference"];
-
-	// Now call the method to apply the change
-	[self setStartAtLogin:newState savePreferences:true];
+    BOOL currentlyEnabled = [self StartAtLogin];
+    [self setStartAtLogin:!currentlyEnabled savePreferences:YES];
+    [self updateStartAtLoginMenuItem];
 }
 
 - (void) setUseAppleCMDModifier:(bool)enabled
