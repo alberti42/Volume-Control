@@ -296,22 +296,25 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         if (enabled) {
             if (service.status != SMAppServiceStatusEnabled) {
                 if (![service registerAndReturnError:&error]) {
-                    NSLog(@"Error registering login item: %@", error.localizedDescription);
+                    NSLog(@"[Volume Control] Error registering login item: %@", error.localizedDescription);
                 }
             }
         } else {
             if (service.status != SMAppServiceStatusNotRegistered) {
                 if (![service unregisterAndReturnError:&error]) {
-                    NSLog(@"Error unregistering login item: %@", error.localizedDescription);
+                    NSLog(@"[Volume Control] Error unregistering login item: %@", error.localizedDescription);
                 }
             }
         }
     } else {
-       // Fallback
-        NSLog(@"[Volume Control] loginItemServiceWithIdentifier not supported by this version of macOS.");
-        if (savePreferences) {
-            [preferences setBool:NO forKey:@"StartAtLoginPreference"];
+        // Legacy fallback (macOS 12 and older)
+        if (!SMLoginItemSetEnabled((__bridge CFStringRef)helperBundleID, enabled)) {
+            NSLog(@"[Volume Control] SMLoginItemSetEnabled failed.");
         }
+    }
+
+    if (savePreferences) {
+        [preferences setBool:enabled forKey:@"StartAtLoginPreference"];
     }
 
     [self updateStartAtLoginMenuItem];
@@ -326,10 +329,9 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         return (service.status == SMAppServiceStatusEnabled ||
                 service.status == SMAppServiceStatusRequiresApproval);
     } else {
-        return NO;
+        return [preferences boolForKey:@"StartAtLoginPreference"];
     }
 }
-
 
 - (void)wasAuthorized
 {
