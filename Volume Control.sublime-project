@@ -1,36 +1,42 @@
 {
-    "folders":
-    [
+    "folders": [
         {
             "path": ".",
-            "folder_exclude_patterns": [
-                "build",
-                "DerivedData",
-                ".git",
-                ".svn"
-            ],
+            "folder_exclude_patterns": ["build", "DerivedData", ".git", ".svn"],
             "file_exclude_patterns": [
                 "*.o",
                 "*.pyc",
                 "*.swp",
                 "*.DS_Store",
                 "*.hop",
-                "*.zip"
-            ]
-        }
+                "*.zip",
+            ],
+        },
     ],
-    "build_systems":
-    [
+    "variables": {
+        "build_dir": "${project_path}/build.nosync/target/debug"
+    },
+    "build_systems": [
         {
-            "name": "Build with xcodebuild",
-            "shell_cmd": "xcodebuild -project VolumeControl.xcodeproj -scheme VolumeControl -configuration Debug build",
+            "name": "Build with xcodebuild for debug+x86_64",
+            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=x86_64' BUILD_DIR=\"\\${BUILD_DIR}\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}\" build | xcpretty",
+            "working_dir": "${project_path}",
+        },
+        {
+            "name": "Clean with xcodebuild for debug+x86_64",
+            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=x86_64' BUILD_DIR=\"\\${BUILD_DIR}\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}\" clean | xcpretty",
+            "working_dir": "${project_path}",
+        },
+        {
+            "name": "Run App for debug",
+            "shell_cmd": "open '${project_path}/build/Debug/Volume Control.app'",
             "working_dir": "${project_path}"
         },
         {
-            "name": "Run App (Simulator)",
-            "shell_cmd": "xcrun simctl install booted ${project_path}/build/Debug-iphonesimulator/VolumeControl.app && xcrun simctl launch booted com.example.VolumeControl",
-            "working_dir": "${project_path}"
-        }
+            "name": "Generate compile_commands.json for debug+x86_64",
+            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=x86_64' BUILD_DIR=\"\\${BUILD_DIR}\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}\" clean build | xcpretty -r json-compilation-database -o compile_commands.json",
+            "working_dir": "${project_path}",
+        },
     ],
     "settings": {
         "tab_size": 4,
@@ -39,9 +45,25 @@
         "ensure_newline_at_eof_on_save": true,
 
         "LSP": {
+            /*
+            To regenerate compile_commands.json, you should run:
+            > gem install xcpretty
+            > xcrun xcodebuild \
+                -project "Volume Control.xcodeproj" \
+                -scheme "Volume Control" \
+                -configuration Debug \
+                -destination 'platform=macOS,arch=x86_64' \
+                clean \
+                build \
+                -UseNewBuildSystem=YES \
+                | xcpretty -r json-compilation-database -o compile_commands.json
+            */
             "LSP-SourceKit": {
-                "enabled": true
-            }
-        }
-    }
+                "enabled": true,
+            },
+            "clangd": {
+                "enabled": true,
+            },
+        },
+    },
 }
