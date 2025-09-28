@@ -40,7 +40,7 @@ typedef enum DopplerEPlS DopplerEPlS;
 @interface DopplerApplication : SBApplication
 
 @property (copy, readonly) DopplerTrack *currentTrack;  // the currently playing track
-@property (readonly) DopplerEPlS playerState;  // the current state of the audio player
+@property (readonly) NSInteger playerState;  // the current state of the audio player
 @property BOOL shuffleEnabled;  // are songs played in random order?
 @property NSInteger soundVolume;  // the sound output volume (0 = minimum, 100 = maximum)
 

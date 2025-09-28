@@ -22,21 +22,12 @@
 		65996E09267EB0FF0080A9A5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E08267EB0FF0080A9A5 /* main.m */; };
 		65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E13267EB14F0080A9A5 /* AppDelegate.m */; };
 		65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E16267EB14F0080A9A5 /* SystemVolume.m */; };
+		65DBBEEF2E89E08100752329 /* Volume Control Helper.app in Embed Login Items */ = {isa = PBXBuildFile; fileRef = 65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		65EF8F5A2E888C9500AAE7B7 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; };
 		65EF8F5B2E888C9500AAE7B7 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		65EF8F5F2E8896B800AAE7B7 /* VolumeControlHelper in Embed Login Items */ = {isa = PBXBuildFile; fileRef = 65EF8F4D2E88769F00AAE7B7 /* VolumeControlHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		65EF8F4B2E88769F00AAE7B7 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
 		65EF8F5C2E888C9500AAE7B7 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -54,7 +45,7 @@
 			dstPath = Contents/Library/LoginItems;
 			dstSubfolderSpec = 1;
 			files = (
-				65EF8F5F2E8896B800AAE7B7 /* VolumeControlHelper in Embed Login Items */,
+				65DBBEEF2E89E08100752329 /* Volume Control Helper.app in Embed Login Items */,
 			);
 			name = "Embed Login Items";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -128,13 +119,13 @@
 		65996E16267EB14F0080A9A5 /* SystemVolume.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemVolume.m; sourceTree = "<group>"; };
 		65996E17267EB14F0080A9A5 /* ISSoundAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISSoundAdditions.h; sourceTree = "<group>"; };
 		65996E1C267EB3030080A9A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = VolumeControl/Info.plist; sourceTree = "<group>"; };
-		65EF8F4D2E88769F00AAE7B7 /* VolumeControlHelper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VolumeControlHelper; sourceTree = BUILT_PRODUCTS_DIR; };
+		65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		BC20FAA128902EF500CF5CAF /* Doppler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Doppler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		65EF8F4E2E88769F00AAE7B7 /* Volume Control Helper */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Volume Control Helper"; sourceTree = "<group>"; };
+		65DBBEDB2E89DE1800752329 /* Volume Control Helper */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Volume Control Helper"; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,7 +142,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		65EF8F4A2E88769F00AAE7B7 /* Frameworks */ = {
+		65DBBED72E89DE1800752329 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -168,8 +159,8 @@
 				65996D03267EAC1F0080A9A5 /* Sources */,
 				65996D1C267EADAA0080A9A5 /* Resources */,
 				65996E1C267EB3030080A9A5 /* Info.plist */,
+				65DBBEDB2E89DE1800752329 /* Volume Control Helper */,
 				65996D0C267EACE30080A9A5 /* Frameworks */,
-				65EF8F4E2E88769F00AAE7B7 /* Volume Control Helper */,
 				65996C56267EA86A0080A9A5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -178,7 +169,7 @@
 			isa = PBXGroup;
 			children = (
 				65996C55267EA86A0080A9A5 /* Volume Control.app */,
-				65EF8F4D2E88769F00AAE7B7 /* VolumeControlHelper */,
+				65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -379,27 +370,27 @@
 			productReference = 65996C55267EA86A0080A9A5 /* Volume Control.app */;
 			productType = "com.apple.product-type.application";
 		};
-		65EF8F4C2E88769F00AAE7B7 /* VolumeControlHelper */ = {
+		65DBBED92E89DE1800752329 /* Volume Control Helper */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 65EF8F532E88769F00AAE7B7 /* Build configuration list for PBXNativeTarget "VolumeControlHelper" */;
+			buildConfigurationList = 65DBBEE22E89DE1A00752329 /* Build configuration list for PBXNativeTarget "Volume Control Helper" */;
 			buildPhases = (
-				65EF8F492E88769F00AAE7B7 /* Sources */,
-				65EF8F4A2E88769F00AAE7B7 /* Frameworks */,
-				65EF8F4B2E88769F00AAE7B7 /* CopyFiles */,
+				65DBBED62E89DE1800752329 /* Sources */,
+				65DBBED72E89DE1800752329 /* Frameworks */,
+				65DBBED82E89DE1800752329 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				65EF8F4E2E88769F00AAE7B7 /* Volume Control Helper */,
+				65DBBEDB2E89DE1800752329 /* Volume Control Helper */,
 			);
-			name = VolumeControlHelper;
+			name = "Volume Control Helper";
 			packageProductDependencies = (
 			);
-			productName = VolumeControlHelper;
-			productReference = 65EF8F4D2E88769F00AAE7B7 /* VolumeControlHelper */;
-			productType = "com.apple.product-type.tool";
+			productName = "Volume Control Helper";
+			productReference = 65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */;
+			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
@@ -408,12 +399,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					65996C54267EA86A0080A9A5 = {
 						CreatedOnToolsVersion = 12.5;
 					};
-					65EF8F4C2E88769F00AAE7B7 = {
+					65DBBED92E89DE1800752329 = {
 						CreatedOnToolsVersion = 26.0;
 					};
 				};
@@ -432,7 +424,7 @@
 			projectRoot = "";
 			targets = (
 				65996C54267EA86A0080A9A5 /* Volume Control */,
-				65EF8F4C2E88769F00AAE7B7 /* VolumeControlHelper */,
+				65DBBED92E89DE1800752329 /* Volume Control Helper */,
 			);
 		};
 /* End PBXProject section */
@@ -451,6 +443,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		65DBBED82E89DE1800752329 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -465,7 +464,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		65EF8F492E88769F00AAE7B7 /* Sources */ = {
+		65DBBED62E89DE1800752329 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -622,7 +621,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -661,7 +660,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -674,39 +673,102 @@
 			};
 			name = Release;
 		};
-		65EF8F512E88769F00AAE7B7 /* Debug */ = {
+		65DBBEE32E89DE1A00752329 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9V3X7C8VCK;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
-				INSTALL_PATH = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Volume Control Login Helper";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControlHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = NO;
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
 		};
-		65EF8F522E88769F00AAE7B7 /* Release */ = {
+		65DBBEE42E89DE1A00752329 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9V3X7C8VCK;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
-				INSTALL_PATH = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Volume Control Login Helper";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControlHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = NO;
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
 		};
@@ -731,11 +793,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		65EF8F532E88769F00AAE7B7 /* Build configuration list for PBXNativeTarget "VolumeControlHelper" */ = {
+		65DBBEE22E89DE1A00752329 /* Build configuration list for PBXNativeTarget "Volume Control Helper" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				65EF8F512E88769F00AAE7B7 /* Debug */,
-				65EF8F522E88769F00AAE7B7 /* Release */,
+				65DBBEE32E89DE1A00752329 /* Debug */,
+				65DBBEE42E89DE1A00752329 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -185,7 +185,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 	return [musicPlayer isRunning];
 }
 
-- (iTunesEPlS) playerState
+- (NSInteger) playerState
 {
 	return [musicPlayer playerState];
 }
@@ -233,9 +233,9 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 @synthesize statusMenu = _statusMenu;
 
 static NSTimeInterval volumeRampTimeInterval=0.01f;
-static NSTimeInterval statusBarHideDelay=3.0f;
+static NSTimeInterval statusBarHideDelay=10.0f;
 static NSTimeInterval checkPlayerTimeout=0.3f;
-static NSTimeInterval volumeLockSyncInterval=1.0f;
+//static NSTimeInterval volumeLockSyncInterval=1.0f;
 static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (IBAction)terminate:(id)sender
@@ -278,61 +278,48 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 }
 
 // In AppDelegate.m -> setStartAtLogin:
-
 - (void)setStartAtLogin:(bool)enabled savePreferences:(bool)savePreferences
 {
-	//    NSMenuItem* menuItem = [self.statusMenu itemWithTag:START_AT_LOGIN_ID];
-	//    [menuItem setState:enabled ? NSControlStateValueOn : NSControlStateValueOff];
-	//
-	//    if (!savePreferences) {
-	//        return;
-	//    }
-	//
-	//    NSString *helperBundleID = @"io.alberti42.VolumeControl.VolumeControlHelper"; // <-- CHANGE THIS
-	//
-	//    if (@available(macOS 13.0, *)) {
-	//        SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
-	//        NSError *error = nil;
-	//
-	//        if (enabled) {
-	//            // Only attempt to register if it's not already enabled.
-	//            if (service.status == SMAppServiceStatusNotRegistered) {
-	//                if (![service registerAndReturnError:&error]) {
-	//                    NSLog(@"[Volume Control] Error registering login item: %@", error.localizedDescription);
-	//                }
-	//            }
-	//        } else {
-	//            // Only attempt to unregister if it is currently enabled.
-	//            if (service.status == SMAppServiceStatusEnabled) {
-	//                 if (![service unregisterAndReturnError:&error]) {
-	//                     NSLog(@"[Volume Control] Error unregistering login item: %@", error.localizedDescription);
-	//                 }
-	//            }
-	//        }
-	//    } else {
-	//        // Fallback for older systems
-	//        if (!SMLoginItemSetEnabled((__bridge CFStringRef)helperBundleID, enabled)) {
-	//            NSLog(@"[Volume Control] SMLoginItemSetEnabled failed.");
-	//        }
-	//    }
+    NSMenuItem* menuItem = [self.statusMenu itemWithTag:START_AT_LOGIN_ID];
+    [menuItem setState:enabled ? NSControlStateValueOn : NSControlStateValueOff];
+
+    if (!savePreferences) return;
+
+    NSString *helperBundleID = @"io.alberti42.VolumeControlHelper";
+
+    if (@available(macOS 13.0, *)) {
+        SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
+        NSError *error = nil;
+
+        if (enabled) {
+            if (service.status != SMAppServiceStatusEnabled) {
+                if (![service registerAndReturnError:&error]) {
+                    NSLog(@"[Volume Control] Error registering login item: %@", error.localizedDescription);
+                }
+            }
+        } else {
+            if (service.status == SMAppServiceStatusEnabled) {
+                if (![service unregisterAndReturnError:&error]) {
+                    NSLog(@"[Volume Control] Error unregistering login item: %@", error.localizedDescription);
+                }
+            }
+        }
+    } else {
+        // Legacy fallback
+        NSLog(@"[Volume Control] loginItemServiceWithIdentifier not supported by this version of macOS.");
+    }
 }
 
 - (bool)StartAtLogin
 {
-	//    NSString *helperBundleID = @"io.alberti42.VolumeControl.VolumeControlHelper";
-	//
-	//    if (@available(macOS 13.0, *)) {
-	//        SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
-	//        // On macOS 13+, the status can be checked directly.
-	//        return service.status == SMAppServiceStatusEnabled;
-	//    } else {
-	//        // There is no simple, official way to check the status on older systems.
-	//        // The common practice is to store the user's choice in NSUserDefaults
-	//        // and trust that it reflects the actual state.
-	//        // We will read from a preference you save in `toggleStartAtLogin:`.
-	//        return [preferences boolForKey:@"StartAtLoginPreference"];
-	//    }
-	return true;
+    NSString *helperBundleID = @"io.alberti42.VolumeControl.VolumeControlHelper";
+
+    if (@available(macOS 13.0, *)) {
+        SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
+        return service.status == SMAppServiceStatusEnabled;
+    } else {
+        return [preferences boolForKey:@"StartAtLoginPreference"];
+    }
 }
 
 - (void)wasAuthorized
@@ -586,7 +573,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 		// Initiate hiding it
 		if([self hideFromStatusBar]) {
-			NSLog(@"Started hiding from status bar");
+			// NSLog(@"Started hiding from status bar");
 			[self setHideFromStatusBar:YES];
 		}
 	}];
@@ -965,11 +952,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		{
 			currentPlayer = iTunes;
 		}
-		else if([_spotifyBtn state] && [spotify isRunning] && [spotify playerState] == SpotifyEPlSPlaying)
+		else if([_spotifyBtn state] && [spotify isRunning] && (SpotifyEPlS)[spotify playerState] == SpotifyEPlSPlaying)
 		{
 			currentPlayer = spotify;
 		}
-		else if([_dopplerBtn state] && [doppler isRunning] && [doppler playerState] == DopplerEPlSPlaying)
+		else if([_dopplerBtn state] && [doppler isRunning] && (DopplerEPlS)[doppler playerState] == DopplerEPlSPlaying)
 		{
 			currentPlayer = doppler;
 		}
@@ -1187,7 +1174,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 			[self setHideFromStatusBarHintLabelWithSeconds:statusBarHideDelay];
 			_statusBarHideTimer = [NSTimer timerWithTimeInterval:statusBarHideDelay target:self selector:@selector(doHideFromStatusBar:) userInfo:nil repeats:NO];
 			[[NSRunLoop mainRunLoop] addTimer:_statusBarHideTimer forMode:NSRunLoopCommonModes];
-			_hideFromStatusBarHintPopoverUpdateTimer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(updateHideFromStatusBarHintPopover:) userInfo:nil repeats:YES];
+			_hideFromStatusBarHintPopoverUpdateTimer = [NSTimer timerWithTimeInterval:0.1 target:self selector:@selector(updateHideFromStatusBarHintPopover:) userInfo:nil repeats:YES];
 			[[NSRunLoop mainRunLoop] addTimer:_hideFromStatusBarHintPopoverUpdateTimer forMode:NSRunLoopCommonModes];
 		}
 	}
@@ -1282,7 +1269,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	NSTimeInterval remaining = [[_statusBarHideTimer fireDate] timeIntervalSinceDate:now];
 	NSUInteger rounded = (NSUInteger)ceil(remaining);
 	[self setHideFromStatusBarHintLabelWithSeconds:rounded];
-	NSLog(@"Timer remaining: %lu s", (unsigned long)rounded);
+	// NSLog(@"Timer remaining: %lu s", (unsigned long)rounded);
 }
 
 - (void)setHideFromStatusBarHintLabelWithSeconds:(NSUInteger)seconds

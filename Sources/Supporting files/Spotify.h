@@ -26,7 +26,7 @@ typedef enum SpotifyEPlS SpotifyEPlS;
 
 @property (copy, readonly) SpotifyTrack *currentTrack;  // The current playing track.
 @property NSInteger soundVolume;  // The sound output volume (0 = minimum, 100 = maximum)
-@property (readonly) SpotifyEPlS playerState;  // Is Spotify stopped, paused, or playing?
+@property (readonly) NSInteger playerState;  // Is Spotify stopped, paused, or playing?
 @property double playerPosition;  // The player’s position within the currently playing track in seconds.
 @property (readonly) BOOL repeatingEnabled;  // Is repeating enabled in the current playback context?
 @property BOOL repeating;  // Is repeating on or off?

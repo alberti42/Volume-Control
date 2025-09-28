@@ -130,7 +130,7 @@
 }
 
 - (BOOL) isRunning;
-- (iTunesEPlS) playerState;
+- (NSInteger) playerState;
 
 @property (assign, nonatomic) double currentVolume;
 @property (assign, nonatomic) double oldVolume;
