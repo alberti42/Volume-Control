@@ -580,7 +580,16 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 	systemAudio = [[SystemApplication alloc] init];
 
-	[self showInStatusBarWithCompletion:nil]; // Install icon into the menu bar
+	// Install icon into the menu bar
+	[self showInStatusBarWithCompletion:^{
+		// This code will only run AFTER the icon has been created and is visible.
+
+		// Initiate hiding it
+		if([self hideFromStatusBar]) {
+			NSLog(@"Started hiding from status bar");
+			[self setHideFromStatusBar:YES];
+		}
+	}];
 
 	// NSString* iTunesVersion = [[NSString alloc] initWithString:[iTunes version]];
 	// NSString* spotifyVersion = [[NSString alloc] initWithString:[spotify version]];
@@ -1225,7 +1234,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 {
 	if ([_hideFromStatusBarHintPopover isShown]) return;
 
-	NSLog(@"Will show popover");
+	// NSLog(@"Will show popover");
 
 	if (! _hideFromStatusBarHintPopover)
 	{
@@ -1335,11 +1344,12 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 - (void)menuDidClose:(NSMenu *)menu
 {
 	menuIsVisible=false;
-	if([self hideFromStatusBar])
+	if([[self statusBar] isVisible] && [self hideFromStatusBar])
 	{
 		[self showHideFromStatusBarHintPopover];
 	}
 
+	// Remove timer used to update volume bar status in the menu bar
 	if(updateSystemVolumeTimer)
 	{
 		[updateSystemVolumeTimer invalidate];

@@ -29,7 +29,7 @@
         },
         {
             "name": "Run App for debug",
-            "shell_cmd": "open '${project_path}/build/Debug/Volume Control.app'",
+            "shell_cmd": "source ./build_config.env && open \"\\${CONFIGURATION_BUILD_DIR}/Volume Control.app\"",
             "working_dir": "${project_path}"
         },
         {
