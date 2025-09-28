@@ -33,73 +33,78 @@
 - (IBAction)onRestart:(id)sender
 {
     //$N = argv[N]
-    NSString *killArg1AndOpenArg2Script = @"kill -15 $1 \n open \"$2\"";
-    
+    NSString *killArg1AndOpenArg2Script = @"kill -15 $0\n"
+            "while kill -0 $0 2>/dev/null; do\n"
+            "  sleep 0.1\n"
+            "done\n"
+            "open \"$1\"";
     //NSTask needs its arguments to be strings
     NSString *ourPID = [NSString stringWithFormat:@"%d",
                         [[NSProcessInfo processInfo] processIdentifier]];
-    
+
     //this will be the path to the .app bundle,
     //not the executable inside it; exactly what `open` wants
-    NSString * pathToUs = [[NSBundle mainBundle] bundlePath];
-    
-    NSArray *shArgs = [NSArray arrayWithObjects:@"-c", // -c tells sh to execute the next argument, passing it the remaining arguments.
-                       killArg1AndOpenArg2Script,
-                       @"", //$0 path to script (ignored)
-                       ourPID, //$1 in restartScript
-                       pathToUs, //$2 in the restartScript
-                       nil];
+    NSString *pathToUs = [[NSBundle mainBundle] bundlePath];
+    NSLog(@"%@",pathToUs);
+
+    NSArray *shArgs = @[
+        @"-c",  // -c tells sh to execute the next argument, passing it the remaining arguments.
+        killArg1AndOpenArg2Script,
+        ourPID,  //$0 in restartScript
+        pathToUs //$1 in the restartScript
+    ];
+
     NSTask *restartTask = [NSTask launchedTaskWithLaunchPath:@"/bin/sh" arguments:shArgs];
-    [restartTask waitUntilExit]; //wait for killArg1AndOpenArg2Script to finish
+    [restartTask waitUntilExit];  //wait for killArg1AndOpenArg2Script to finish
     NSLog(@"*** ERROR: %@ should have been terminated, but we are still running", pathToUs);
     assert(!"We should not be running!");
 }
 
 - (void)windowDidLoad {
     [super windowDidLoad];
-    
+
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
-    
     [openSecurityPrivacyBtn setBezelStyle:NSBezelStyleRounded];
     [exitBtn setBezelStyle:NSBezelStyleRounded];
     [restartBtn setBezelStyle:NSBezelStyleRounded];
-    
+
     [[self window] setDefaultButtonCell:[openSecurityPrivacyBtn cell]];
-    [self window].styleMask &= ~NSWindowStyleMaskResizable;
+    self.window.styleMask &= ~NSWindowStyleMaskResizable;
 }
 
 - (void)checkAuthorization:(NSTimer*)aTimer
 {
-    extern CFStringRef kAXTrustedCheckOptionPrompt __attribute__((weak_import));
-    
-    if ( AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)@{(__bridge id)kAXTrustedCheckOptionPrompt: @NO}) && [(AppDelegate*)[NSApp delegate] createEventTap] )
-    {
+    AppDelegate *delegate = (AppDelegate *)[NSApp delegate];
+    if ([delegate tryCreateEventTap]) {
         [aTimer invalidate];
         aTimer = nil;
-        
-        [(AppDelegate*)[NSApp delegate] wasAuthorized];
+        [delegate wasAuthorized];
     }
 }
 
 - (IBAction)showWindow:(id)sender
 {
     [super showWindow:sender];
-    [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
-    [[self window] makeKeyAndOrderFront:sender];
-    
-    checkAuthorizationTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(checkAuthorization:) userInfo:nil repeats:YES];
+    [NSApp activateIgnoringOtherApps:YES];
+    [self.window makeKeyAndOrderFront:sender];
+
+    checkAuthorizationTimer = [NSTimer scheduledTimerWithTimeInterval:0.3
+                                                               target:self
+                                                             selector:@selector(checkAuthorization:)
+                                                             userInfo:nil
+                                                              repeats:YES];
 }
 
--(void)dealloc
+- (void)dealloc
 {
     exitBtn = nil;
     openSecurityPrivacyBtn = nil;
     restartBtn = nil;
 }
 
--(id) init
+- (instancetype)init
 {
-    if (self = [super init])  {
+    if ((self = [super init])) {
         self->authorized = false;
     }
     return self;
@@ -107,30 +112,28 @@
 
 @end
 
+#pragma mark - ScreenshotView
+
 @implementation ScreenshotView
 
 - (void)awakeFromNib {
     [super awakeFromNib];
-//    [self ignorem]
-    //    self.ignoresMouseEvents = YES; // allow clicks to pass through
     [self setAppropriateImage];
 }
 
-- (void) setAppropriateImage
+- (void)setAppropriateImage
 {
     bool isDark = [[[NSApp effectiveAppearance] name] isEqualToString:@"NSAppearanceNameDarkAqua"];
-    
-    if(isDark)
+    if (isDark) {
         screenshotImage = [NSImage imageNamed:@"SecurityPrivacyDark"];
-    else
+    } else {
         screenshotImage = [NSImage imageNamed:@"SecurityPrivacyLight"];
-    
+    }
     [self setImage:screenshotImage];
-    
     [self setNeedsDisplay:YES];
 }
 
-- (void) viewDidChangeEffectiveAppearance
+- (void)viewDidChangeEffectiveAppearance
 {
     [self setAppropriateImage];
 }

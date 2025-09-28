@@ -632,8 +632,6 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
     if ([self tryCreateEventTap]) {
         [self completeInitialization];
-        //accessibilityDialog = [[AccessibilityDialog alloc] initWithWindowNibName:@"AccessibilityDialog"];
-        //[accessibilityDialog showWindow:self];
     } else {
         // Not yet trusted, show helper dialog
         accessibilityDialog = [[AccessibilityDialog alloc] initWithWindowNibName:@"AccessibilityDialog"];
