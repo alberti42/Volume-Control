@@ -49,7 +49,7 @@
                         <action selector="toggleHideFromStatusBar:" target="3" id="5IS-cK-VYc"/>
                     </connections>
                 </menuItem>
-                <menuItem title="Hide volume feedback bezel" tag="6" id="IG3-xA-1iJ">
+                <menuItem title="Hide volume feedback bezel" tag="6" hidden="YES" id="IG3-xA-1iJ">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="toggleHideVolumeWindow:" target="3" id="YZl-KG-mLA"/>

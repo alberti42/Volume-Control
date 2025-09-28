@@ -581,9 +581,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     systemAudio = [[SystemApplication alloc] init];
     
     // Defer status bar creation to next runloop
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self showInStatusBar]; // Install icon into the menu bar
-    });
+    [self showInStatusBar]; // Install icon into the menu bar
+    //dispatch_async(dispatch_get_main_queue(), ^{
+    //    [self showInStatusBar]; // Install icon into the menu bar
+    //});
     
     // NSString* iTunesVersion = [[NSString alloc] initWithString:[iTunes version]];
     // NSString* spotifyVersion = [[NSString alloc] initWithString:[spotify version]];
@@ -610,10 +611,6 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             [volumeSound stop];
         [volumeSound play];
     }
-}
-
-- (void)applicationDidBecomeActive:(NSNotification *)notification {\
-    // NSLog(@"ACTIVE");
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
@@ -644,11 +641,17 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)sender hasVisibleWindows:(BOOL)flag
 {
-    [self showInStatusBar];
-    [self setHideFromStatusBar:[self hideFromStatusBar]];
-    if ([self hideFromStatusBar])
-    {
-        [self showHideFromStatusBarHintPopover];
+    if([self hideFromStatusBar]) {
+        // First show the icon in the status bar
+        [self showInStatusBar];
+        
+        // Initiate hiding it
+        [self setHideFromStatusBar: YES];
+        if ([self hideFromStatusBar])
+        {
+            // Actively show the popover to make sure user notices
+            [self showHideFromStatusBarHintPopover];
+        }
     }
 
     return false;
@@ -663,13 +666,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         self.statusBar.menu = self.statusMenu;
     }
     
-    // Sync with stored preference
-    //    self.statusBar.visible = !self.hideFromStatusBar;
-    if(self.hideFromStatusBar) {
-        [self hideFromStatusBar];
-    } else {
-        [self showStatusBarItem];
-    }
+    // Always start by showing the status bar
+    [self showStatusBarItem];
 
     NSImage *icon = [NSImage imageNamed:@"statusbar-icon"];
     icon.template = YES;
@@ -1151,29 +1149,33 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         [self showHideFromStatusBarHintPopover];
 }
 
-- (void)setHideFromStatusBar:(bool)enabled
+- (void)setHideFromStatusBar:(bool)want_hide
 {
-    _hideFromStatusBar=enabled;
+    // NSLog(@"Will it hide: %d",want_hide);
+
+    _hideFromStatusBar=want_hide;
     
     NSMenuItem* menuItem=[_statusMenu itemWithTag:HIDE_FROM_STATUS_BAR_ID];
     [menuItem setState:[self hideFromStatusBar]];
     
-    [preferences setBool:enabled forKey:@"hideFromStatusBarPreference"];
+    [preferences setBool:want_hide forKey:@"hideFromStatusBarPreference"];
     [preferences synchronize];
     
-    if(enabled)
+    if(want_hide && self.statusBar.isVisible)
     {
-        if (![_statusBarHideTimer isValid] && [self statusBar])
+        if (![_statusBarHideTimer isValid] )
         {
+            // NSLog(@"Start new timers");
             [self setHideFromStatusBarHintLabelWithSeconds:statusBarHideDelay];
             _statusBarHideTimer = [NSTimer timerWithTimeInterval:statusBarHideDelay target:self selector:@selector(doHideFromStatusBar:) userInfo:nil repeats:NO];
             [[NSRunLoop mainRunLoop] addTimer:_statusBarHideTimer forMode:NSRunLoopCommonModes];
-            _hideFromStatusBarHintPopoverUpdateTimer = [NSTimer timerWithTimeInterval:0.5 target:self selector:@selector(updateHideFromStatusBarHintPopover:) userInfo:nil repeats:YES];
+            _hideFromStatusBarHintPopoverUpdateTimer = [NSTimer timerWithTimeInterval:0.1 target:self selector:@selector(updateHideFromStatusBarHintPopover:) userInfo:nil repeats:YES];
             [[NSRunLoop mainRunLoop] addTimer:_hideFromStatusBarHintPopoverUpdateTimer forMode:NSRunLoopCommonModes];
         }
     }
     else
     {
+        // NSLog(@"INVALIDATE TIMERS");
         [_hideFromStatusBarHintPopover close];
         [_statusBarHideTimer invalidate];
         _statusBarHideTimer = nil;
@@ -1192,15 +1194,19 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 - (void)showStatusBarItem {
    if (self.statusBar) {
        self.statusBar.visible = YES;
-       self.statusBar.length = NSSquareStatusItemLength;
+       // self.statusBar.length = NSSquareStatusItemLength;
    }
 }
 
 - (void)doHideFromStatusBar:(NSTimer*)aTimer
 {
+    // NSLog(@"doHideFromStatusBar");
     [_hideFromStatusBarHintPopoverUpdateTimer invalidate];
     _hideFromStatusBarHintPopoverUpdateTimer = nil;
+
+    [_statusBarHideTimer invalidate];
     _statusBarHideTimer = nil;
+
     [_hideFromStatusBarHintPopover close];
     [self hideStatusBarItem];
     [self setHideFromStatusBar:true];
@@ -1241,8 +1247,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (void)updateHideFromStatusBarHintPopover:(NSTimer*)aTimer
 {
-    NSDate* now = [NSDate date];
-    [self setHideFromStatusBarHintLabelWithSeconds:[[_statusBarHideTimer fireDate] timeIntervalSinceDate:now]];
+    NSDate *now = [NSDate date];
+    NSTimeInterval remaining = [[_statusBarHideTimer fireDate] timeIntervalSinceDate:now];
+    NSUInteger rounded = (NSUInteger)ceil(remaining);
+    [self setHideFromStatusBarHintLabelWithSeconds:rounded];
+    // NSLog(@"Timer remaining: %.1f s", remaining);
 }
 
 - (void)setHideFromStatusBarHintLabelWithSeconds:(NSUInteger)seconds
