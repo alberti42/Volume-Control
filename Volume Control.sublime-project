@@ -19,17 +19,22 @@
     "build_systems": [
         {
             "name": "Build with xcodebuild for debug+x86_64",
-            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=x86_64' BUILD_DIR=\"\\${BUILD_DIR}\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}\" build | xcpretty",
+            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=x86_64' BUILD_DIR=\"\\${BUILD_DIR}/debug\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" build | xcpretty",
+            "working_dir": "${project_path}",
+        },
+        {
+            "name": "Distribute",
+            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Release ARCHS=\"arm64 x86_64\" ONLY_ACTIVE_ARCH=NO BUILD_DIR=\"\\${BUILD_DIR}/release\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/release\" build | xcpretty",
             "working_dir": "${project_path}",
         },
         {
             "name": "Clean with xcodebuild for debug+x86_64",
-            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=x86_64' BUILD_DIR=\"\\${BUILD_DIR}\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}\" clean | xcpretty",
+            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=x86_64' BUILD_DIR=\"\\${BUILD_DIR}/debug\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" clean | xcpretty",
             "working_dir": "${project_path}",
         },
         {
             "name": "Run App for debug",
-            "shell_cmd": "source ./build_config.env && open \"\\${CONFIGURATION_BUILD_DIR}/Volume Control.app\"",
+            "shell_cmd": "source ./build_config.env && open \"\\${CONFIGURATION_BUILD_DIR}/debug/Volume Control.app\"",
             "working_dir": "${project_path}"
         },
         {

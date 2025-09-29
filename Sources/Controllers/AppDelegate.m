@@ -241,7 +241,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 static NSString * const kHelperBundleIDSuffix = @"Helper";
 
 - (NSString *)helperBundleID {
-    return [[[NSBundle mainBundle] bundleIdentifier] stringByAppendingString:kHelperBundleIDSuffix];
+	return [[[NSBundle mainBundle] bundleIdentifier] stringByAppendingString:kHelperBundleIDSuffix];
 }
 
 - (IBAction)terminate:(id)sender
@@ -285,58 +285,58 @@ static NSString * const kHelperBundleIDSuffix = @"Helper";
 
 - (void)updateStartAtLoginMenuItem
 {
-    BOOL enabled = [self StartAtLogin];
-    NSMenuItem* menuItem = [self.statusMenu itemWithTag:START_AT_LOGIN_ID];
-    [menuItem setState:enabled ? NSControlStateValueOn : NSControlStateValueOff];
+	BOOL enabled = [self StartAtLogin];
+	NSMenuItem* menuItem = [self.statusMenu itemWithTag:START_AT_LOGIN_ID];
+	[menuItem setState:enabled ? NSControlStateValueOn : NSControlStateValueOff];
 }
 
 
 - (void)setStartAtLogin:(BOOL)enabled savePreferences:(BOOL)savePreferences
 {
-    NSString *helperBundleID = @"io.alberti42.VolumeControlHelper";
+	NSString *helperBundleID = @"io.alberti42.VolumeControlHelper";
 
-    if (@available(macOS 13.0, *)) {
-        SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
-        NSError *error = nil;
+	if (@available(macOS 13.0, *)) {
+		SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
+		NSError *error = nil;
 
-        if (enabled) {
-            if (service.status != SMAppServiceStatusEnabled) {
-                if (![service registerAndReturnError:&error]) {
-                    NSLog(@"[Volume Control] Error registering login item: %@", error.localizedDescription);
-                }
-            }
-        } else {
-            if (service.status != SMAppServiceStatusNotRegistered) {
-                if (![service unregisterAndReturnError:&error]) {
-                    NSLog(@"[Volume Control] Error unregistering login item: %@", error.localizedDescription);
-                }
-            }
-        }
-    } else {
-        // Legacy fallback (macOS 12 and older)
-        if (!SMLoginItemSetEnabled((__bridge CFStringRef)helperBundleID, enabled)) {
-            NSLog(@"[Volume Control] SMLoginItemSetEnabled failed.");
-        }
-    }
+		if (enabled) {
+			if (service.status != SMAppServiceStatusEnabled) {
+				if (![service registerAndReturnError:&error]) {
+					NSLog(@"[Volume Control] Error registering login item: %@", error.localizedDescription);
+				}
+			}
+		} else {
+			if (service.status != SMAppServiceStatusNotRegistered) {
+				if (![service unregisterAndReturnError:&error]) {
+					NSLog(@"[Volume Control] Error unregistering login item: %@", error.localizedDescription);
+				}
+			}
+		}
+	} else {
+		// Legacy fallback (macOS 12 and older)
+		if (!SMLoginItemSetEnabled((__bridge CFStringRef)helperBundleID, enabled)) {
+			NSLog(@"[Volume Control] SMLoginItemSetEnabled failed.");
+		}
+	}
 
-    if (savePreferences) {
-        [preferences setBool:enabled forKey:@"StartAtLoginPreference"];
-    }
+	if (savePreferences) {
+		[preferences setBool:enabled forKey:@"StartAtLoginPreference"];
+	}
 
-    [self updateStartAtLoginMenuItem];
+	[self updateStartAtLoginMenuItem];
 }
 
 - (bool)StartAtLogin
 {
-    NSString *helperBundleID = @"io.alberti42.VolumeControlHelper";
+	NSString *helperBundleID = @"io.alberti42.VolumeControlHelper";
 
-    if (@available(macOS 13.0, *)) {
-        SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
-        return (service.status == SMAppServiceStatusEnabled ||
-                service.status == SMAppServiceStatusRequiresApproval);
-    } else {
-        return [preferences boolForKey:@"StartAtLoginPreference"];
-    }
+	if (@available(macOS 13.0, *)) {
+		SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
+		return (service.status == SMAppServiceStatusEnabled ||
+				service.status == SMAppServiceStatusRequiresApproval);
+	} else {
+		return [preferences boolForKey:@"StartAtLoginPreference"];
+	}
 }
 
 - (void)wasAuthorized
@@ -490,8 +490,11 @@ static NSString * const kHelperBundleIDSuffix = @"Helper";
 		else if (runningPlayerPtr == doppler)
 			[self setSpotifyVolume:[runningPlayerPtr currentVolume]];
 
-		if (_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio)
-			[self setSystemVolume:[runningPlayerPtr currentVolume]];
+		// Update system UI if system volume is affected or when locked
+		if (_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio) {
+			[self setSystemVolume:[systemAudio currentVolume]];
+		}
+
 	}
 }
 
@@ -785,9 +788,9 @@ static NSString * const kHelperBundleIDSuffix = @"Helper";
 
 - (IBAction)toggleStartAtLogin:(id)sender
 {
-    BOOL currentlyEnabled = [self StartAtLogin];
-    [self setStartAtLogin:!currentlyEnabled savePreferences:YES];
-    [self updateStartAtLoginMenuItem];
+	BOOL currentlyEnabled = [self StartAtLogin];
+	[self setStartAtLogin:!currentlyEnabled savePreferences:YES];
+	[self updateStartAtLoginMenuItem];
 }
 
 - (void) setUseAppleCMDModifier:(bool)enabled
