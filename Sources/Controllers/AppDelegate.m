@@ -238,10 +238,8 @@ static NSTimeInterval checkPlayerTimeout=0.3f;
 //static NSTimeInterval volumeLockSyncInterval=1.0f;
 static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
-static NSString * const kHelperBundleIDSuffix = @"Helper";
-
 - (NSString *)helperBundleID {
-	return [[[NSBundle mainBundle] bundleIdentifier] stringByAppendingString:kHelperBundleIDSuffix];
+	return [[[NSBundle mainBundle] bundleIdentifier] stringByAppendingString:@"Helper"];
 }
 
 - (IBAction)terminate:(id)sender
@@ -290,10 +288,30 @@ static NSString * const kHelperBundleIDSuffix = @"Helper";
 	[menuItem setState:enabled ? NSControlStateValueOn : NSControlStateValueOff];
 }
 
+- (IBAction)toggleStartAtLogin:(id)sender {
+    BOOL currentlyEnabled = [self StartAtLogin];
+
+    if (currentlyEnabled) {
+        // User clicked to disable
+        [self setStartAtLogin:NO savePreferences:YES];
+    } else {
+        // User clicked to enable
+        [self setStartAtLogin:YES savePreferences:YES];
+
+        if (@available(macOS 13.0, *)) {
+            SMAppService *service = [SMAppService loginItemServiceWithIdentifier:[self helperBundleID]];
+            if (service.status == SMAppServiceStatusRequiresApproval) {
+                // TODO: prompt user to open System Settings
+                NSLog(@"Login item requires approval in System Settings → Login Items");
+            }
+        }
+    }
+    [self updateStartAtLoginMenuItem];
+}
 
 - (void)setStartAtLogin:(BOOL)enabled savePreferences:(BOOL)savePreferences
 {
-	NSString *helperBundleID = @"io.alberti42.VolumeControlHelper";
+	NSString *helperBundleID = [self helperBundleID];
 
 	if (@available(macOS 13.0, *)) {
 		SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
@@ -314,9 +332,12 @@ static NSString * const kHelperBundleIDSuffix = @"Helper";
 		}
 	} else {
 		// Legacy fallback (macOS 12 and older)
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 		if (!SMLoginItemSetEnabled((__bridge CFStringRef)helperBundleID, enabled)) {
 			NSLog(@"[Volume Control] SMLoginItemSetEnabled failed.");
 		}
+        #pragma clang diagnostic pop
 	}
 
 	if (savePreferences) {
@@ -328,10 +349,21 @@ static NSString * const kHelperBundleIDSuffix = @"Helper";
 
 - (bool)StartAtLogin
 {
-	NSString *helperBundleID = @"io.alberti42.VolumeControlHelper";
+	// Enabled → the login item is registered and will launch at login.
+	// NotRegistered → no login item exists.
+	// RequiresApproval → your app tried to register the login item, but the user hasn’t granted approval yet in System Settings
+    //
+    // sfltool dumpbtm → dump the entire macOS database of login authorizations for inspection from the command line.
+    // sfltool resetbtm → reset the entire macOS database of login authorizations. Be careful: the reset applies to all apps, not only this one
+    
+	NSString *helperBundleID = [self helperBundleID];
 
 	if (@available(macOS 13.0, *)) {
 		SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
+
+		// In case of RequiresApproval, it means the user requested to start the app at login, but the request has not been approved yet.
+		// In this case, "Start at login" should be assumed to be checked because it would confuse the user to have click on the toggle
+		// and see no changes.
 		return (service.status == SMAppServiceStatusEnabled ||
 				service.status == SMAppServiceStatusRequiresApproval);
 	} else {
@@ -784,13 +816,6 @@ static NSString * const kHelperBundleIDSuffix = @"Helper";
 	[menuItem setState:enabled];
 
 	_PlaySoundFeedback=enabled;
-}
-
-- (IBAction)toggleStartAtLogin:(id)sender
-{
-	BOOL currentlyEnabled = [self StartAtLogin];
-	[self setStartAtLogin:!currentlyEnabled savePreferences:YES];
-	[self updateStartAtLoginMenuItem];
 }
 
 - (void) setUseAppleCMDModifier:(bool)enabled
