@@ -1,5 +1,6 @@
 # Exclude the build directory
 build/*
+build.nosync/*
  
 # Exclude temp nibs and swap files
 *~.nib
@@ -24,4 +25,3 @@ bin/*
 
 # Sublime Text
 *.sublime-workspace
-

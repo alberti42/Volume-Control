@@ -18,6 +18,11 @@
     },
     "build_systems": [
         {
+            "name": "Build with xcodebuild for debug+arm64",
+            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=arm64' BUILD_DIR=\"\\${BUILD_DIR}/debug\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" build | xcpretty",
+            "working_dir": "${project_path}",
+        },
+        {
             "name": "Build with xcodebuild for debug+x86_64",
             "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=x86_64' BUILD_DIR=\"\\${BUILD_DIR}/debug\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" build | xcpretty",
             "working_dir": "${project_path}",
@@ -28,8 +33,13 @@
             "working_dir": "${project_path}",
         },
         {
+            "name": "Clean with xcodebuild for debug+arm64",
+            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug BUILD_DIR=\"\\${BUILD_DIR}/debug\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" clean | xcpretty",
+            "working_dir": "${project_path}",
+        },
+        {
             "name": "Clean with xcodebuild for debug+x86_64",
-            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=x86_64' BUILD_DIR=\"\\${BUILD_DIR}/debug\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" clean | xcpretty",
+            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug BUILD_DIR=\"\\${BUILD_DIR}/debug\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" clean | xcpretty",
             "working_dir": "${project_path}",
         },
         {
@@ -38,8 +48,8 @@
             "working_dir": "${project_path}"
         },
         {
-            "name": "Generate compile_commands.json for debug+x86_64",
-            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=x86_64' BUILD_DIR=\"\\${BUILD_DIR}\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}\" clean build | xcpretty -r json-compilation-database -o compile_commands.json",
+            "name": "Generate compile_commands.json for debug",
+            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS' ARCHS=\"arm64 x86_64\" ONLY_ACTIVE_ARCH=NO BUILD_DIR=\"\\${BUILD_DIR}\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}\" clean build | xcpretty -r json-compilation-database -o compile_commands.json",
             "working_dir": "${project_path}",
         },
     ],
