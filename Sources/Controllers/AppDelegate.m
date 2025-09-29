@@ -685,18 +685,19 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)sender hasVisibleWindows:(BOOL)flag
 {
-	if ([self hideFromStatusBar]) {
+    if ([self hideFromStatusBar]) {
 		// First, tell the status bar to show itself.
 		[self showInStatusBarWithCompletion:^{
 			// This code will only run AFTER the icon has been created and is visible.
 
 			// Initiate hiding it
-			NSLog(@"Started hiding from status bar");
 			[self setHideFromStatusBar:YES];
 
-			// Actively show the popover to make sure user notices
-			// Now it has a proper anchor and will appear in the right place.
-			[self showHideFromStatusBarHintPopover];
+            // Actively show the popover to make sure user notices; delay it until status item has settled in its final position
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)),
+                           dispatch_get_main_queue(), ^{
+                [self showHideFromStatusBarHintPopover];
+            });
 		}];
 	}
 	return false;
@@ -1206,6 +1207,34 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 	[preferences setBool:want_hide forKey:@"hideFromStatusBarPreference"];
 	[preferences synchronize];
+    
+    if(want_hide){
+        // Pre-create the popover so it's ready when we need to show it
+        if (! _hideFromStatusBarHintPopover)
+        {
+            CGRect popoverRect = (CGRect) {
+                .size.width = 250,
+                .size.height = 63
+            };
+
+            _hideFromStatusBarHintLabel = [[NSTextField alloc] initWithFrame:CGRectInset(popoverRect, 10, 10)];
+            [_hideFromStatusBarHintLabel setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
+            [_hideFromStatusBarHintLabel setEditable:false];
+            [_hideFromStatusBarHintLabel setSelectable:false];
+            [_hideFromStatusBarHintLabel setBezeled:false];
+            [_hideFromStatusBarHintLabel setBackgroundColor:[NSColor clearColor]];
+            [_hideFromStatusBarHintLabel setAlignment:NSTextAlignmentCenter];
+
+            _hintView = [[NSView alloc] initWithFrame:popoverRect];
+            [_hintView addSubview:_hideFromStatusBarHintLabel];
+
+            _hintVC = [[NSViewController alloc] init];
+            [_hintVC setView:_hintView];
+
+            _hideFromStatusBarHintPopover = [[NSPopover alloc] init];
+            [_hideFromStatusBarHintPopover setContentViewController:_hintVC];
+        }
+    }
 
 	if(want_hide && self.statusBar.isVisible)
 	{
@@ -1264,43 +1293,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 	// NSLog(@"Will show popover");
 
-	if (! _hideFromStatusBarHintPopover)
-	{
-		CGRect popoverRect = (CGRect) {
-			.size.width = 250,
-			.size.height = 63
-		};
-
-		_hideFromStatusBarHintLabel = [[NSTextField alloc] initWithFrame:CGRectInset(popoverRect, 10, 10)];
-		[_hideFromStatusBarHintLabel setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
-		[_hideFromStatusBarHintLabel setEditable:false];
-		[_hideFromStatusBarHintLabel setSelectable:false];
-		[_hideFromStatusBarHintLabel setBezeled:false];
-		[_hideFromStatusBarHintLabel setBackgroundColor:[NSColor clearColor]];
-		[_hideFromStatusBarHintLabel setAlignment:NSTextAlignmentCenter];
-
-		_hintView = [[NSView alloc] initWithFrame:popoverRect];
-		[_hintView addSubview:_hideFromStatusBarHintLabel];
-
-		_hintVC = [[NSViewController alloc] init];
-		[_hintVC setView:_hintView];
-
-		_hideFromStatusBarHintPopover = [[NSPopover alloc] init];
-		[_hideFromStatusBarHintPopover setContentViewController:_hintVC];
-	}
-
 	NSStatusBarButton *statusBarButton = [[self statusBar] button];
-	// --- Start of Debug Code ---
-
-	// First, get the button's frame relative to its window.
-	NSRect buttonFrameInWindow = [statusBarButton frame];
-
-	// Then, use the button's window to convert that frame to absolute screen coordinates.
-	NSRect rectOnScreen = [statusBarButton.window convertRectToScreen:buttonFrameInWindow];
-
-	NSLog(@"[Popover Debug] Popover will be shown relative to TRUE screen rect: %@", NSStringFromRect(rectOnScreen));
-
-	// --- End of Debug Code ---
 	[_hideFromStatusBarHintPopover showRelativeToRect:[statusBarButton bounds] ofView:statusBarButton preferredEdge:NSMinYEdge];
 }
 
