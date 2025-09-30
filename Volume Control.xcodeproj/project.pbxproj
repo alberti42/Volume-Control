@@ -55,6 +55,8 @@
 /* Begin PBXFileReference section */
 		65220C75267F49CB007BE316 /* generate_keys.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = generate_keys.rb; sourceTree = "<group>"; };
 		65220C76267F49D4007BE316 /* sign_update.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = sign_update.rb; sourceTree = "<group>"; };
+		6546E1892E8C66FB0087E95F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6546E18A2E8C66FB0087E95F /* VolumeControl.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VolumeControl.entitlements; sourceTree = "<group>"; };
 		65533216267F5D86004231D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		65996C55267EA86A0080A9A5 /* Volume Control.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65996CDF267EAB660080A9A5 /* keyboard.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = keyboard.png; sourceTree = "<group>"; };
@@ -118,7 +120,6 @@
 		65996E15267EB14F0080A9A5 /* SystemVolume.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemVolume.h; sourceTree = "<group>"; };
 		65996E16267EB14F0080A9A5 /* SystemVolume.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemVolume.m; sourceTree = "<group>"; };
 		65996E17267EB14F0080A9A5 /* ISSoundAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISSoundAdditions.h; sourceTree = "<group>"; };
-		65996E1C267EB3030080A9A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = VolumeControl/Info.plist; sourceTree = "<group>"; };
 		65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		BC20FAA128902EF500CF5CAF /* Doppler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Doppler.h; sourceTree = "<group>"; };
@@ -152,13 +153,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6546E18B2E8C66FB0087E95F /* VolumeControl */ = {
+			isa = PBXGroup;
+			children = (
+				6546E1892E8C66FB0087E95F /* Info.plist */,
+				6546E18A2E8C66FB0087E95F /* VolumeControl.entitlements */,
+			);
+			path = VolumeControl;
+			sourceTree = "<group>";
+		};
 		65996C4C267EA86A0080A9A5 = {
 			isa = PBXGroup;
 			children = (
 				65996CD7267EAAC40080A9A5 /* User interface */,
 				65996D03267EAC1F0080A9A5 /* Sources */,
 				65996D1C267EADAA0080A9A5 /* Resources */,
-				65996E1C267EB3030080A9A5 /* Info.plist */,
+				6546E18B2E8C66FB0087E95F /* VolumeControl */,
 				65DBBEDB2E89DE1800752329 /* Volume Control Helper */,
 				65996D0C267EACE30080A9A5 /* Frameworks */,
 				65996C56267EA86A0080A9A5 /* Products */,
@@ -467,6 +477,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/info.plist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

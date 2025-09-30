@@ -6,13 +6,48 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.0.1</title>
+            <pubDate>Tue, 30 Sep 2025 21:53:20 +0200</pubDate>
+            <sparkle:version>197</sparkle:version>
+            <sparkle:shortVersionString>2.0.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.5</sparkle:minimumSystemVersion>
+            <enclosure url="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.1.zip" length="7683346" type="application/octet-stream" sparkle:edSignature="djIIq6HWDerkFYmmdHriCXMCPG6sXDSsAk/1+3LdkptT8pIS0lkW4sSi7EvgMAmzTXe1LTYArZuWmKbu7zuAAw==" sparkle:dsaSignature="MC4CFQCwo5O2dPiK8t5BbBtVnRRGAUWCzQIVANah+WEnJItoyXt4MuB8MTf4fofY"/>
+            <description><![CDATA[
+			<h2>Version 2.0.1 (Tahoe compatible &amp; notarized)</h2>
+
+			<p style="color:red; font-weight:bold;">
+			⚠️ Important: This release introduces a new bundle identifier and is now notarized by Apple.
+			We strongly recommend downloading and installing a fresh copy directly from:
+			<a href="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip">
+			https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip
+			</a>
+			This ensures a smooth transition. Future updates will then work automatically.
+			</p>
+
+			<h3>New features</h3>
+			<ul>
+			    <li>Now fully compatible with macOS Tahoe (supports systems from macOS Ventura onward).</li>
+			    <li>Numerous under-the-hood improvements: removed deprecated APIs and improved robustness.</li>
+			    <li>Now fully <strong>notarized by Apple</strong> — no more workarounds required to install or run the app.</li>
+			    <li>HUD for volume indication has been removed on Tahoe (a replacement may return in a future update).</li>
+			</ul>
+
+			<h3>Bug fixes</h3>
+			<ul>
+				<li>Corrected problem preventing control of music players' volume. With this fix, the app will be granted permission to control the volume.</li>
+			    <li>Correct handling of volume key events from the MacBook Pro Touch Bar.</li>
+			    <li>System volume can now be muted completely (previously “0” was not truly silent).</li>
+			</ul>
+			]]></description>
+        </item>
+        <item>
             <title>2.0.0</title>
             <pubDate>Tue, 30 Sep 2025 14:15:52 +0200</pubDate>
             <sparkle:version>192</sparkle:version>
             <sparkle:shortVersionString>2.0.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>13.5</sparkle:minimumSystemVersion>
-            <enclosure url="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.0.zip" length="7681818" type="application/octet-stream" sparkle:edSignature="iSJWuW41JzNBWcm/Q9bein1KtrSM8Y/I/bIfs+NVnNQkzwJGkpNIrM/0X7MnvXKBtr4i34Rssgoq7xawAMMPDw==" sparkle:dsaSignature="MC4CFQC7NJ0t8cELQJsNmx2k5y43TWCTYAIVAJCch0SAcH+Ydf5RDr262VBeEAml"/>
-			<description><![CDATA[
+            <enclosure url="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.0.zip" length="7681818" type="application/octet-stream" sparkle:edSignature="iSJWuW41JzNBWcm/Q9bein1KtrSM8Y/I/bIfs+NVnNQkzwJGkpNIrM/0X7MnvXKBtr4i34Rssgoq7xawAMMPDw==" sparkle:dsaSignature="MC4CFQCYewNdobymTI2+DFspOD6YpgrPhwIVAMKe6v7g86d7JwDPgcHnaR87kjIu"/>
+            <description><![CDATA[
 			<h2>Version 2.0.0 (Tahoe compatible &amp; notarized)</h2>
 
 			<p style="color:red; font-weight:bold;">
