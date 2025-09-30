@@ -76,16 +76,6 @@ The app requires Accessibility and Automation permissions to control other apps'
 
 ---
 
-## Troubleshooting
-
-- If keyboard input is unresponsive after removing permissions, **reboot** your Mac.
-- If the app stops adjusting volume after an update:
-  - Quit the app.
-  - Remove it from **Accessibility** and **Automation** permissions.
-  - Reopen the app and re-authorize when prompted.
-
----
-
 ## Requirements
 
 - macOS **Ventura (13.5)** or later (Sonoma, Sequoia, Tahoe)
