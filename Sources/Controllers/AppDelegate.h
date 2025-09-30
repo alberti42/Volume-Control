@@ -76,6 +76,8 @@
 
 @property (nonatomic, strong) NSStatusItem *statusBar;
 
+@property (atomic, assign) BOOL isSendingAppleEvent;
+
 @property (assign, nonatomic) NSInteger volumeInc;
 @property (assign, nonatomic) bool AppleRemoteConnected;
 @property (assign, nonatomic) bool StartAtLogin;
@@ -104,19 +106,7 @@
 - (BOOL)tryCreateEventTap;
 
 // - (void)appleRemoteButton: (AppleRemoteEventIdentifier)buttonIdentifier pressedDown: (BOOL) pressedDown clickCount: (unsigned int) count;
-
-- (void)resetEventTap;
-
-- (void)stopVolumeRampTimer;
-
-- (void)updatePercentages;
-
 - (void)wasAuthorized;
-
-- (bool)createEventTap;
-
-- (void)handleEventTapDisabledByUser;
-
 - (void)handleAsynchronouslyTappedEventWithKeyCode:(int)keyCode
                                           keyState:(BOOL)keyState
                                        keyIsRepeat:(BOOL)keyIsRepeat

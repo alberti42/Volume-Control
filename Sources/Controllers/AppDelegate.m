@@ -31,33 +31,38 @@ void handleSIGTERM(int sig) {
 
 #pragma mark - Tapping key stroke events
 
-//static void displayPreferencesChanged(CGDirectDisplayID displayID, CGDisplayChangeSummaryFlags flags, void *userInfo) {
-//    [[NSNotificationCenter defaultCenter] postNotificationName:@"displayResolutionHasChanged" object:NULL];
-//}
-
 CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
     if (type == kCGEventTapDisabledByTimeout) {
-        NSLog(@"[Volume Control] Event tap disabled due to timeout. Disabling tapping.");
-        dispatch_async(dispatch_get_main_queue(), ^{
-            AppDelegate *app = (__bridge AppDelegate *)refcon;
-            [app setTapping:NO];
-
-            NSAlert *alert = [[NSAlert alloc] init];
-            alert.messageText = @"Tapping Disabled";
-            alert.informativeText = @"Volume Control lost its ability to monitor volume keys because it became unresponsive. "
-                                    @"Tapping has been turned off. You can re-enable it from the menu.";
-
-            [alert addButtonWithTitle:@"OK"];
-            [alert addButtonWithTitle:@"Report Issue on GitHub"];
-
-            NSModalResponse response = [alert runModal];
-            if (response == NSAlertSecondButtonReturn) {
-                [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:
-                    @"https://github.com/alberti42/Volume-Control/issues"]];
-            }
-        });
-        return event; // always return quickly
+        AppDelegate *app = (__bridge AppDelegate *)refcon;
+        if (app.isSendingAppleEvent) {
+            // False positive timeout caused by TCC
+            NSLog(@"[Volume Control] Tap disabled during AppleEvent/TCC dialog → restarting tap.");
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [app setTapping:YES]; // try to resume
+            });
+        } else {
+            // Real unresponsiveness
+            dispatch_async(dispatch_get_main_queue(), ^{
+                AppDelegate *app = (__bridge AppDelegate *)refcon;
+                [app setTapping:NO];
+                
+                NSAlert *alert = [[NSAlert alloc] init];
+                alert.messageText = @"Tapping Disabled";
+                alert.informativeText = @"Volume Control lost its ability to monitor volume keys because it became unresponsive. "
+                @"Tapping has been turned off. You can re-enable it from the menu.";
+                
+                [alert addButtonWithTitle:@"OK"];
+                [alert addButtonWithTitle:@"Report Issue on GitHub"];
+                
+                NSModalResponse response = [alert runModal];
+                if (response == NSAlertSecondButtonReturn) {
+                    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:
+                                                            @"https://github.com/alberti42/Volume-Control/issues"]];
+                }
+            });
+            return event; // always return quickly
+        }
     }
 
     // Pass through events we don't care about
@@ -122,6 +127,18 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     BOOL _muteDown;
 }
 
+// Forward declare private methods
+- (id)runningPlayer;
+- (void)completeInitialization;
+- (void)setVolumeUp:(bool)increase;
+- (void) setItunesVolume:(NSInteger)volume;
+- (void) setSpotifyVolume:(NSInteger)volume;
+- (void) setSystemVolume:(NSInteger)volume;
+- (void)stopVolumeRampTimer;
+- (void)updatePercentages;
+- (bool)createEventTap;
+- (void)handleEventTapDisabledByUser;
+
 @end
 
 #pragma mark - Extention music applications
@@ -139,8 +156,13 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 - (double) currentVolume
 {
+    AppDelegate *app = (AppDelegate *)NSApp.delegate;
+    app.isSendingAppleEvent = YES;
+    
 	double vol = [musicPlayer soundVolume];
 
+    app.isSendingAppleEvent = NO;
+    
 	if (fabs(vol-[self doubleVolume])<1)
 	{
 		vol = [self doubleVolume];
@@ -223,7 +245,7 @@ static NSTimeInterval checkPlayerTimeout=0.3f;
 static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (NSString *)helperBundleID {
-	return [[[NSBundle mainBundle] bundleIdentifier] stringByAppendingString:@"Helper"];
+    return [[[NSBundle mainBundle] bundleIdentifier] stringByAppendingString:@"Helper"];
 }
 
 - (IBAction)terminate:(id)sender
@@ -240,54 +262,58 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         CFRelease(eventTap);
         eventTap = nil;
     }
-
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
-
-	systemAudio = nil;
-	iTunes = nil;
-	spotify = nil;
-	doppler = nil;
-
-	_statusBar = nil;
-
-	accessibilityDialog = nil;
-	introWindowController = nil;
-
-	[volumeRampTimer invalidate];
-	volumeRampTimer = nil;
-
-	[checkPlayerTimer invalidate];
-	checkPlayerTimer = nil;
-
-	[timerImgSpeaker invalidate];
-	timerImgSpeaker = nil;
-
-	[updateSystemVolumeTimer invalidate];
-	updateSystemVolumeTimer = nil;
-
-	preferences = nil;
-
-	[NSApp terminate:nil];
+    
+    [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
+    
+    systemAudio = nil;
+    iTunes = nil;
+    spotify = nil;
+    doppler = nil;
+    
+    _statusBar = nil;
+    
+    accessibilityDialog = nil;
+    introWindowController = nil;
+    
+    [volumeRampTimer invalidate];
+    volumeRampTimer = nil;
+    
+    [checkPlayerTimer invalidate];
+    checkPlayerTimer = nil;
+    
+    [timerImgSpeaker invalidate];
+    timerImgSpeaker = nil;
+    
+    [updateSystemVolumeTimer invalidate];
+    updateSystemVolumeTimer = nil;
+    
+    preferences = nil;
+    
+    // IMPORTANT: Use [NSApp terminate:nil] for a clean exit.
+    // This ensures AppKit tears down the NSStatusItem properly
+    // and preserves the status bar icon position between launches.
+    // Simply returning or calling exit() would skip this cleanup
+    // and cause the icon to reset to the default position.
+    [NSApp terminate:nil];
 }
 
 - (void)updateStartAtLoginMenuItem
 {
-	BOOL enabled = [self StartAtLogin];
-	NSMenuItem* menuItem = [self.statusMenu itemWithTag:START_AT_LOGIN_ID];
-	[menuItem setState:enabled ? NSControlStateValueOn : NSControlStateValueOff];
+    BOOL enabled = [self StartAtLogin];
+    NSMenuItem* menuItem = [self.statusMenu itemWithTag:START_AT_LOGIN_ID];
+    [menuItem setState:enabled ? NSControlStateValueOn : NSControlStateValueOff];
 }
 
 - (IBAction)toggleStartAtLogin:(id)sender {
     BOOL currentlyEnabled = [self StartAtLogin];
-
+    
     if (currentlyEnabled) {
         // User clicked to disable
         [self setStartAtLogin:NO savePreferences:YES];
     } else {
         // User clicked to enable
         [self setStartAtLogin:YES savePreferences:YES];
-
+        
         if (@available(macOS 13.0, *)) {
             SMAppService *service = [SMAppService loginItemServiceWithIdentifier:[self helperBundleID]];
             if (service.status == SMAppServiceStatusRequiresApproval) {
@@ -301,92 +327,92 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (void)setStartAtLogin:(BOOL)enabled savePreferences:(BOOL)savePreferences
 {
-	NSString *helperBundleID = [self helperBundleID];
-
-	if (@available(macOS 13.0, *)) {
-		SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
-		NSError *error = nil;
-
-		if (enabled) {
-			if (service.status != SMAppServiceStatusEnabled) {
-				if (![service registerAndReturnError:&error]) {
-					NSLog(@"[Volume Control] Error registering login item: %@", error.localizedDescription);
-				}
-			}
-		} else {
-			if (service.status != SMAppServiceStatusNotRegistered) {
-				if (![service unregisterAndReturnError:&error]) {
-					NSLog(@"[Volume Control] Error unregistering login item: %@", error.localizedDescription);
-				}
-			}
-		}
-	} else {
-		// Legacy fallback (macOS 12 and older)
-        #pragma clang diagnostic push
-        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-		if (!SMLoginItemSetEnabled((__bridge CFStringRef)helperBundleID, enabled)) {
-			NSLog(@"[Volume Control] SMLoginItemSetEnabled failed.");
-		}
-        #pragma clang diagnostic pop
-	}
-
-	if (savePreferences) {
-		[preferences setBool:enabled forKey:@"StartAtLoginPreference"];
-	}
-
-	[self updateStartAtLoginMenuItem];
+    NSString *helperBundleID = [self helperBundleID];
+    
+    if (@available(macOS 13.0, *)) {
+        SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
+        NSError *error = nil;
+        
+        if (enabled) {
+            if (service.status != SMAppServiceStatusEnabled) {
+                if (![service registerAndReturnError:&error]) {
+                    NSLog(@"[Volume Control] Error registering login item: %@", error.localizedDescription);
+                }
+            }
+        } else {
+            if (service.status != SMAppServiceStatusNotRegistered) {
+                if (![service unregisterAndReturnError:&error]) {
+                    NSLog(@"[Volume Control] Error unregistering login item: %@", error.localizedDescription);
+                }
+            }
+        }
+    } else {
+        // Legacy fallback (macOS 12 and older)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        if (!SMLoginItemSetEnabled((__bridge CFStringRef)helperBundleID, enabled)) {
+            NSLog(@"[Volume Control] SMLoginItemSetEnabled failed.");
+        }
+#pragma clang diagnostic pop
+    }
+    
+    if (savePreferences) {
+        [preferences setBool:enabled forKey:@"StartAtLoginPreference"];
+    }
+    
+    [self updateStartAtLoginMenuItem];
 }
 
 - (bool)StartAtLogin
 {
-	// Enabled → the login item is registered and will launch at login.
-	// NotRegistered → no login item exists.
-	// RequiresApproval → your app tried to register the login item, but the user hasn’t granted approval yet in System Settings
+    // Enabled → the login item is registered and will launch at login.
+    // NotRegistered → no login item exists.
+    // RequiresApproval → your app tried to register the login item, but the user hasn’t granted approval yet in System Settings
     //
     // sfltool dumpbtm → dump the entire macOS database of login authorizations for inspection from the command line.
     // sfltool resetbtm → reset the entire macOS database of login authorizations. Be careful: the reset applies to all apps, not only this one
     
-	NSString *helperBundleID = [self helperBundleID];
-
-	if (@available(macOS 13.0, *)) {
-		SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
-
-		// In case of RequiresApproval, it means the user requested to start the app at login, but the request has not been approved yet.
-		// In this case, "Start at login" should be assumed to be checked because it would confuse the user to have click on the toggle
-		// and see no changes.
-		return (service.status == SMAppServiceStatusEnabled ||
-				service.status == SMAppServiceStatusRequiresApproval);
-	} else {
-		return [preferences boolForKey:@"StartAtLoginPreference"];
-	}
+    NSString *helperBundleID = [self helperBundleID];
+    
+    if (@available(macOS 13.0, *)) {
+        SMAppService *service = [SMAppService loginItemServiceWithIdentifier:helperBundleID];
+        
+        // In case of RequiresApproval, it means the user requested to start the app at login, but the request has not been approved yet.
+        // In this case, "Start at login" should be assumed to be checked because it would confuse the user to have click on the toggle
+        // and see no changes.
+        return (service.status == SMAppServiceStatusEnabled ||
+                service.status == SMAppServiceStatusRequiresApproval);
+    } else {
+        return [preferences boolForKey:@"StartAtLoginPreference"];
+    }
 }
 
 - (void)wasAuthorized
 {
-	[accessibilityDialog close];
-	accessibilityDialog = nil;
-
-	[self completeInitialization];
+    [accessibilityDialog close];
+    accessibilityDialog = nil;
+    
+    [self completeInitialization];
 }
 
 - (void)stopVolumeRampTimer
 {
-	[volumeRampTimer invalidate];
-	volumeRampTimer=nil;
-	[[NSNotificationCenter defaultCenter] postNotificationName:@"SoundFeedback" object:NULL];
-
-	checkPlayerTimer = [NSTimer timerWithTimeInterval:checkPlayerTimeout target:self selector:@selector(resetCurrentPlayer:) userInfo:nil repeats:NO];
-	[[NSRunLoop mainRunLoop] addTimer:checkPlayerTimer forMode:NSRunLoopCommonModes];
+    [volumeRampTimer invalidate];
+    volumeRampTimer=nil;
+    [self emitAcousticFeedback];
+    
+    checkPlayerTimer = [NSTimer timerWithTimeInterval:checkPlayerTimeout target:self selector:@selector(resetCurrentPlayer:) userInfo:nil repeats:NO];
+    [[NSRunLoop mainRunLoop] addTimer:checkPlayerTimer forMode:NSRunLoopCommonModes];
 }
 
 - (void)rampVolumeUp:(NSTimer*)theTimer
 {
-	[self setVolumeUp:true];
+    [self setVolumeUp:true];
 }
 
 - (void)rampVolumeDown:(NSTimer*)theTimer
 {
-	[self setVolumeUp:false];
+    [self setVolumeUp:false];
 }
 
 - (void)checkAccessibilityTrust:(NSTimer *)timer {
@@ -410,22 +436,22 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
                                                  &kCFTypeDictionaryKeyCallBacks,    // standard key callbacks
                                                  &kCFTypeDictionaryValueCallBacks   // standard value callbacks
                                                  );
-
+    
     BOOL trusted = AXIsProcessTrustedWithOptions(options);
     CFRelease(options);
-
+    
     return trusted;
 }
 
 - (BOOL)tryCreateEventTap {
     BOOL trusted = [self isTappingTrusted];
-
-	if (trusted) {
-		if ([self createEventTap]) {
-			return YES;
-		}
-	}
-	return NO;
+    
+    if (trusted) {
+        if ([self createEventTap]) {
+            return YES;
+        }
+    }
+    return NO;
 }
 
 - (bool)createEventTap
@@ -453,10 +479,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         
         // Start safety timer to monitor trust state
         accessibilityCheckTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
-                                         target:self
-                                       selector:@selector(checkAccessibilityTrust:)
-                                       userInfo:nil
-                                        repeats:YES];
+                                                                   target:self
+                                                                 selector:@selector(checkAccessibilityTrust:)
+                                                                 userInfo:nil
+                                                                  repeats:YES];
         
         return true;
     } else {
@@ -490,8 +516,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         NSAlert *alert = [[NSAlert alloc] init];
         alert.messageText = @"Accessibility Permission Revoked";
         alert.informativeText = @"Volume Control has lost permission to monitor keyboard events. "
-                                @"Keyboard input may stop working until you restore permission in "
-                                @"System Settings → Privacy & Security → Accessibility.";
+        @"Keyboard input may stop working until you restore permission in "
+        @"System Settings → Privacy & Security → Accessibility.";
         [alert runModal];
     });
 }
@@ -509,16 +535,15 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
                 [self stopVolumeRampTimer];
             }
             _previousKeyCode = keyCode;
-
+            
             if (keyState == 1) {
                 _muteDown = true;
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"MuteVol" object:nil];
-//                [self MuteVol:nil];
+                [self MuteVol];
             } else {
                 _muteDown = false;
             }
             break;
-
+            
         case NX_KEYTYPE_SOUND_UP:
         case NX_KEYTYPE_SOUND_DOWN:
             if (!_muteDown) {
@@ -526,14 +551,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
                     [self stopVolumeRampTimer];
                 }
                 _previousKeyCode = keyCode;
-
+                
                 if (keyState == 1) {
                     if (!self->volumeRampTimer) {
-                        if (keyCode == NX_KEYTYPE_SOUND_UP) {
-                            [[NSNotificationCenter defaultCenter] postNotificationName:(keyIsRepeat ? @"IncVolRamp" : @"IncVol") object:nil];
-                        } else {
-                            [[NSNotificationCenter defaultCenter] postNotificationName:(keyIsRepeat ? @"DecVolRamp" : @"DecVol") object:nil];
-                        }
+                        BOOL increase = (keyCode == NX_KEYTYPE_SOUND_UP);
+                        [self adjustVolumeUp:increase ramp:keyIsRepeat];
                     }
                 } else {
                     if (self->volumeRampTimer) {
@@ -546,35 +568,37 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 }
 
 -(void) sendMediaKey: (int)key {
-	// create and send down key event
-	NSEvent* key_event;
-
-	key_event = [NSEvent otherEventWithType:NSEventTypeSystemDefined location:CGPointZero modifierFlags:0xa00 timestamp:0 windowNumber:0 context:0 subtype:8 data1:((key << 16) | (0xa << 8)) data2:-1];
-	CGEventPost(0, key_event.CGEvent);
-	// NSLog(@"%d keycode (down) sent",key);
-
-	// create and send up key event
-	key_event = [NSEvent otherEventWithType:NSEventTypeSystemDefined location:CGPointZero modifierFlags:0xb00 timestamp:0 windowNumber:0 context:0 subtype:8 data1:((key << 16) | (0xb << 8)) data2:-1];
-	CGEventPost(0, key_event.CGEvent);
-	// NSLog(@"%d keycode (up) sent",key);
+    // create and send down key event
+    NSEvent* key_event;
+    
+    key_event = [NSEvent otherEventWithType:NSEventTypeSystemDefined location:CGPointZero modifierFlags:0xa00 timestamp:0 windowNumber:0 context:0 subtype:8 data1:((key << 16) | (0xa << 8)) data2:-1];
+    CGEventPost(0, key_event.CGEvent);
+    // NSLog(@"%d keycode (down) sent",key);
+    
+    // create and send up key event
+    key_event = [NSEvent otherEventWithType:NSEventTypeSystemDefined location:CGPointZero modifierFlags:0xb00 timestamp:0 windowNumber:0 context:0 subtype:8 data1:((key << 16) | (0xb << 8)) data2:-1];
+    CGEventPost(0, key_event.CGEvent);
+    // NSLog(@"%d keycode (up) sent",key);
 }
 
-- (void)PlayPauseMusic:(NSNotification *)aNotification
+/*
+- (void)PlayPauseMusic
 {
-	[self sendMediaKey:NX_KEYTYPE_PLAY];
+    [self sendMediaKey:NX_KEYTYPE_PLAY];
 }
 
-- (void)NextTrackMusic:(NSNotification *)aNotification
+- (void)NextTrackMusic
 {
-	[self sendMediaKey:NX_KEYTYPE_NEXT];
+    [self sendMediaKey:NX_KEYTYPE_NEXT];
 }
 
-- (void)PreviousTrackMusic:(NSNotification *)aNotification
+- (void)PreviousTrackMusic
 {
-	[self sendMediaKey:NX_KEYTYPE_PREVIOUS];
+    [self sendMediaKey:NX_KEYTYPE_PREVIOUS];
 }
+ */
 
-- (void)MuteVol:(NSNotification *)aNotification
+- (void)MuteVol
 {
 	id runningPlayerPtr = [self runningPlayer];
 
@@ -594,10 +618,12 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
                 if (@available(macOS 16.0, *)) {
                     // Running on Tahoe (2026) or newer
                 } else {
-                    [[self->OSDManager sharedManager] showImage:OSDGraphicSpeakerMute onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:0 totalChiclets:(unsigned int)100 locked:NO];
+                    id osdMgr = [self->OSDManager sharedManager];
+                    if (osdMgr) {
+                        [osdMgr showImage:OSDGraphicSpeakerMute onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:0 totalChiclets:(unsigned int)100 locked:NO];
+                    }
                 }
             }
-			 
 		}
 		else
 		{
@@ -612,7 +638,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
                 if (@available(macOS 16.0, *)) {
                     // Running on Tahoe (2026) or newer
                 } else {
-                    [[self->OSDManager sharedManager] showImage:OSDGraphicSpeaker onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)[runningPlayerPtr oldVolume] totalChiclets:(unsigned int)100 locked:NO];
+                    id osdMgr = [self->OSDManager sharedManager];
+                    if (osdMgr) {
+                        [osdMgr showImage:OSDGraphicSpeaker onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)[runningPlayerPtr oldVolume] totalChiclets:(unsigned int)100 locked:NO];
+                    }
                 }
             }
             
@@ -634,38 +663,26 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	}
 }
 
-- (void)IncVol:(NSNotification *)aNotification
-{
-	if( [[aNotification name] isEqualToString:@"IncVolRamp"] )
-	{
-		[checkPlayerTimer invalidate];
-		checkPlayerTimer = nil;
-		volumeRampTimer=[NSTimer timerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeUp:) userInfo:nil repeats:YES];
-		[[NSRunLoop mainRunLoop] addTimer:volumeRampTimer forMode:NSRunLoopCommonModes];
+- (void)adjustVolumeUp:(BOOL)increase ramp:(BOOL)ramp {
+    if (ramp) {
+        [checkPlayerTimer invalidate];
+        checkPlayerTimer = nil;
 
-		if(timerImgSpeaker) {[timerImgSpeaker invalidate]; timerImgSpeaker=nil;}
-	}
-	else
-	{
-		[self setVolumeUp:true];
-	}
-}
+        SEL selector = increase ? @selector(rampVolumeUp:) : @selector(rampVolumeDown:);
+        volumeRampTimer = [NSTimer timerWithTimeInterval:volumeRampTimeInterval * (NSTimeInterval)increment
+                                                  target:self
+                                                selector:selector
+                                                userInfo:nil
+                                                 repeats:YES];
+        [[NSRunLoop mainRunLoop] addTimer:volumeRampTimer forMode:NSRunLoopCommonModes];
 
-- (void)DecVol:(NSNotification *)aNotification
-{
-	if( [[aNotification name] isEqualToString:@"DecVolRamp"] )
-	{
-		[checkPlayerTimer invalidate];
-		checkPlayerTimer = nil;
-		volumeRampTimer=[NSTimer timerWithTimeInterval:volumeRampTimeInterval*(NSTimeInterval)increment target:self selector:@selector(rampVolumeDown:) userInfo:nil repeats:YES];
-		[[NSRunLoop mainRunLoop] addTimer:volumeRampTimer forMode:NSRunLoopCommonModes];
-
-		if(timerImgSpeaker) {[timerImgSpeaker invalidate]; timerImgSpeaker=nil;}
-	}
-	else
-	{
-		[self setVolumeUp:false];
-	}
+        if (timerImgSpeaker) {
+            [timerImgSpeaker invalidate];
+            timerImgSpeaker = nil;
+        }
+    } else {
+        [self setVolumeUp:increase];
+    }
 }
 
 - (id)init
@@ -758,7 +775,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	return YES; // Default behavior
 }
 
-- (void)emitAcousticFeedback:(NSNotification *)aNotification
+- (void)emitAcousticFeedback
 {
 	if([self PlaySoundFeedback] && (_AppleCMDModifierPressed != _UseAppleCMDModifier || [[self runningPlayer] isKindOfClass:[SystemApplication class]]))
 	{
@@ -770,17 +787,6 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-	// NSLog(@"FINISHED LAUNCHING");
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(emitAcousticFeedback:) name:@"SoundFeedback" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(IncVol:) name:@"IncVol" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(IncVol:) name:@"IncVolRamp" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(DecVol:) name:@"DecVol" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(DecVol:) name:@"DecVolRamp" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(MuteVol:) name:@"MuteVol" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(PlayPauseMusic:) name:@"PlayPauseMusic" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(NextTrackMusic:) name:@"NextTrackMusic" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(PreviousTrackMusic:) name:@"PreviousTrackMusic" object:nil];
-
 	[[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self selector: @selector(receiveWakeNote:) name:NSWorkspaceDidWakeNotification object: NULL];
 
 	signal(SIGTERM, handleSIGTERM);
@@ -1083,11 +1089,6 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[self setTapping:[self Tapping]];
 }
 
-- (void) dealloc
-{
-
-}
-
 - (void)resetCurrentPlayer:(NSTimer*)theTimer
 {
 	// Keep memory of the current player until this timeout is reached
@@ -1153,9 +1154,9 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		if (volume<0) volume=0;
 		if (volume>100) volume=100;
         
-        OSDGraphic image;
-        NSInteger numFullBlks;
-        NSInteger numQrtsBlks;
+        OSDGraphic image = 0;
+        NSInteger numFullBlks = 0;
+        NSInteger numQrtsBlks = 0;
         
         if (@available(macOS 16.0, *)) {
             // Running on Tahoe (2026) or newer
@@ -1172,7 +1173,12 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             if (@available(macOS 16.0, *)) {
                 // Running on Tahoe (2026) or newer
             } else {
-                [[self->OSDManager sharedManager] showImage:image onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)(round(((numFullBlks*4+numQrtsBlks)*1.5625)*100)) totalChiclets:(unsigned int)10000 locked:NO];
+                if(image) {
+                    id osdMgr = [self->OSDManager sharedManager];
+                    if (osdMgr) {
+                        [osdMgr showImage:image onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)(round(((numFullBlks*4+numQrtsBlks)*1.5625)*100)) totalChiclets:(unsigned int)10000 locked:NO];
+                    }
+                }
             }
         }
 
@@ -1182,7 +1188,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		}
 
 		if(self->volumeRampTimer == nil)
-			[self emitAcousticFeedback:nil];
+			[self emitAcousticFeedback];
 
 		if( runningPlayerPtr == iTunes)
 			[self setItunesVolume:volume];
