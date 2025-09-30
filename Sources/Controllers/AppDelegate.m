@@ -13,7 +13,7 @@
 #import <IOKit/hidsystem/ev_keymap.h>
 #import <ServiceManagement/ServiceManagement.h>
 
-//#import "OSD.h"
+#import "OSD.h"
 
 //This will handle signals for us, specifically SIGTERM.
 void handleSIGTERM(int sig) {
@@ -41,11 +41,26 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 	static bool muteDown = false;
 	NSEvent * sysEvent;
 
-	if (type == kCGEventTapDisabledByTimeout) {
-		//        NSLog(@"Event Taps Disabled! Re-enabling");
-		[(__bridge AppDelegate *)(refcon) resetEventTap];
-		return event;
-	}
+    if (type == kCGEventTapDisabledByTimeout) {
+        NSLog(@"[Volume Control] Event tap disabled due to timeout. Disabling tapping.");
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [(__bridge AppDelegate *)refcon setTapping:NO];
+            NSAlert *alert = [[NSAlert alloc] init];
+            alert.messageText = @"Tapping Disabled";
+            alert.informativeText = @"Volume Control lost its ability to monitor volume keys because it became unresponsive. "
+                                    @"Tapping has been turned off. You can re-enable it from the menu.";
+
+            [alert addButtonWithTitle:@"OK"];
+            [alert addButtonWithTitle:@"Report Issue on GitHub"];
+
+            NSModalResponse response = [alert runModal];
+            if (response == NSAlertSecondButtonReturn) {
+                [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:
+                    @"https://github.com/alberti42/Volume-Control/issues"]];
+            }
+        });
+        return event;
+    }
 
 	// No event we care for, then return ASAP
 	if (type != NX_SYSDEFINED) return event;
@@ -244,12 +259,18 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (IBAction)terminate:(id)sender
 {
-	if(CFMachPortIsValid(eventTap)) {
-		CFMachPortInvalidate(eventTap);
-		CFRunLoopSourceInvalidate(runLoopSource);
-		CFRelease(eventTap);
-		CFRelease(runLoopSource);
-	}
+    if (eventTap && CFMachPortIsValid(eventTap)) {
+        if (CFMachPortIsValid(eventTap)) {
+            CFMachPortInvalidate(eventTap);
+        }
+        if (runLoopSource) {
+            CFRunLoopSourceInvalidate(runLoopSource);
+            CFRelease(runLoopSource);
+            runLoopSource = nil;
+        }
+        CFRelease(eventTap);
+        eventTap = nil;
+    }
 
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
@@ -399,25 +420,36 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[self setVolumeUp:false];
 }
 
+- (void)checkAccessibilityTrust:(NSTimer *)timer {
+    if (eventTap && ![self isTappingTrusted]) {
+        // NSLog(@"Accessibility permission revoked during runtime. Cleaning up tap.");
+        [self handleEventTapDisabledByUser];
+    }
+}
+
+- (BOOL)isTappingTrusted {
+    // Key must be a CFStringRef (no need to retain/release since it's a constant)
+    const void *keys[]   = { kAXTrustedCheckOptionPrompt };
+    // Value must be a CFBooleanRef
+    const void *values[] = { kCFBooleanFalse };
+    
+    CFDictionaryRef options = CFDictionaryCreate(
+                                                 kCFAllocatorDefault,   // allocator
+                                                 keys,                  // keys
+                                                 values,                // values
+                                                 1,                     // number of keys/values
+                                                 &kCFTypeDictionaryKeyCallBacks,    // standard key callbacks
+                                                 &kCFTypeDictionaryValueCallBacks   // standard value callbacks
+                                                 );
+
+    BOOL trusted = AXIsProcessTrustedWithOptions(options);
+    CFRelease(options);
+
+    return trusted;
+}
+
 - (BOOL)tryCreateEventTap {
-	// Key must be a CFStringRef (no need to retain/release since it's a constant)
-	const void *keys[]   = { kAXTrustedCheckOptionPrompt };
-	// Value must be a CFBooleanRef
-	const void *values[] = { kCFBooleanFalse };
-
-	CFDictionaryRef options = CFDictionaryCreate(
-												 kCFAllocatorDefault,   // allocator
-												 keys,                  // keys
-												 values,                // values
-												 1,                     // number of keys/values
-												 &kCFTypeDictionaryKeyCallBacks,    // standard key callbacks
-												 &kCFTypeDictionaryValueCallBacks   // standard value callbacks
-												 );
-
-	BOOL trusted = AXIsProcessTrustedWithOptions(options);
-	CFRelease(options);
-
-	// BOOL trusted = AXIsProcessTrusted();
+    BOOL trusted = [self isTappingTrusted];
 
 	if (trusted) {
 		if ([self createEventTap]) {
@@ -429,25 +461,70 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (bool)createEventTap
 {
-	if(eventTap != nil && CFMachPortIsValid(eventTap)) {
-		CFMachPortInvalidate(eventTap);
-		CFRunLoopSourceInvalidate(runLoopSource);
-		CFRelease(eventTap);
-		CFRelease(runLoopSource);
-	}
+    if (eventTap != nil && CFMachPortIsValid(eventTap)) {
+        CFMachPortInvalidate(eventTap);
+        CFRunLoopSourceInvalidate(runLoopSource);
+        CFRelease(eventTap);
+        CFRelease(runLoopSource);
+        eventTap = nil;
+        runLoopSource = nil;
+    }
+    
+    CGEventMask eventMask = CGEventMaskBit(NX_SYSDEFINED);
+    eventTap = CGEventTapCreate(kCGSessionEventTap,
+                                kCGHeadInsertEventTap,
+                                kCGEventTapOptionDefault,
+                                eventMask,
+                                event_tap_callback,
+                                (__bridge void *)self);
+    
+    if (eventTap != nil) {
+        runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0);
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
+        
+        // Start safety timer to monitor trust state
+        accessibilityCheckTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
+                                         target:self
+                                       selector:@selector(checkAccessibilityTrust:)
+                                       userInfo:nil
+                                        repeats:YES];
+        
+        return true;
+    } else {
+        return false;
+    }
+}
 
-	CGEventMask eventMask = (/*(1 << kCGEventKeyDown) | (1 << kCGEventKeyUp) |*/CGEventMaskBit(NX_SYSDEFINED));
-	eventTap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
-								eventMask, event_tap_callback, (__bridge void *)self); // Create an event tap. We are interested in SYS key presses.
-
-	if(eventTap != nil)
-	{
-		runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0); // Create a run loop source.
-		CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes); // Add to the current run loop.
-		return true;
-	}
-	else
-		return false;
+- (void)handleEventTapDisabledByUser {
+    if (eventTap && CFMachPortIsValid(eventTap)) {
+        if (CFMachPortIsValid(eventTap)) {
+            CFMachPortInvalidate(eventTap);
+        }
+        if (runLoopSource) {
+            CFRunLoopSourceInvalidate(runLoopSource);
+            CFRelease(runLoopSource);
+            runLoopSource = nil;
+        }
+        CFRelease(eventTap);
+        eventTap = nil;
+    }
+    
+    if (accessibilityCheckTimer) {
+        [accessibilityCheckTimer invalidate];
+        accessibilityCheckTimer = nil;
+    }
+    
+    // Update toggle state to reflect reality
+    [self setTapping:NO];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSAlert *alert = [[NSAlert alloc] init];
+        alert.messageText = @"Accessibility Permission Revoked";
+        alert.informativeText = @"Volume Control has lost permission to monitor keyboard events. "
+                                @"Keyboard input may stop working until you restore permission in "
+                                @"System Settings → Privacy & Security → Accessibility.";
+        [alert runModal];
+    });
 }
 
 -(void) sendMediaKey: (int)key {
@@ -495,10 +572,14 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 				[systemAudio setCurrentVolume:0];
 			}
 
-			if(!_hideVolumeWindow)
-			{}
-			// [[self->OSDManager sharedManager] showImage:OSDGraphicSpeakerMute onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:0 totalChiclets:(unsigned int)100 locked:NO];
-
+            if(!_hideVolumeWindow){
+                if (@available(macOS 16.0, *)) {
+                    // Running on Tahoe (2026) or newer
+                } else {
+                    [[self->OSDManager sharedManager] showImage:OSDGraphicSpeakerMute onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:0 totalChiclets:(unsigned int)100 locked:NO];
+                }
+            }
+			 
 		}
 		else
 		{
@@ -509,9 +590,14 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 			}
 
 			if(!_hideVolumeWindow)
-			{}
-			// [[self->OSDManager sharedManager] showImage:OSDGraphicSpeaker onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)[runningPlayerPtr oldVolume] totalChiclets:(unsigned int)100 locked:NO];
-
+            {
+                if (@available(macOS 16.0, *)) {
+                    // Running on Tahoe (2026) or newer
+                } else {
+                    [[self->OSDManager sharedManager] showImage:OSDGraphicSpeaker onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)[runningPlayerPtr oldVolume] totalChiclets:(unsigned int)100 locked:NO];
+                }
+            }
+            
 			[runningPlayerPtr setOldVolume:-1];
 		}
 
@@ -593,8 +679,12 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	//[[SUUpdater sharedUpdater] setUpdateCheckInterval:60*60*24*7]; // look for new updates every 7 days
 
 	// [self _loadBezelServices]; // El Capitan and probably older systems
-	// [[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/OSD.framework"] load];
-	// self->OSDManager = NSClassFromString(@"OSDManager");
+    if (@available(macOS 16.0, *)) {
+        // Running on Tahoe (2026) or newer
+    } else {
+        [[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/OSD.framework"] load];
+        self->OSDManager = NSClassFromString(@"OSDManager");
+    }
 
 	//[self checkSIPforAppIdentifier:@"com.apple.iTunes" promptIfNeeded:YES];
 	//[self checkSIPforAppIdentifier:@"com.spotify.client" promptIfNeeded:YES];
@@ -885,19 +975,27 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	 */
 }
 
-- (void) setTapping:(bool)enabled
-{
-	NSMenuItem* menuItem=[_statusMenu itemWithTag:TAPPING_ID];
-	[menuItem setState:enabled];
+- (void)setTapping:(bool)enabled {
+    if (eventTap) {
+        CGEventTapEnable(eventTap, enabled);
+    } else if (enabled) {
+        // Try to recreate the tap if it was torn down
+        if (![self createEventTap]) {
+            NSLog(@"[Volume Control] Failed to recreate event tap.");
+            // You could also show an alert here if desired
+            enabled = NO; // fallback
+        }
+    }
+    
+    NSMenuItem *menuItem = [_statusMenu itemWithTag:TAPPING_ID];
+    [menuItem setState:enabled];
 
-	CGEventTapEnable(eventTap, enabled);
+    [[[self statusBar] button] setAppearsDisabled:!enabled];
 
-	[[[self statusBar] button] setAppearsDisabled:!enabled];
+    [preferences setBool:enabled forKey:@"TappingEnabled"];
+    [preferences synchronize];
 
-	[preferences setBool:enabled forKey:@"TappingEnabled"];
-	[preferences synchronize];
-
-	_Tapping=enabled;
+    _Tapping = enabled;
 }
 
 - (IBAction)toggleTapping:(id)sender
@@ -1020,7 +1118,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	if (runningPlayerPtr != nil)
 	{
 		double volume = [runningPlayerPtr currentVolume];
-		NSLog(@"Current volume: %1.2f%%", volume);
+		// NSLog(@"Current volume: %1.2f%%", volume);
 
 		if([runningPlayerPtr oldVolume]<0) // if it was not mute
 		{
@@ -1036,16 +1134,28 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		if (volume<0) volume=0;
 		if (volume>100) volume=100;
 
-		// OSDGraphic image = (volume > 0)? OSDGraphicSpeaker : OSDGraphicSpeakerMute;
-
-		// NSInteger numFullBlks = floor(volume/6.25);
-		// NSInteger numQrtsBlks = round((volume-(double)numFullBlks*6.25)/1.5625);
+        OSDGraphic image;
+        NSInteger numFullBlks;
+        NSInteger numQrtsBlks;
+        
+        if (@available(macOS 16.0, *)) {
+            // Running on Tahoe (2026) or newer
+        } else {
+            image = (volume > 0)? OSDGraphicSpeaker : OSDGraphicSpeakerMute;
+            numFullBlks = floor(volume/6.25);
+            numQrtsBlks = round((volume-(double)numFullBlks*6.25)/1.5625);
+        }
 
 		//NSLog(@"%d %d",(int)numFullBlks,(int)numQrtsBlks);
 
 		if(!_hideVolumeWindow)
-		{}
-		// [[self->OSDManager sharedManager] showImage:image onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)(round(((numFullBlks*4+numQrtsBlks)*1.5625)*100)) totalChiclets:(unsigned int)10000 locked:NO];
+        {
+            if (@available(macOS 16.0, *)) {
+                // Running on Tahoe (2026) or newer
+            } else {
+                [[self->OSDManager sharedManager] showImage:image onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)(round(((numFullBlks*4+numQrtsBlks)*1.5625)*100)) totalChiclets:(unsigned int)10000 locked:NO];
+            }
+        }
 
 		[runningPlayerPtr setCurrentVolume:volume];
 		if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
@@ -1067,7 +1177,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 		[self refreshVolumeBar:(int)volume];
 
-		NSLog(@"New volume: %1.2f%%", [runningPlayerPtr currentVolume]);
+		// NSLog(@"New volume: %1.2f%%", [runningPlayerPtr currentVolume]);
 	}
 }
 

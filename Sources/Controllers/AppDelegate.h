@@ -45,7 +45,7 @@
     
     id currentPlayer;
     
-    // Class OSDManager;
+    Class OSDManager;
     
     NSSound* volumeSound;
     
@@ -63,6 +63,7 @@
     NSTimer* timerImgSpeaker;
     NSTimer* checkPlayerTimer;
     NSTimer* updateSystemVolumeTimer;
+    NSTimer* accessibilityCheckTimer;
     NSTimeInterval waitOverlayPanel;
     bool fadeInAnimationReady;
 }
@@ -122,6 +123,8 @@
 - (void)wasAuthorized;
 
 - (bool)createEventTap;
+
+- (void)handleEventTapDisabledByUser;
 
 @end
 
