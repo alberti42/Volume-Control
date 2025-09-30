@@ -168,9 +168,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 - (double) currentVolume
 {
-    AppDelegate *app = (AppDelegate *)NSApp.delegate;
-    
-	double vol = [musicPlayer soundVolume];
+    double vol = [musicPlayer soundVolume];
 
     if (fabs(vol-[self doubleVolume])<1)
 	{
