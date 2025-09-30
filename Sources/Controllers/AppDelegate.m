@@ -33,16 +33,28 @@ void handleSIGTERM(int sig) {
 
 CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
+    // Keep track of how many consecutive timeouts we’ve seen.
+    // macOS fires kCGEventTapDisabledByTimeout when it thinks the tap is “hung”
+    // (e.g. if the app is suspended by TCC while showing an Apple Events dialog).
+    // We auto-resume a few times, then give up and alert the user if it persists.
+    static int timeout_count = 0;
+    
     if (type == kCGEventTapDisabledByTimeout) {
-        AppDelegate *app = (__bridge AppDelegate *)refcon;
-        if (app.isSendingAppleEvent) {
-            // False positive timeout caused by TCC
-            NSLog(@"[Volume Control] Tap disabled during AppleEvent/TCC dialog → restarting tap.");
+        if (timeout_count < 5) {
+            // Try to resume tapping automatically.
+            // This handles “false positives” that occur when macOS temporarily
+            // suspends the app for Apple Events permission prompts.
+            AppDelegate *app = (__bridge AppDelegate *)refcon;
             dispatch_async(dispatch_get_main_queue(), ^{
-                [app setTapping:YES]; // try to resume
+                [app setTapping:YES]; // attempt to re-enable tap
             });
+            
+            timeout_count++;
         } else {
-            // Real unresponsiveness
+            // After 5 consecutive timeouts, assume it’s a real problem
+            // (e.g. the tap logic is genuinely unresponsive).
+            // Disable tapping and inform the user instead of looping forever.
+            timeout_count = 0; // reset counter for next time
             dispatch_async(dispatch_get_main_queue(), ^{
                 AppDelegate *app = (__bridge AppDelegate *)refcon;
                 [app setTapping:NO];
@@ -50,7 +62,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
                 NSAlert *alert = [[NSAlert alloc] init];
                 alert.messageText = @"Tapping Disabled";
                 alert.informativeText = @"Volume Control lost its ability to monitor volume keys because it became unresponsive. "
-                @"Tapping has been turned off. You can re-enable it from the menu.";
+                                        @"Tapping has been turned off. You can re-enable it from the menu.";
                 
                 [alert addButtonWithTitle:@"OK"];
                 [alert addButtonWithTitle:@"Report Issue on GitHub"];
@@ -61,8 +73,8 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
                                                             @"https://github.com/alberti42/Volume-Control/issues"]];
                 }
             });
-            return event; // always return quickly
         }
+        return event; // always return quickly so system input isn’t blocked
     }
 
     // Pass through events we don't care about
@@ -157,13 +169,10 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 - (double) currentVolume
 {
     AppDelegate *app = (AppDelegate *)NSApp.delegate;
-    app.isSendingAppleEvent = YES;
     
 	double vol = [musicPlayer soundVolume];
 
-    app.isSendingAppleEvent = NO;
-    
-	if (fabs(vol-[self doubleVolume])<1)
+    if (fabs(vol-[self doubleVolume])<1)
 	{
 		vol = [self doubleVolume];
 	}

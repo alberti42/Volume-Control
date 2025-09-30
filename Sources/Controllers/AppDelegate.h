@@ -76,8 +76,6 @@
 
 @property (nonatomic, strong) NSStatusItem *statusBar;
 
-@property (atomic, assign) BOOL isSendingAppleEvent;
-
 @property (assign, nonatomic) NSInteger volumeInc;
 @property (assign, nonatomic) bool AppleRemoteConnected;
 @property (assign, nonatomic) bool StartAtLogin;
