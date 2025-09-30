@@ -2,7 +2,7 @@
 
 ♫ **Control the volume of Apple Music, Spotify, and Doppler using your keyboard — seamlessly.**
 
-> 🚀 Now compatible with macOS Tahoe (supports Ventura and newer).
+> 🚀 Now compatible with macOS Tahoe (supports Ventura and newer).<br>
 > ✅ Fully notarized — no workarounds required to install.
 
 This app is the spiritual successor to _iTunes Volume Control_, offering a simple yet powerful way to adjust volume for your favorite music apps directly from your keyboard — especially when listening via AirPlay or external speakers.
