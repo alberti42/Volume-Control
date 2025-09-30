@@ -1,13 +1,47 @@
 <?xml version="1.0" standalone="yes"?>
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
-<channel>
-<title>Volume Control for MacOS</title>
-<link>https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControlCast.xml</link>
-<description>Most recent changes with links to updates.</description>
-<language>en</language>
-<item>
-    <title>Version 1.7.7</title>
-    <description><![CDATA[
+    <channel>
+        <title>Volume Control for MacOS</title>
+        <link>https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControlCast.xml</link>
+        <description>Most recent changes with links to updates.</description>
+        <language>en</language>
+        <item>
+            <title>2.0.0</title>
+            <pubDate>Tue, 30 Sep 2025 14:15:52 +0200</pubDate>
+            <sparkle:version>192</sparkle:version>
+            <sparkle:shortVersionString>2.0.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.5</sparkle:minimumSystemVersion>
+            <enclosure url="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.0.zip" length="7681818" type="application/octet-stream" sparkle:edSignature="iSJWuW41JzNBWcm/Q9bein1KtrSM8Y/I/bIfs+NVnNQkzwJGkpNIrM/0X7MnvXKBtr4i34Rssgoq7xawAMMPDw==" sparkle:dsaSignature="MC4CFQC7NJ0t8cELQJsNmx2k5y43TWCTYAIVAJCch0SAcH+Ydf5RDr262VBeEAml"/>
+			<description><![CDATA[
+			<h2>Version 2.0.0 (Tahoe compatible &amp; notarized)</h2>
+
+			<p style="color:red; font-weight:bold;">
+			⚠️ Important: This release introduces a new bundle identifier and is now notarized by Apple.
+			We strongly recommend downloading and installing a fresh copy directly from:
+			<a href="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip">
+			https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip
+			</a>
+			This ensures a smooth transition. Future updates will then work automatically.
+			</p>
+
+			<h3>New features</h3>
+			<ul>
+			    <li>Now fully compatible with macOS Tahoe (supports systems from macOS Ventura onward).</li>
+			    <li>Numerous under-the-hood improvements: removed deprecated APIs and improved robustness.</li>
+			    <li>Now fully <strong>notarized by Apple</strong> — no more workarounds required to install or run the app.</li>
+			    <li>HUD for volume indication has been removed on Tahoe (a replacement may return in a future update).</li>
+			</ul>
+
+			<h3>Bug fixes</h3>
+			<ul>
+			    <li>Correct handling of volume key events from the MacBook Pro Touch Bar.</li>
+			    <li>System volume can now be muted completely (previously “0” was not truly silent).</li>
+			</ul>
+			]]></description>
+        </item>
+        <item>
+            <title>Version 1.7.7</title>
+            <description><![CDATA[
     <h1>Version 1.7.7</h1>
     <h2>New feature</h2>
     <ul>
@@ -208,15 +242,15 @@
 		<li>Other minor bug fixes.</li>
 	</ul>
 ]]></description>
-    <pubDate>Sun, 13 Apr 2025 16:08:45 +0200</pubDate>
-    <sparkle:version>1.7.7.111</sparkle:version>
-    <sparkle:shortVersionString>1.7.7</sparkle:shortVersionString>
-    <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
-    <enclosure url="VolumeControl-v1.7.7.zip" length="5916769" type="application/octet-stream" sparkle:edSignature="mwWjICQxVG8JhSYD1MEVpVPaqT42V1ioTM1d2NUG2TJdv+rxvRRGuKKT2OHbS1iig3B0uSGH5fATV58xdLgVCA==" sparkle:dsaSignature="MCwCFCfmqoazVxtrPdfSJBTtUJEb7SedAhQ+3ZMvo/wxESBfuvhY7CETBcVIKg=="/>
-</item>
-<item>
-    <title>Version 1.7.6</title>
-	<description><![CDATA[
+            <pubDate>Sun, 13 Apr 2025 16:08:45 +0200</pubDate>
+            <sparkle:version>1.7.7.111</sparkle:version>
+            <sparkle:shortVersionString>1.7.7</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <enclosure url="VolumeControl-v1.7.7.zip" length="5916769" type="application/octet-stream" sparkle:edSignature="mwWjICQxVG8JhSYD1MEVpVPaqT42V1ioTM1d2NUG2TJdv+rxvRRGuKKT2OHbS1iig3B0uSGH5fATV58xdLgVCA==" sparkle:dsaSignature="MCwCFCfmqoazVxtrPdfSJBTtUJEb7SedAhQ+3ZMvo/wxESBfuvhY7CETBcVIKg=="/>
+        </item>
+        <item>
+            <title>Version 1.7.6</title>
+            <description><![CDATA[
 	<h1>Version 1.7.6</h1>
 	<h2>Fixed a couple of minor bugs</h2>
 	<ul>
@@ -408,16 +442,15 @@
 		<li>Other minor bug fixes.</li>
 	</ul>
 ]]></description>
-  <pubDate>Sun, 27 Oct 2024 17:31:02 +0100</pubDate>
-  <sparkle:version>1.7.6.110</sparkle:version>
-  <sparkle:shortVersionString>1.7.6</sparkle:shortVersionString>
-  <sparkle:minimumSystemVersion>10.14</sparkle:minimumSystemVersion>
-  <enclosure url="VolumeControl-v1.7.6.zip" length="3693388" type="application/octet-stream" sparkle:edSignature="WdNNp/xySyWgH8xh8J+p9OVBSZEOQK+b0cyjB9VrxvuXJ7CjngdzmEIyQfxIqOt+TtKorCW+6jqUCOVPcCIaCw==" sparkle:dsaSignature="MC4CFQCoSpOlSLoUe6pDgsVwUbTzdbxglQIVAIXMjID7SV8xfzMij2vnSfLKjCTh"/>
-</item>    
-
-<item>
-	<title>Version 1.7.4 (support for Doppler Music Player)</title>
-	<description><![CDATA[
+            <pubDate>Sun, 27 Oct 2024 17:31:02 +0100</pubDate>
+            <sparkle:version>1.7.6.110</sparkle:version>
+            <sparkle:shortVersionString>1.7.6</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>10.14</sparkle:minimumSystemVersion>
+            <enclosure url="VolumeControl-v1.7.6.zip" length="3693388" type="application/octet-stream" sparkle:edSignature="WdNNp/xySyWgH8xh8J+p9OVBSZEOQK+b0cyjB9VrxvuXJ7CjngdzmEIyQfxIqOt+TtKorCW+6jqUCOVPcCIaCw==" sparkle:dsaSignature="MC4CFQCoSpOlSLoUe6pDgsVwUbTzdbxglQIVAIXMjID7SV8xfzMij2vnSfLKjCTh"/>
+        </item>
+        <item>
+            <title>Version 1.7.4 (support for Doppler Music Player)</title>
+            <description><![CDATA[
 	<h1>Version 1.7.4</h1>
 	<h2>Added support for Doppler app</h2>
 	<ul>
@@ -603,16 +636,15 @@
 		<li>Other minor bug fixes.</li>
 	</ul>
 ]]></description>
-    <pubDate>Sun, 25 Sep 2022 18:28:48 +0200</pubDate>
-    <sparkle:version>1.7.4.99</sparkle:version>
-    <sparkle:shortVersionString>1.7.4</sparkle:shortVersionString>
-    <sparkle:minimumSystemVersion>10.14</sparkle:minimumSystemVersion>
-    <enclosure url="VolumeControl-v1.7.4.zip" length="3733035" type="application/octet-stream" sparkle:edSignature="AvihQ0OHKFvfwRGJv+hhcdrxGoabvKJbvkTTw+khfc91uf6eNCwBs2BOtWk0kMr8BQTmYGG8wl+HINYGTzsIAQ==" sparkle:dsaSignature="MC0CFHJF8mFrGYc37yiM1YG1EEWZFxU/AhUAtYGZvT/ea/EjMfXxgmtz86vD1/c="/>
-</item>
-
-<item>
-	<title>Version 1.7.3 (bug fix)</title>
-	<description><![CDATA[
+            <pubDate>Sun, 25 Sep 2022 18:28:48 +0200</pubDate>
+            <sparkle:version>1.7.4.99</sparkle:version>
+            <sparkle:shortVersionString>1.7.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>10.14</sparkle:minimumSystemVersion>
+            <enclosure url="VolumeControl-v1.7.4.zip" length="3733035" type="application/octet-stream" sparkle:edSignature="AvihQ0OHKFvfwRGJv+hhcdrxGoabvKJbvkTTw+khfc91uf6eNCwBs2BOtWk0kMr8BQTmYGG8wl+HINYGTzsIAQ==" sparkle:dsaSignature="MC0CFHJF8mFrGYc37yiM1YG1EEWZFxU/AhUAtYGZvT/ea/EjMfXxgmtz86vD1/c="/>
+        </item>
+        <item>
+            <title>Version 1.7.3 (bug fix)</title>
+            <description><![CDATA[
 	<h1>Version 1.7.3</h1>
 	<h2>More responsive acoustic feedback</h2>
 	<ul>
@@ -793,16 +825,15 @@
 		<li>Other minor bug fixes.</li>
 	</ul>
 ]]></description>
-    <pubDate>Fri, 31 Dec 2021 17:30:38 +0100</pubDate>
-    <sparkle:version>1.7.3.65</sparkle:version>
-    <sparkle:shortVersionString>1.7.3</sparkle:shortVersionString>
-    <sparkle:minimumSystemVersion>10.14</sparkle:minimumSystemVersion>
-    <enclosure url="VolumeControl-v1.7.3.zip" length="3700292" type="application/octet-stream" sparkle:edSignature="V/iNvOVEEvX6/RyyIbh7Mzfy0dSK/zP4Amtxb3lg8Pu/GiYa37B3paxdZCFrpvyDahXuSYbC1RznlDxUHxfJCw==" sparkle:dsaSignature="MCwCFHxOSNloXqoktMtk2HrGH0Zs6VELAhRX3xN42X0SaOCXLrzqZKzOpiyL8Q=="/>
-</item>
-
-<item>
-<title>Version 1.7.2 (bug fixes)</title>
-<description><![CDATA[
+            <pubDate>Fri, 31 Dec 2021 17:30:38 +0100</pubDate>
+            <sparkle:version>1.7.3.65</sparkle:version>
+            <sparkle:shortVersionString>1.7.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>10.14</sparkle:minimumSystemVersion>
+            <enclosure url="VolumeControl-v1.7.3.zip" length="3700292" type="application/octet-stream" sparkle:edSignature="V/iNvOVEEvX6/RyyIbh7Mzfy0dSK/zP4Amtxb3lg8Pu/GiYa37B3paxdZCFrpvyDahXuSYbC1RznlDxUHxfJCw==" sparkle:dsaSignature="MCwCFHxOSNloXqoktMtk2HrGH0Zs6VELAhRX3xN42X0SaOCXLrzqZKzOpiyL8Q=="/>
+        </item>
+        <item>
+            <title>Version 1.7.2 (bug fixes)</title>
+            <description><![CDATA[
 	<h1>Version 1.7.2</h1>
 	<h2>Improved visualizaton of icon in menu bar</h2>
 	<ul>
@@ -977,20 +1008,14 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Wed, 29 Dec 2021 16:54:00 +0100</pubDate>
-<sparkle:minimumSystemVersion>10.15</sparkle:minimumSystemVersion>
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.7.2.zip"
-				sparkle:dsaSignature="MCwCFEWt68oAsSpF/MsFdpojwqCDh48bAhRb9CIQQcxX5/usGlnIT3jRBYvnjQ=="
-			  sparkle:version="1.7.2"
-				length="3373909"
-			  type="application/octet-stream" />
-</item>
-
-<item>
-<title>Version 1.7.0 (1 improvement; 1 bug fix)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Wed, 29 Dec 2021 16:54:00 +0100</pubDate>
+            <sparkle:minimumSystemVersion>10.15</sparkle:minimumSystemVersion>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.7.2.zip" sparkle:dsaSignature="MCwCFEWt68oAsSpF/MsFdpojwqCDh48bAhRb9CIQQcxX5/usGlnIT3jRBYvnjQ==" sparkle:version="1.7.2" length="3373909" type="application/octet-stream"/>
+        </item>
+        <item>
+            <title>Version 1.7.0 (1 improvement; 1 bug fix)</title>
+            <description><![CDATA[
 	<h1>Version 1.7.0</h1>
 	<h2>Changed named to Volume Control</h2>
 	<ul>
@@ -1157,21 +1182,14 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Sun, 20 Jun 2021 19:21:00 +0100</pubDate>
-<sparkle:minimumSystemVersion>10.9</sparkle:minimumSystemVersion>
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.7.0.pkg.zip"
-				sparkle:dsaSignature="MCwCFAK1+mBnKrJehy9cRAUetvytwocXAhR0NtIVrX9inid66z0dQR4/Y/EmsQ=="
-			  sparkle:version="1.7.0"
-				length="4614380"
-			  type="application/octet-stream" />
-</item>
-
-
-<item>
-<title>Version 1.6.8 (1 improvement; 1 bug fix)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Sun, 20 Jun 2021 19:21:00 +0100</pubDate>
+            <sparkle:minimumSystemVersion>10.9</sparkle:minimumSystemVersion>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.7.0.pkg.zip" sparkle:dsaSignature="MCwCFAK1+mBnKrJehy9cRAUetvytwocXAhR0NtIVrX9inid66z0dQR4/Y/EmsQ==" sparkle:version="1.7.0" length="4614380" type="application/octet-stream"/>
+        </item>
+        <item>
+            <title>Version 1.6.8 (1 improvement; 1 bug fix)</title>
+            <description><![CDATA[
 	<h1>Version 1.6.8</h1>
 	<h2>1 improvement; 1 bug fix; 1 discontinued feature</h2>
 	<ul>
@@ -1330,23 +1348,14 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Sun, 26 Apr 2020 19:21:00 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.8.zip"
-				sparkle:dsaSignature="MC0CFGR00lYIAT7nzVebgITWyder2A/jAhUAuoiA8I/vObc7OPV8IWRm9wQO6gc="
-			  sparkle:version="1.6.8"
-				length="1919137"
-			  type="application/zip" />
-<sparkle:minimumSystemVersion>10.9</sparkle:minimumSystemVersion>
-</item>
-
-
-
-<item>
-<title>Version 1.6.7 (1 improvement)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Sun, 26 Apr 2020 19:21:00 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.8.zip" sparkle:dsaSignature="MC0CFGR00lYIAT7nzVebgITWyder2A/jAhUAuoiA8I/vObc7OPV8IWRm9wQO6gc=" sparkle:version="1.6.8" length="1919137" type="application/zip"/>
+            <sparkle:minimumSystemVersion>10.9</sparkle:minimumSystemVersion>
+        </item>
+        <item>
+            <title>Version 1.6.7 (1 improvement)</title>
+            <description><![CDATA[
 	<h1>Version 1.6.7</h1>
 	<h2>Catalina compatibility:</h2>
 	<ul>
@@ -1498,22 +1507,13 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Sun, 13 Oct 2019 00:57:00 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.7.zip"
-				sparkle:dsaSignature="MC0CFQCj+zU/wchBO0lpO2kjcF9WWnSHZAIUKSneK+f+psMurrrwfCsHq5955zI="
-			  sparkle:version="1.6.7"
-				length="1948858"
-			  type="application/zip" />
-</item>
-
-
-
-<item>
-<title>Version 1.6.6 (1 improvement)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Sun, 13 Oct 2019 00:57:00 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.7.zip" sparkle:dsaSignature="MC0CFQCj+zU/wchBO0lpO2kjcF9WWnSHZAIUKSneK+f+psMurrrwfCsHq5955zI=" sparkle:version="1.6.7" length="1948858" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.6.6 (1 improvement)</title>
+            <description><![CDATA[
 	<h1>Version 1.6.6</h1>
 	<h2>Important notifications:</h2>
 	<ul>
@@ -1660,21 +1660,13 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Sun, 09 Jun 2019 17:45:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.6.zip"
-				sparkle:dsaSignature="MC0CFALN5x5WtUcerwpVPudWWZjZMxh9AhUAxcZzsSWmXTiebaRs+5C3g6i/8As="
-			  sparkle:version="1.6.6"
-				length="1974828"
-			  type="application/zip" />
-</item>
-
-
-<item>
-<title>Version 1.6.5 (1 bug fix)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Sun, 09 Jun 2019 17:45:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.6.zip" sparkle:dsaSignature="MC0CFALN5x5WtUcerwpVPudWWZjZMxh9AhUAxcZzsSWmXTiebaRs+5C3g6i/8As=" sparkle:version="1.6.6" length="1974828" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.6.5 (1 bug fix)</title>
+            <description><![CDATA[
 	<h1>Version 1.6.5</h1>
 	<h2>Important notifications:</h2>
 	<ul>
@@ -1812,21 +1804,13 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Sun, 09 Jun 2019 17:45:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.5.zip"
-				sparkle:dsaSignature="MC0CFQCUil+gd+yOylAtrUs36Aqcpd3+dgIUY2wU28OFsmuQMEotD/oP4Zghsa0="
-			  sparkle:version="1.6.5"
-				length="1976302"
-			  type="application/zip" />
-</item>
-
-
-<item>
-<title>Version 1.6.4 (1 bug fix)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Sun, 09 Jun 2019 17:45:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.5.zip" sparkle:dsaSignature="MC0CFQCUil+gd+yOylAtrUs36Aqcpd3+dgIUY2wU28OFsmuQMEotD/oP4Zghsa0=" sparkle:version="1.6.5" length="1976302" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.6.4 (1 bug fix)</title>
+            <description><![CDATA[
 	<h1>Version 1.6.4</h1>
 	<h2>Important notifications:</h2>
 	<ul>
@@ -1955,22 +1939,13 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Sun, 09 Jun 2019 17:45:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.4.zip"
-				sparkle:dsaSignature="MCwCFGQebMPxz0ZsUYKtrTujK/JDgw6HAhQkjF2CeKGovz/E5f9LbFyQDvTbKA=="
-			  sparkle:version="1.6.4"
-				length="1993988"
-			  type="application/zip" />
-</item>
-
-
-
-<item>
-<title>Version 1.6.3.1 (1 bug fix)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Sun, 09 Jun 2019 17:45:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.4.zip" sparkle:dsaSignature="MCwCFGQebMPxz0ZsUYKtrTujK/JDgw6HAhQkjF2CeKGovz/E5f9LbFyQDvTbKA==" sparkle:version="1.6.4" length="1993988" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.6.3.1 (1 bug fix)</title>
+            <description><![CDATA[
 	<h1>Version 1.6.3.1</h1>
 	<h2>Important notifications:</h2>
 	<ul>
@@ -2098,21 +2073,13 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Sun, 09 Jun 2019 17:45:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.3.1.zip"
-				sparkle:dsaSignature="MCwCFAXNiEglK7uTI3B8InDdYcxB147UAhRH3kLcuAQD4ExLVRUjxu1kCShpwA=="
-			  sparkle:version="1.6.3.1"
-				length="3602080"
-			  type="application/zip" />
-</item>
-
-
-<item>
-<title>Version 1.6.3 (1 bug fix, 1 improvement)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Sun, 09 Jun 2019 17:45:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.3.1.zip" sparkle:dsaSignature="MCwCFAXNiEglK7uTI3B8InDdYcxB147UAhRH3kLcuAQD4ExLVRUjxu1kCShpwA==" sparkle:version="1.6.3.1" length="3602080" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.6.3 (1 bug fix, 1 improvement)</title>
+            <description><![CDATA[
 	<h1>Version 1.6.3</h1>
 	<h2>Important notifications:</h2>
 	<ul>
@@ -2241,21 +2208,13 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Sun, 09 Jun 2019 17:45:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.3.zip"
-				sparkle:dsaSignature="MC0CFHh972/Jbk/JLqWB+6VM7aMRfFS7AhUArnj5YLNjIZjM37Iq1474iVu+qGI="
-			  sparkle:version="1.6.3"
-				length="3601834"
-			  type="application/zip" />
-</item>
-
-
-<item>
-<title>Version 1.6.2 (1 bug fix)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Sun, 09 Jun 2019 17:45:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.3.zip" sparkle:dsaSignature="MC0CFHh972/Jbk/JLqWB+6VM7aMRfFS7AhUArnj5YLNjIZjM37Iq1474iVu+qGI=" sparkle:version="1.6.3" length="3601834" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.6.2 (1 bug fix)</title>
+            <description><![CDATA[
 	<h1>Version 1.6.2</h1>
 	<h2>Important notifications:</h2>
 	<ul>
@@ -2373,21 +2332,13 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Fri, 07 Jun 2019 23:12:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.2.zip"
-				sparkle:dsaSignature="MCwCFE+tpgP9aFhH8P8H0q8m08A/28vzAhR/5ouap58VZMCAAr9VyQPSIJc/Kg=="
-			  sparkle:version="1.6.2"
-				length="3426451"
-			  type="application/zip" />
-</item>
-
-
-<item>
-<title>Version 1.6.1 (1 improvement)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Fri, 07 Jun 2019 23:12:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.2.zip" sparkle:dsaSignature="MCwCFE+tpgP9aFhH8P8H0q8m08A/28vzAhR/5ouap58VZMCAAr9VyQPSIJc/Kg==" sparkle:version="1.6.2" length="3426451" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.6.1 (1 improvement)</title>
+            <description><![CDATA[
 	<h1>Version 1.6.1</h1>
 	<h2>Important notifications:</h2>
 	<ul>
@@ -2495,21 +2446,13 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Wed, 05 Jun 2019 23:12:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.1.zip"
-				sparkle:dsaSignature="MC0CFHHK6TDvH2v/3/OWc+M02CzlLU0XAhUAwCBQKqz/poycWQtPbnNPVli2UvM="
-			  sparkle:version="1.6.1"
-				length="3426489"
-			  type="application/zip" />
-</item>
-
-
-<item>
-<title>Version 1.6.0 (2 new features)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Wed, 05 Jun 2019 23:12:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.1.zip" sparkle:dsaSignature="MC0CFHHK6TDvH2v/3/OWc+M02CzlLU0XAhUAwCBQKqz/poycWQtPbnNPVli2UvM=" sparkle:version="1.6.1" length="3426489" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.6.0 (2 new features)</title>
+            <description><![CDATA[
 	<h1>Version 1.6.0</h1>
 	<h2>Important notifications:</h2>
 	<ul>
@@ -2607,20 +2550,13 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-]]>
-    </description>
-<pubDate>Tue, 04 Jun 2019 23:12:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.0.zip"
-				sparkle:dsaSignature="MC0CFCLUFMXdqcYxKImcf44qUF+RSP3aAhUAxkELjOm094EuznFqahLzxxwJwBA="
-			  sparkle:version="1.6.0"
-				length="3426532"
-			  type="application/zip" />
-</item>
-
-<item>
-<title>Version 1.5.1 (1 extra feature)</title>
-<description><![CDATA[
+]]></description>
+            <pubDate>Tue, 04 Jun 2019 23:12:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.6.0.zip" sparkle:dsaSignature="MC0CFCLUFMXdqcYxKImcf44qUF+RSP3aAhUAxkELjOm094EuznFqahLzxxwJwBA=" sparkle:version="1.6.0" length="3426532" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.5.1 (1 extra feature)</title>
+            <description><![CDATA[
 <h1>Version 1.5.1</h1>
 <h2>Back compatibility</h2>
 <ul>
@@ -2696,20 +2632,13 @@
 	<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 	<li>Other minor bug fixes.</li>
 </ul>
-    ]]>
-    </description>
-<pubDate>Sun, 21 Nov 2014 19:20:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.5.1.zip"
-				sparkle:dsaSignature="MC0CFFRVqiOVlPoTGAmGtm+XfcGsSuRyAhUAyIovyevWJOPgoelzCsRH7pzoiUs="
-			  sparkle:version="1.5.1"
-				length="1284946"
-			  type="application/zip" />
-</item>
-
-<item>
-<title>Version 1.5 (2 bug fixes, 2 extra features, 1 missing feature)</title>
-<description><![CDATA[
+    ]]></description>
+            <pubDate>Sun, 21 Nov 2014 19:20:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.5.1.zip" sparkle:dsaSignature="MC0CFFRVqiOVlPoTGAmGtm+XfcGsSuRyAhUAyIovyevWJOPgoelzCsRH7pzoiUs=" sparkle:version="1.5.1" length="1284946" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.5 (2 bug fixes, 2 extra features, 1 missing feature)</title>
+            <description><![CDATA[
 <h1>Version 1.5</h1>
 <h2>New features</h2>
 <li>Support dark and light theme in Yosemite.</li>
@@ -2780,155 +2709,103 @@
 	<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 	<li>Other minor bug fixes.</li>
 </ul>
-    ]]>
-    </description>
-<pubDate>Sun, 10 Nov 2014 19:20:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.5.zip"
-				sparkle:dsaSignature="MCwCFHtLtKu54/QvzLP/KgN6msk2Xj2/AhRVCwFSRLwINmckLsn3ml/7Lm9fWQ=="
-			  sparkle:version="1.5"
-				length="1379104"
-			  type="application/zip" />
-</item>
-
-<item>
-<title>Version 1.4.10 (1 small bug fix)</title>
-<description><![CDATA[
+    ]]></description>
+            <pubDate>Sun, 10 Nov 2014 19:20:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.5.zip" sparkle:dsaSignature="MCwCFHtLtKu54/QvzLP/KgN6msk2Xj2/AhRVCwFSRLwINmckLsn3ml/7Lm9fWQ==" sparkle:version="1.5" length="1379104" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.4.10 (1 small bug fix)</title>
+            <description><![CDATA[
 <h1>Version 1.4.10</h1>
 <h2>Bug fixes</h2>
 <li>Fixed problem at startup when the app is not responding.</li>
 <li>Fixed problem with position of the volume indicator on the screen after changing the display resolution.</li>
 <li>Repositioned the volume indicator in the new position of Yosemite. This breaks compatibility with Mavericks.</li>
-    ]]>
-    </description>
-<pubDate>Sun, 26 Oct 2014 17:20:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.4.10.zip"
-				sparkle:dsaSignature="MCwCFGMrrz+bSSX9uOSnXZJkrTcHCwT3AhQWHfphUUMSnKxNdAyZarl/wWWBPA=="
-			  sparkle:version="1.4.10"
-				length="1381647"
-			  type="application/zip" />
-</item>
-
-
-<item>
-<title>Version 1.4.9 (1 small bug fix)</title>
-<description><![CDATA[
+    ]]></description>
+            <pubDate>Sun, 26 Oct 2014 17:20:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.4.10.zip" sparkle:dsaSignature="MCwCFGMrrz+bSSX9uOSnXZJkrTcHCwT3AhQWHfphUUMSnKxNdAyZarl/wWWBPA==" sparkle:version="1.4.10" length="1381647" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.4.9 (1 small bug fix)</title>
+            <description><![CDATA[
 <h2>Fixed permament highlight in statusbar</h2>
 <ul>
 	<li>Removed bug when the icon in the status bar reimained always highlighted after clicking.</li>
 </ul>
-    ]]>
-    </description>
-<pubDate>Sat, 25 Oct 2014 17:17:30 +0100</pubDate>
-
-<enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.4.9.zip"
-				sparkle:dsaSignature="MC0CFQDMNqJrLogt+q7ewweqkyC513QnqwIUSlpq05td/w/DY73xco0OmTxCoQ0="
-			  sparkle:version="1.4.9"
-				length="1390494"
-			  type="application/zip" />
-</item>
-
-<item>
-<title>Version 1.4.8 (1 new security improvement)</title>
-<description><![CDATA[
+    ]]></description>
+            <pubDate>Sat, 25 Oct 2014 17:17:30 +0100</pubDate>
+            <enclosure url="http://quantum-technologies.iap.uni-bonn.de/alberti/iTunesVolumeControl/iTunesVolumeControl-v1.4.9.zip" sparkle:dsaSignature="MC0CFQDMNqJrLogt+q7ewweqkyC513QnqwIUSlpq05td/w/DY73xco0OmTxCoQ0=" sparkle:version="1.4.9" length="1390494" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.4.8 (1 new security improvement)</title>
+            <description><![CDATA[
 <h2>Security improvements</h2>
 <ul>
 	<li>Next updates will be signed with DSA (digital signature algorithm).</li>
 </ul>
-    ]]>
-    </description>
-<pubDate>Sun, 15 Dec 2013 16:49:30 +0100</pubDate>
-
-<enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.8.zip"
-			  sparkle:version="1.4.8"
-				length="591036"
-			  type="application/zip" />
-</item>
-<item>
-<title>Version 1.4.7 (1 new feature)</title>
-<description><![CDATA[
+    ]]></description>
+            <pubDate>Sun, 15 Dec 2013 16:49:30 +0100</pubDate>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.8.zip" sparkle:version="1.4.8" length="591036" type="application/zip"/>
+        </item>
+        <item>
+            <title>Version 1.4.7 (1 new feature)</title>
+            <description><![CDATA[
 <h2>New features</h2>
 <ul>
 	<li>Icons and graphical interface are now compatible with retina displays.</li>
 </ul>
-    ]]>
-    </description>
-<pubDate>Sun, 15 Dec 2013 00:37:59 +0100</pubDate>
-
-<enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.7.zip"
-			  sparkle:version="1.4.7"
-			  length="1422123"
-			  type="application/octet-stream" />
-</item>
-<item>
-<title>Version 1.4.6 (1 new feature)</title>
-<description><![CDATA[
+    ]]></description>
+            <pubDate>Sun, 15 Dec 2013 00:37:59 +0100</pubDate>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.7.zip" sparkle:version="1.4.7" length="1422123" type="application/octet-stream"/>
+        </item>
+        <item>
+            <title>Version 1.4.6 (1 new feature)</title>
+            <description><![CDATA[
 <h2>New features</h2>
 <ul>
 	<li>Added the option to hide the icon from status bar, which can be convenient when many icons are already present. The icon reappears temporarily (for 10 seconds) by simply restarting the application. This gives the time to change the hide behavior as desired. The credits must go to Thomas Heß.</li>
 </ul>
-    ]]>
-    </description>
-<pubDate>Tue, 23 Jul 2013 23:45:32 +0100</pubDate>
-
-<enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.6.zip"
-			  sparkle:version="1.4.6"
-			  length="505722"
-			  type="application/octet-stream" />
-</item>
-<item>
-<title>Version 1.4.5 (1 new feature)</title>
-<description><![CDATA[
+    ]]></description>
+            <pubDate>Tue, 23 Jul 2013 23:45:32 +0100</pubDate>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.6.zip" sparkle:version="1.4.6" length="505722" type="application/octet-stream"/>
+        </item>
+        <item>
+            <title>Version 1.4.5 (1 new feature)</title>
+            <description><![CDATA[
 <h2>New feature</h2>
 <ul>
 	<li>Added the option to enable/disable automatic updates occurring once a week.</li>
 </ul>
-    ]]>
-    </description>
-<pubDate>Sun, 20 Jul 2013 18:17:32 +0100</pubDate>
-
-<enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.5.zip"
-			  sparkle:version="1.4.5"
-			  length="502603"
-			  type="application/octet-stream" />
-</item>
-<item>
-<title>Version 1.4.4 (2 bugs fixed)</title>
-<description><![CDATA[
+    ]]></description>
+            <pubDate>Sun, 20 Jul 2013 18:17:32 +0100</pubDate>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.5.zip" sparkle:version="1.4.5" length="502603" type="application/octet-stream"/>
+        </item>
+        <item>
+            <title>Version 1.4.4 (2 bugs fixed)</title>
+            <description><![CDATA[
 <h2>Bug Fixes</h2>
 <ul>
 	<li>The window focus remains on the currently active application after changing iTunes' volume setting.</li>
 	<li>The cap lock does not prevent anymore iTunes' volume to be changed.</li>
 </ul>
-    ]]>
-    </description>
-<pubDate>Sun, 14 Jul 2013 20:43:12 +0100</pubDate>
-
-<enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.4.zip"
-			  sparkle:version="1.4.4"
-			  length="501988"
-			  type="application/octet-stream" />
-</item>
-<item>
-<title>Version 1.4.3 (1 bug fixed)</title>
-<description><![CDATA[
+    ]]></description>
+            <pubDate>Sun, 14 Jul 2013 20:43:12 +0100</pubDate>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.4.zip" sparkle:version="1.4.4" length="501988" type="application/octet-stream"/>
+        </item>
+        <item>
+            <title>Version 1.4.3 (1 bug fixed)</title>
+            <description><![CDATA[
 <h2>Bug Fixes</h2>
 <ul>
 	<li>Properly hide transparent panels when animations are completed (thanks to Justin Kerr Sheckler).</li>
 </ul>
-    ]]>
-    </description>
-<pubDate>Mon, 20 May 2013 01:07:30 +0100</pubDate>
-
-<enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.3.zip"
-			  sparkle:version="1.4.3"
-			  length="502054"
-			  type="application/octet-stream" />
-</item>
-<item>
-<title>Version 1.4.2 (1 bug fixed; 1 new feature)</title>
-<description><![CDATA[
+    ]]></description>
+            <pubDate>Mon, 20 May 2013 01:07:30 +0100</pubDate>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.3.zip" sparkle:version="1.4.3" length="502054" type="application/octet-stream"/>
+        </item>
+        <item>
+            <title>Version 1.4.2 (1 bug fixed; 1 new feature)</title>
+            <description><![CDATA[
 <h2>New Features</h2>
 <ul>
 	<li>Added the iTunes icon on the volume display panel in order to distinguish it from the system volume indicator.</li>
@@ -2937,18 +2814,13 @@
 <ul>
 	<li>Removed an annoying bug occurring when iTunes was busy syncing/starting. The app regains normal control after iTunes becomes again available.</li>
 </ul>
-    ]]>
-    </description>
-<pubDate>Sun, 06 Jan 2013 20:19:46 +0100</pubDate>
-
-<enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.2.zip"
-			  sparkle:version="1.4.2"
-			  length="501693"
-			  type="application/octet-stream" />
-</item>
-<item>
-<title>Version 1.4.1 (2 bugs fixed; 1 new feature)</title>
-<description><![CDATA[
+    ]]></description>
+            <pubDate>Sun, 06 Jan 2013 20:19:46 +0100</pubDate>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.2.zip" sparkle:version="1.4.2" length="501693" type="application/octet-stream"/>
+        </item>
+        <item>
+            <title>Version 1.4.1 (2 bugs fixed; 1 new feature)</title>
+            <description><![CDATA[
 	<h2>New Features</h2>
 	<ul>
 		<li>Added the ability to check for new updates.</li>
@@ -2959,14 +2831,9 @@
 		<li>Fixed bug when pressing simultaneously the two volume keys.</li>
 		<li>Other minor bug fixes.</li>
 	</ul>
-    ]]>
-    </description>
-<pubDate>Sun, 06 Jan 2013 00:25:46 +0100</pubDate>
-
-<enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.1.zip"
-			  sparkle:version="1.4.1"
-			  length="1327480"
-			  type="application/octet-stream" />
-</item>
-</channel>
+    ]]></description>
+            <pubDate>Sun, 06 Jan 2013 00:25:46 +0100</pubDate>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.1.zip" sparkle:version="1.4.1" length="1327480" type="application/octet-stream"/>
+        </item>
+    </channel>
 </rss>
