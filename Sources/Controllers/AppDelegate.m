@@ -37,14 +37,12 @@ void handleSIGTERM(int sig) {
 
 CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
-	static int previousKeyCode = 0;
-	static bool muteDown = false;
-	NSEvent * sysEvent;
-
     if (type == kCGEventTapDisabledByTimeout) {
         NSLog(@"[Volume Control] Event tap disabled due to timeout. Disabling tapping.");
         dispatch_async(dispatch_get_main_queue(), ^{
-            [(__bridge AppDelegate *)refcon setTapping:NO];
+            AppDelegate *app = (__bridge AppDelegate *)refcon;
+            [app setTapping:NO];
+
             NSAlert *alert = [[NSAlert alloc] init];
             alert.messageText = @"Tapping Disabled";
             alert.informativeText = @"Volume Control lost its ability to monitor volume keys because it became unresponsive. "
@@ -59,85 +57,44 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
                     @"https://github.com/alberti42/Volume-Control/issues"]];
             }
         });
-        return event;
+        return event; // always return quickly
     }
 
-	// No event we care for, then return ASAP
-	if (type != NX_SYSDEFINED) return event;
+    // Pass through events we don't care about
+    if (type != NX_SYSDEFINED) return event;
 
-	sysEvent = [NSEvent eventWithCGEvent:event];
-	// No need to test event type, we know it is NSSystemDefined, becuase that is the same as NX_SYSDEFINED
-	// if ([sysEvent subtype] != NX_SUBTYPE_AUX_CONTROL_BUTTONS && [sysEvent subtype] != NX_SUBTYPE_AUX_MOUSE_BUTTONS) return event;
-	if ([sysEvent subtype] != NX_SUBTYPE_AUX_CONTROL_BUTTONS) return event;
+    NSEvent *sysEvent = [NSEvent eventWithCGEvent:event];
+    if ([sysEvent subtype] != NX_SUBTYPE_AUX_CONTROL_BUTTONS) return event;
 
-	AppDelegate* app=(__bridge AppDelegate *)(refcon);
+    // Extract key info
+    int keyFlags   = ([sysEvent data1] & 0x0000FFFF);
+    int keyCode    = (([sysEvent data1] & 0xFFFF0000) >> 16);
+    int keyState   = (((keyFlags & 0xFF00) >> 8)) == 0xA;
+    bool keyIsRepeat = (keyFlags & 0x1);
+    CGEventFlags keyModifier = [sysEvent modifierFlags] | 0xFFFF;
 
-	int keyFlags = ([sysEvent data1] & 0x0000FFFF);
-	int keyCode = (([sysEvent data1] & 0xFFFF0000) >> 16);
-	int keyState = (((keyFlags & 0xFF00) >> 8)) == 0xA;
-	bool keyIsRepeat = (keyFlags & 0x1);
-	CGEventFlags keyModifier = [sysEvent modifierFlags]|0xFFFF;
-
-	// store whether Apple CMD modifier has been pressed or not
-	[app setAppleCMDModifierPressed:(keyModifier&NX_COMMANDMASK)==NX_COMMANDMASK];
-
-	switch( keyCode )
-	{
-		case NX_KEYTYPE_MUTE:
-
-			if(previousKeyCode!=keyCode && app->volumeRampTimer)
-			{
-				[app stopVolumeRampTimer];
-			}
-			previousKeyCode=keyCode;
-
-			if( keyState == 1 )
-			{
-				muteDown = true;
-				[[NSNotificationCenter defaultCenter] postNotificationName:@"MuteVol" object:NULL];
-			}
-			else
-			{
-				muteDown = false;
-			}
-			return NULL;
-			break;
-		case NX_KEYTYPE_SOUND_UP:
-		case NX_KEYTYPE_SOUND_DOWN:
-
-			if(!muteDown)
-			{
-				if(previousKeyCode!=keyCode && app->volumeRampTimer)
-				{
-					[app stopVolumeRampTimer];
-				}
-				previousKeyCode=keyCode;
-
-				if( keyState == 1 )
-				{
-					if( !app->volumeRampTimer )
-					{
-						if( keyCode == NX_KEYTYPE_SOUND_UP )
-							[[NSNotificationCenter defaultCenter] postNotificationName:(keyIsRepeat?@"IncVolRamp":@"IncVol") object:NULL];
-						else
-							[[NSNotificationCenter defaultCenter] postNotificationName:(keyIsRepeat?@"DecVolRamp":@"DecVol") object:NULL];
-					}
-				}
-				else
-				{
-					if(app->volumeRampTimer)
-					{
-						[app stopVolumeRampTimer];
-					}
-				}
-				return NULL;
-			}
-			break;
-	}
-
-
-	return event;
+    // Decide here if it's a volume/mute event
+    BOOL isMediaKey = (keyCode == NX_KEYTYPE_MUTE ||
+                       keyCode == NX_KEYTYPE_SOUND_UP ||
+                       keyCode == NX_KEYTYPE_SOUND_DOWN);
+    
+    if(isMediaKey) {
+        // Hand off all actual logic to main thread
+        dispatch_async(dispatch_get_main_queue(), ^{
+            AppDelegate *app = (__bridge AppDelegate *)refcon;
+            [app handleAsynchronouslyTappedEventWithKeyCode:keyCode
+                                                   keyState:keyState
+                                                keyIsRepeat:keyIsRepeat
+                                                keyModifier:keyModifier];
+        });
+        
+        return NULL;
+    } else {
+        // Always return immediately to keep the system input flowing
+        return event;
+    }
 }
+
 
 #pragma mark - Class extension for status menu
 
@@ -151,6 +108,18 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 	NSView* _hintView;
 	NSViewController* _hintVC;
+    
+    NSTimer* accessibilityCheckTimer;
+    NSTimer* volumeRampTimer;
+    NSTimer* timerImgSpeaker;
+    NSTimer* checkPlayerTimer;
+    NSTimer* updateSystemVolumeTimer;
+    NSTimeInterval waitOverlayPanel;
+    bool fadeInAnimationReady;
+    
+    // Event tap state
+    int _previousKeyCode;
+    BOOL _muteDown;
 }
 
 @end
@@ -527,6 +496,55 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     });
 }
 
+- (void)handleAsynchronouslyTappedEventWithKeyCode:(int)keyCode
+                                          keyState:(BOOL)keyState
+                                       keyIsRepeat:(BOOL)keyIsRepeat
+                                       keyModifier:(CGEventFlags)keyModifier
+{
+    [self setAppleCMDModifierPressed:(keyModifier & NX_COMMANDMASK) == NX_COMMANDMASK];
+    
+    switch (keyCode) {
+        case NX_KEYTYPE_MUTE:
+            if (_previousKeyCode != keyCode && self->volumeRampTimer) {
+                [self stopVolumeRampTimer];
+            }
+            _previousKeyCode = keyCode;
+
+            if (keyState == 1) {
+                _muteDown = true;
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"MuteVol" object:nil];
+//                [self MuteVol:nil];
+            } else {
+                _muteDown = false;
+            }
+            break;
+
+        case NX_KEYTYPE_SOUND_UP:
+        case NX_KEYTYPE_SOUND_DOWN:
+            if (!_muteDown) {
+                if (_previousKeyCode != keyCode && self->volumeRampTimer) {
+                    [self stopVolumeRampTimer];
+                }
+                _previousKeyCode = keyCode;
+
+                if (keyState == 1) {
+                    if (!self->volumeRampTimer) {
+                        if (keyCode == NX_KEYTYPE_SOUND_UP) {
+                            [[NSNotificationCenter defaultCenter] postNotificationName:(keyIsRepeat ? @"IncVolRamp" : @"IncVol") object:nil];
+                        } else {
+                            [[NSNotificationCenter defaultCenter] postNotificationName:(keyIsRepeat ? @"DecVolRamp" : @"DecVol") object:nil];
+                        }
+                    }
+                } else {
+                    if (self->volumeRampTimer) {
+                        [self stopVolumeRampTimer];
+                    }
+                }
+            }
+            break;
+    }
+}
+
 -(void) sendMediaKey: (int)key {
 	// create and send down key event
 	NSEvent* key_event;
@@ -663,7 +681,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		volumeRampTimer=nil;
 		timerImgSpeaker=nil;
 		checkPlayerTimer=nil;
-
+        
+        // Explicitly initialize event tap state
+        _previousKeyCode = 0;
+        _muteDown = NO;
 	}
 	return self;
 }
@@ -978,6 +999,9 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 - (void)setTapping:(bool)enabled {
     if (eventTap) {
         CGEventTapEnable(eventTap, enabled);
+        // Reset key state tracking to avoid stale state after re-creation
+        _previousKeyCode = 0;
+        _muteDown = NO;
     } else if (enabled) {
         // Try to recreate the tap if it was torn down
         if (![self createEventTap]) {
@@ -1064,11 +1088,6 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 }
 
--(void)resetEventTap
-{
-	CGEventTapEnable(eventTap, _Tapping);
-}
-
 - (void)resetCurrentPlayer:(NSTimer*)theTimer
 {
 	// Keep memory of the current player until this timeout is reached
@@ -1133,7 +1152,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		}
 		if (volume<0) volume=0;
 		if (volume>100) volume=100;
-
+        
         OSDGraphic image;
         NSInteger numFullBlks;
         NSInteger numQrtsBlks;

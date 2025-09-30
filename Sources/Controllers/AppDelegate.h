@@ -57,15 +57,6 @@
     
     IntroWindowController *introWindowController;
     AccessibilityDialog *accessibilityDialog;
-    
-    // NSTimer* volumeLockSyncTimer;
-    NSTimer* volumeRampTimer;
-    NSTimer* timerImgSpeaker;
-    NSTimer* checkPlayerTimer;
-    NSTimer* updateSystemVolumeTimer;
-    NSTimer* accessibilityCheckTimer;
-    NSTimeInterval waitOverlayPanel;
-    bool fadeInAnimationReady;
 }
 
 @property (nonatomic, assign) IBOutlet NSMenu* statusMenu;
@@ -125,6 +116,11 @@
 - (bool)createEventTap;
 
 - (void)handleEventTapDisabledByUser;
+
+- (void)handleAsynchronouslyTappedEventWithKeyCode:(int)keyCode
+                                          keyState:(BOOL)keyState
+                                       keyIsRepeat:(BOOL)keyIsRepeat
+                                       keyModifier:(CGEventFlags)keyModifier;
 
 @end
 
