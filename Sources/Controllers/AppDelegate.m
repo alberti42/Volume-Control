@@ -1079,17 +1079,15 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (IBAction)aboutPanel:(id)sender
 {
-	NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-	NSString* version = [infoDict objectForKey:@"CFBundleVersion"];
-	NSRange range=[version rangeOfString:@"." options:NSBackwardsSearch];
-	if(version>0) version=[version substringFromIndex:range.location+1];
-
-	infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
-				version,@"Version",
-				nil ]; // terminate the list
-
-	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
-	[[NSApplication sharedApplication] orderFrontStandardAboutPanelWithOptions:infoDict];
+    NSDictionary *infoDict = [[NSBundle mainBundle] infoDictionary];
+    
+    NSString *shortVersion = infoDict[@"CFBundleShortVersionString"]; // e.g. "1.7.7"
+    NSString *buildNumber  = infoDict[@"CFBundleVersion"];            // e.g. "190"
+    
+    NSDictionary *options = @{NSAboutPanelOptionApplicationVersion: shortVersion, NSAboutPanelOptionVersion: buildNumber};
+    
+    [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+    [[NSApplication sharedApplication] orderFrontStandardAboutPanelWithOptions:options];
 }
 
 - (void) receiveWakeNote: (NSNotification*) note
