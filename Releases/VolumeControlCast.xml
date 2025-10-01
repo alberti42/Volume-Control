@@ -26,7 +26,7 @@
 			<ul>
 				<li>Corrected problem preventing control of music players' volume. With this fix, the app will be granted permission to control the volume.</li>
 			</ul>
-			<h2>Version 2.0.1 (Tahoe compatible &amp; notarized)</h2>
+			<h2>Version 2.0.0 (Tahoe compatible &amp; notarized)</h2>
 			<h3>New features</h3>
 			<ul>
 			    <li>Now fully compatible with macOS Tahoe (supports systems from macOS Ventura onward).</li>
