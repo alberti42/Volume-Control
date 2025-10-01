@@ -14,42 +14,47 @@
         },
     ],
     "variables": {
-        "build_dir": "${project_path}/build.nosync/target/debug"
+        "build_dir": "${project_path}/build.nosync/target/debug",
     },
     "build_systems": [
         {
-            "name": "Build with xcodebuild for debug+arm64",
-            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=arm64' BUILD_DIR=\"\\${BUILD_DIR}/debug\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" build | xcpretty",
+            "name": "Build Debug (arm64)",
+            "shell_cmd": "make debug-arm64",
             "working_dir": "${project_path}",
         },
         {
-            "name": "Build with xcodebuild for debug+x86_64",
-            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=x86_64' BUILD_DIR=\"\\${BUILD_DIR}/debug\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" build | xcpretty",
+            "name": "Build Debug (x86_64)",
+            "shell_cmd": "make debug-x86_64",
             "working_dir": "${project_path}",
         },
         {
             "name": "Distribute",
-            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Release ARCHS=\"arm64 x86_64\" ONLY_ACTIVE_ARCH=NO BUILD_DIR=\"\\${BUILD_DIR}/release\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/release\" build | xcpretty",
+            "shell_cmd": "make release",
             "working_dir": "${project_path}",
         },
         {
-            "name": "Clean with xcodebuild for debug+arm64",
-            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug BUILD_DIR=\"\\${BUILD_DIR}/debug\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" clean | xcpretty",
+            "name": "Clean Debug (arm64)",
+            "shell_cmd": "make clean-arm64",
             "working_dir": "${project_path}",
         },
         {
-            "name": "Clean with xcodebuild for debug+x86_64",
-            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug BUILD_DIR=\"\\${BUILD_DIR}/debug\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" clean | xcpretty",
+            "name": "Clean Debug (x86_64)",
+            "shell_cmd": "make clean-x86_64",
             "working_dir": "${project_path}",
         },
         {
-            "name": "Run App for debug",
-            "shell_cmd": "source ./build_config.env && open \"\\${CONFIGURATION_BUILD_DIR}/debug/Volume Control.app\"",
-            "working_dir": "${project_path}"
+            "name": "Run App",
+            "shell_cmd": "make run",
+            "working_dir": "${project_path}",
         },
         {
-            "name": "Generate compile_commands.json for debug",
-            "shell_cmd": "source ./build_config.env && xcrun xcodebuild -project 'Volume Control.xcodeproj' -scheme 'Volume Control' -configuration Debug -destination 'platform=macOS,arch=arm64' BUILD_DIR=\"\\${BUILD_DIR}\" CONFIGURATION_BUILD_DIR=\"\\${CONFIGURATION_BUILD_DIR}/debug\" clean build | xcpretty -r json-compilation-database -o compile_commands.json",
+            "name": "Generate Compilation DB (arm64)",
+            "shell_cmd": "make generate-db-arm64",
+            "working_dir": "${project_path}",
+        },
+        {
+            "name": "Generate Compilation DB (x86_64)",
+            "shell_cmd": "make generate-db-x86_64",
             "working_dir": "${project_path}",
         },
     ],
@@ -61,17 +66,7 @@
 
         "LSP": {
             /*
-            To regenerate compile_commands.json, you should run:
-            > gem install xcpretty
-            > xcrun xcodebuild \
-                -project "Volume Control.xcodeproj" \
-                -scheme "Volume Control" \
-                -configuration Debug \
-                -destination 'platform=macOS,arch=x86_64' \
-                clean \
-                build \
-                -UseNewBuildSystem=YES \
-                | xcpretty -r json-compilation-database -o compile_commands.json
+                It requires compile_commands.json generated with `make generate-db-${YOUR_PLATFORM}`
             */
             "LSP-SourceKit": {
                 "enabled": true,
