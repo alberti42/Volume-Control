@@ -13,17 +13,20 @@
             <sparkle:minimumSystemVersion>13.5</sparkle:minimumSystemVersion>
             <enclosure url="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.1.zip" length="7683346" type="application/octet-stream" sparkle:edSignature="djIIq6HWDerkFYmmdHriCXMCPG6sXDSsAk/1+3LdkptT8pIS0lkW4sSi7EvgMAmzTXe1LTYArZuWmKbu7zuAAw==" sparkle:dsaSignature="MC4CFQCwo5O2dPiK8t5BbBtVnRRGAUWCzQIVANah+WEnJItoyXt4MuB8MTf4fofY"/>
             <description><![CDATA[
-			<h2>Version 2.0.1 (Tahoe compatible &amp; notarized)</h2>
-
-			<p style="color:red; font-weight:bold;">
-			⚠️ Important: This release introduces a new bundle identifier and is now notarized by Apple.
-			We strongly recommend downloading and installing a fresh copy directly from:
+            <p style="color:red; font-weight:bold;">
+			⚠️ Important: The version 2 release introduces a new bundle identifier and has been notarized by Apple.
+			If you are upgrading from version 1.7, we strongly recommend downloading and installing a fresh copy directly from the following link:
 			<a href="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip">
 			https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip
 			</a>
-			This ensures a smooth transition. Future updates will then work automatically.
+			This will ensure a smooth transition. Future updates will then work automatically from within the app.
 			</p>
-
+            <h2>Version 2.0.1 (Tahoe compatible &amp; notarized)</h2>
+			<h3>Bug fixes</h3>
+			<ul>
+				<li>Corrected problem preventing control of music players' volume. With this fix, the app will be granted permission to control the volume.</li>
+			</ul>
+			<h2>Version 2.0.1 (Tahoe compatible &amp; notarized)</h2>
 			<h3>New features</h3>
 			<ul>
 			    <li>Now fully compatible with macOS Tahoe (supports systems from macOS Ventura onward).</li>
@@ -31,11 +34,10 @@
 			    <li>Now fully <strong>notarized by Apple</strong> — no more workarounds required to install or run the app.</li>
 			    <li>HUD for volume indication has been removed on Tahoe (a replacement may return in a future update).</li>
 			</ul>
-
 			<h3>Bug fixes</h3>
 			<ul>
-				<li>Corrected problem preventing control of music players' volume. With this fix, the app will be granted permission to control the volume.</li>
-			    <li>Correct handling of volume key events from the MacBook Pro Touch Bar.</li>
+				<li>Prevent the computer from becoming unresponsive when accessibility authorization is revoked and the application was running.</li>
+				<li>Correct handling of volume key events from the MacBook Pro Touch Bar.</li>
 			    <li>System volume can now be muted completely (previously “0” was not truly silent).</li>
 			</ul>
 			]]></description>
@@ -51,12 +53,12 @@
 			<h2>Version 2.0.0 (Tahoe compatible &amp; notarized)</h2>
 
 			<p style="color:red; font-weight:bold;">
-			⚠️ Important: This release introduces a new bundle identifier and is now notarized by Apple.
-			We strongly recommend downloading and installing a fresh copy directly from:
+			⚠️ Important: The version 2 release introduces a new bundle identifier and has been notarized by Apple.
+			If you are upgrading from version 1.7, we strongly recommend downloading and installing a fresh copy directly from the following link:
 			<a href="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip">
 			https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip
 			</a>
-			This ensures a smooth transition. Future updates will then work automatically.
+			This will ensure a smooth transition. Future updates will then work automatically from within the app.
 			</p>
 
 			<h3>New features</h3>
@@ -66,10 +68,10 @@
 			    <li>Now fully <strong>notarized by Apple</strong> — no more workarounds required to install or run the app.</li>
 			    <li>HUD for volume indication has been removed on Tahoe (a replacement may return in a future update).</li>
 			</ul>
-
 			<h3>Bug fixes</h3>
 			<ul>
-			    <li>Correct handling of volume key events from the MacBook Pro Touch Bar.</li>
+				<li>Prevent the computer from becoming unresponsive when accessibility authorization is revoked and the application was running.</li>
+				<li>Correct handling of volume key events from the MacBook Pro Touch Bar.</li>
 			    <li>System volume can now be muted completely (previously “0” was not truly silent).</li>
 			</ul>
 			]]></description>
