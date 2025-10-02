@@ -884,13 +884,19 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 						  [NSNumber numberWithBool:true],  @"PlaySoundFeedback",
 						  nil ]; // terminate the list
 	[preferences registerDefaults:dict];
-
+    
 	[self setTapping:[preferences boolForKey:              @"TappingEnabled"]];
 	[self setUseAppleCMDModifier:[preferences boolForKey:  @"UseAppleCMDModifier"]];
 	[self setLockSystemAndPlayerVolume:[preferences boolForKey:  @"LockSystemAndPlayerVolume"]];
 	[self setAutomaticUpdates:[preferences boolForKey:     @"AutomaticUpdates"]];
 	[self setHideFromStatusBar:[preferences boolForKey:    @"hideFromStatusBarPreference"]];
-	[self setHideVolumeWindow:[preferences boolForKey:     @"hideVolumeWindowPreference"]];
+    if (@available(macOS 16.0, *)) {
+        // Running on Tahoe (2026) or newer
+        NSMenuItem *item = [self.statusMenu itemWithTag:HIDE_VOLUME_WINDOW_ID];
+        [item setHidden:YES];
+    } else {
+        [self setHideVolumeWindow:[preferences boolForKey:     @"hideVolumeWindowPreference"]];
+    }
 	[[self iTunesBtn] setState:[preferences boolForKey:    @"iTunesControl"]];
 	if (@available(macOS 10.15, *)) {
 		[[self iTunesBtn] setTitle:@"Music"];
