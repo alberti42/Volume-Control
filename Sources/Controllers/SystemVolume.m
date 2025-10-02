@@ -69,7 +69,7 @@
 			NSLog(@"Failed to mute device 0x%0x", defaultOutputDeviceID);
 		}
 	} else {
-		// Unmute the device
+		// Set the volume to currentVolume (unmute the device if needed)
 		UInt32 mute = 0;
 		dataSize = sizeof(mute);
 		AudioObjectSetPropertyData(defaultOutputDeviceID,
