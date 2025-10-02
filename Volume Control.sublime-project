@@ -44,8 +44,10 @@
         },
         {
             "name": "Run App",
-            "shell_cmd": "make run",
-            "working_dir": "${project_path}",
+            "target": "terminus_exec",
+            "cancel": "terminus_cancel_build",
+            "cmd": ["make", "run"],
+            "working_dir": "$folder"
         },
         {
             "name": "Generate Compilation DB (arm64)",

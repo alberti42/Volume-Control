@@ -72,6 +72,12 @@ clean-x86_64:
 # Run the app (after debug build)
 run:
 	$(Q)open "$(CONFIGURATION_BUILD_DIR)/debug/Volume Control.app"
+	command log stream --process "Volume Control" --predicate 'eventMessage CONTAINS "[DEBUG]"'
+run:
+	$(Q)killall -15 "Volume Control" 2>/dev/null || true
+	$(Q)open "$(CONFIGURATION_BUILD_DIR)/debug/Volume Control.app"
+	echo "Waiting for logs from Volume Control..."
+	$(Q)command log stream --process "Volume Control"
 
 # Generate compile_commands.json for LSP-clangd server
 generate-db-x86_64:
