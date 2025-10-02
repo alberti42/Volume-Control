@@ -41,15 +41,17 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     
     if (type == kCGEventTapDisabledByTimeout) {
         if (timeout_count < 5) {
-            // Try to resume tapping automatically.
             // This handles “false positives” that occur when macOS temporarily
             // suspends the app for Apple Events permission prompts.
-            AppDelegate *app = (__bridge AppDelegate *)refcon;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [app setTapping:YES]; // attempt to re-enable tap
-            });
-            
             timeout_count++;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)),
+                           dispatch_get_main_queue(), ^{
+                // Try to resume tapping automatically.
+                AppDelegate *app = (__bridge AppDelegate *)refcon;
+                if ([app Tapping]) { // guard if user disabled it manually
+                    [app setTapping:YES]; // attempt to re-enable tap
+                }
+            });
         } else {
             // After 5 consecutive timeouts, assume it’s a real problem
             // (e.g. the tap logic is genuinely unresponsive).
