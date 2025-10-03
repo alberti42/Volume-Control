@@ -121,6 +121,7 @@ GitHub: [@alberti42](https://github.com/alberti42)
 
 You can download older versions here:
 
+- [2.0.1](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.1.zip): Fixed a bug preventing controlling volume of music players.
 - [2.0.0](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.0.zip): Notarized and compatible with Tahoe. Many improvements under the hood.
 - [1.7.7](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v1.7.7.zip): Added option for locking system and player volumes together.
 - [1.7.6](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v1.7.6.zip): Fixes some bugs with the volume not reaching zero.
