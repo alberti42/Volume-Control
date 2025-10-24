@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import "SystemVolume.h"
 #import "AccessibilityDialog.h"
+#import "TahoeVolumeHUD.h"
 
 #import <IOKit/hidsystem/ev_keymap.h>
 #import <ServiceManagement/ServiceManagement.h>
@@ -625,8 +626,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
             if(!_hideVolumeWindow){
                 if (@available(macOS 16.0, *)) {
-                    // Running on Tahoe (2026) or newer
+                    // On Tahoe, show the new popover HUD.
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:0 anchoredToView:self.statusBar.button];
                 } else {
+                    // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
                     if (osdMgr) {
                         [osdMgr showImage:OSDGraphicSpeakerMute onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:0 totalChiclets:(unsigned int)100 locked:NO];
@@ -641,12 +644,14 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 			if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
 				[systemAudio setCurrentVolume:[systemAudio oldVolume]];
 			}
-
-			if(!_hideVolumeWindow)
+            
+            if(!_hideVolumeWindow)
             {
                 if (@available(macOS 16.0, *)) {
-                    // Running on Tahoe (2026) or newer
+                    // On Tahoe, show the new popover HUD.
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:[runningPlayerPtr oldVolume] anchoredToView:self.statusBar.button];
                 } else {
+                    // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
                     if (osdMgr) {
                         [osdMgr showImage:OSDGraphicSpeaker onDisplayID:CGSMainDisplayID() priority:OSDPriorityDefault msecUntilFade:1000 filledChiclets:(unsigned int)[runningPlayerPtr oldVolume] totalChiclets:(unsigned int)100 locked:NO];
@@ -1181,10 +1186,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 		//NSLog(@"%d %d",(int)numFullBlks,(int)numQrtsBlks);
 
-		if(!_hideVolumeWindow)
+        if(!_hideVolumeWindow)
         {
             if (@available(macOS 16.0, *)) {
-                // Running on Tahoe (2026) or newer
+                // On Tahoe, show the new popover HUD anchored to the status item.
+                [[TahoeVolumeHUD sharedManager] showHUDWithVolume:volume anchoredToView:self.statusBar.button];
             } else {
                 if(image) {
                     id osdMgr = [self->OSDManager sharedManager];
