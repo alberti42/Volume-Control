@@ -11,6 +11,7 @@
 
 #import <Sparkle/Sparkle.h>
 
+#import "TahoeVolumeHUD.h"
 #import "iTunes.h"
 // #import "Music.h"
 #import "Spotify.h"
@@ -18,14 +19,11 @@
 
 @class IntroWindowController, AccessibilityDialog, StatusBarItem, PlayerApplication, SystemApplication;
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuItemValidation, SPUUpdaterDelegate, SPUStandardUserDriverDelegate> {
-    CALayer *mainLayer;
+@interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuItemValidation, SPUUpdaterDelegate, SPUStandardUserDriverDelegate, TahoeVolumeHUDDelegate> {
     CALayer *volumeImageLayer;
-    CALayer *iconLayer;
     CALayer *volumeBar[16];
     
     NSImage *imgVolOn,*imgVolOff;
-    NSImage *iTunesIcon,*spotifyIcon;
     
     NSUserDefaults *preferences;
     
@@ -122,6 +120,6 @@
 @property (assign, nonatomic) double currentVolume;
 @property (assign, nonatomic) double oldVolume;
 @property (assign, nonatomic) double doubleVolume;
-
+@property (assign, nonatomic) NSImage* icon;
 
 @end

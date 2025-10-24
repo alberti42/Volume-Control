@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 73;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -59,35 +59,6 @@
 		6546E18A2E8C66FB0087E95F /* VolumeControl.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VolumeControl.entitlements; sourceTree = "<group>"; };
 		65533216267F5D86004231D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		65996C55267EA86A0080A9A5 /* Volume Control.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		65996CDF267EAB660080A9A5 /* keyboard.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = keyboard.png; sourceTree = "<group>"; };
-		65996CE0267EAB660080A9A5 /* introButtons-next.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-next.png"; sourceTree = "<group>"; };
-		65996CE1267EAB660080A9A5 /* statusbar-screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "statusbar-screenshot.png"; sourceTree = "<group>"; };
-		65996CE2267EAB660080A9A5 /* introButtons-next@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-next@2x.png"; sourceTree = "<group>"; };
-		65996CE3267EAB660080A9A5 /* keyboard.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = keyboard.psd; sourceTree = "<group>"; };
-		65996CE4267EAB660080A9A5 /* introButtons-close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-close.png"; sourceTree = "<group>"; };
-		65996CE5267EAB660080A9A5 /* introButtons-prev-HL@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-prev-HL@2x.png"; sourceTree = "<group>"; };
-		65996CE6267EAB660080A9A5 /* introButtons-close-HL@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-close-HL@2x.png"; sourceTree = "<group>"; };
-		65996CE7267EAB660080A9A5 /* iTunes-screenshot.psd */ = {isa = PBXFileReference; lastKnownFileType = file; path = "iTunes-screenshot.psd"; sourceTree = "<group>"; };
-		65996CE8267EAB660080A9A5 /* iTunes-screenshot.ai */ = {isa = PBXFileReference; lastKnownFileType = text; path = "iTunes-screenshot.ai"; sourceTree = "<group>"; };
-		65996CE9267EAB660080A9A5 /* iTunes-arrow-2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunes-arrow-2.png"; sourceTree = "<group>"; };
-		65996CEA267EAB660080A9A5 /* introButtons-prev@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-prev@2x.png"; sourceTree = "<group>"; };
-		65996CEB267EAB660080A9A5 /* keyboard@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "keyboard@2x.png"; sourceTree = "<group>"; };
-		65996CEC267EAB660080A9A5 /* introButtons-next-HL.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-next-HL.png"; sourceTree = "<group>"; };
-		65996CED267EAB670080A9A5 /* introButtons-close-HL.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-close-HL.png"; sourceTree = "<group>"; };
-		65996CEE267EAB670080A9A5 /* iTunes-arrow-1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunes-arrow-1@2x.png"; sourceTree = "<group>"; };
-		65996CEF267EAB670080A9A5 /* iTunes-arrow-2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunes-arrow-2@2x.png"; sourceTree = "<group>"; };
-		65996CF0267EAB670080A9A5 /* iTunes-screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunes-screenshot.png"; sourceTree = "<group>"; };
-		65996CF1267EAB670080A9A5 /* introButtons-next-HL@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-next-HL@2x.png"; sourceTree = "<group>"; };
-		65996CF2267EAB670080A9A5 /* iTunes-arrow-1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunes-arrow-1.png"; sourceTree = "<group>"; };
-		65996CF3267EAB670080A9A5 /* introButtons-prev.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-prev.png"; sourceTree = "<group>"; };
-		65996CF4267EAB670080A9A5 /* introButtons-prev-HL.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-prev-HL.png"; sourceTree = "<group>"; };
-		65996CF5267EAB670080A9A5 /* introButtons-close@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "introButtons-close@2x.png"; sourceTree = "<group>"; };
-		65996CF6267EAB670080A9A5 /* introButtons.ai */ = {isa = PBXFileReference; lastKnownFileType = text; path = introButtons.ai; sourceTree = "<group>"; };
-		65996CF7267EAB800080A9A5 /* icon_32x32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_32x32.png; sourceTree = "<group>"; };
-		65996CF8267EAB800080A9A5 /* icon_16x16@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_16x16@2x.png"; sourceTree = "<group>"; };
-		65996CF9267EAB800080A9A5 /* icon_128x128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_128x128.png; sourceTree = "<group>"; };
-		65996CFA267EAB800080A9A5 /* icon_16x16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_16x16.png; sourceTree = "<group>"; };
-		65996CFB267EAB800080A9A5 /* icon_32x32@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_32x32@2x.png"; sourceTree = "<group>"; };
 		65996CFE267EAB9E0080A9A5 /* AccessibilityDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccessibilityDialog.h; sourceTree = "<group>"; };
 		65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccessibilityDialog.m; sourceTree = "<group>"; };
 		65996D06267EAC8E0080A9A5 /* SystemVolume.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = SystemVolume.scpt; sourceTree = "<group>"; };
@@ -98,8 +69,6 @@
 		65996D17267EAD470080A9A5 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		65996DE3267EAE1F0080A9A5 /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		65996DE7267EAE650080A9A5 /* dsa_pub.pem */ = {isa = PBXFileReference; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
-		65996DF2267EAEF20080A9A5 /* volume.ai */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = volume.ai; sourceTree = "<group>"; };
-		65996DF3267EAEF20080A9A5 /* statusbar-item.ai */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "statusbar-item.ai"; sourceTree = "<group>"; };
 		65996DF4267EAEF30080A9A5 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		65996DF8267EAF260080A9A5 /* MainMenu.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainMenu.xib; sourceTree = "<group>"; };
 		65996DFA267EAF330080A9A5 /* AccessibilityDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AccessibilityDialog.xib; sourceTree = "<group>"; };
@@ -111,21 +80,28 @@
 		65996E0B267EB1300080A9A5 /* AppleRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppleRemote.h; sourceTree = "<group>"; };
 		65996E0C267EB1300080A9A5 /* CompatibilityFixes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompatibilityFixes.h; sourceTree = "<group>"; };
 		65996E0D267EB1300080A9A5 /* AppleRemote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppleRemote.m; sourceTree = "<group>"; };
-		65996E0F267EB14F0080A9A5 /* ISSoundAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISSoundAdditions.m; sourceTree = "<group>"; };
 		65996E10267EB14F0080A9A5 /* OSD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSD.h; sourceTree = "<group>"; };
-		65996E11267EB14F0080A9A5 /* IntroWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IntroWindowController.h; sourceTree = "<group>"; };
-		65996E12267EB14F0080A9A5 /* IntroWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IntroWindowController.m; sourceTree = "<group>"; };
 		65996E13267EB14F0080A9A5 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		65996E14267EB14F0080A9A5 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		65996E15267EB14F0080A9A5 /* SystemVolume.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemVolume.h; sourceTree = "<group>"; };
 		65996E16267EB14F0080A9A5 /* SystemVolume.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemVolume.m; sourceTree = "<group>"; };
-		65996E17267EB14F0080A9A5 /* ISSoundAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISSoundAdditions.h; sourceTree = "<group>"; };
 		65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		BC20FAA128902EF500CF5CAF /* Doppler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Doppler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		654FF5DC2EAD6C9900B9C699 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 65996C53267EA86A0080A9A5 /* Resources */;
+			membershipExceptions = (
+				HUDPanel.h,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		654FF5DA2EAD6C8E00B9C699 /* HUD */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (654FF5DC2EAD6C9900B9C699 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = HUD; sourceTree = "<group>"; };
 		65DBBEDB2E89DE1800752329 /* Volume Control Helper */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Volume Control Helper"; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -187,9 +163,10 @@
 		65996CD7267EAAC40080A9A5 /* User interface */ = {
 			isa = PBXGroup;
 			children = (
-				65996CD8267EAAD30080A9A5 /* Accessability */,
-				65996CD9267EAADB0080A9A5 /* Images */,
 				65996D04267EAC710080A9A5 /* XIBs */,
+				65996CD8267EAAD30080A9A5 /* Accessability */,
+				654FF5DA2EAD6C8E00B9C699 /* HUD */,
+				65996DF4267EAEF30080A9A5 /* Media.xcassets */,
 			);
 			path = "User interface";
 			sourceTree = "<group>";
@@ -202,61 +179,6 @@
 				65996DFA267EAF330080A9A5 /* AccessibilityDialog.xib */,
 			);
 			path = Accessability;
-			sourceTree = "<group>";
-		};
-		65996CD9267EAADB0080A9A5 /* Images */ = {
-			isa = PBXGroup;
-			children = (
-				65996CDB267EAB100080A9A5 /* Intro window */,
-				65996CDC267EAB280080A9A5 /* appicon */,
-				65996DF4267EAEF30080A9A5 /* Media.xcassets */,
-				65996DF3267EAEF20080A9A5 /* statusbar-item.ai */,
-				65996DF2267EAEF20080A9A5 /* volume.ai */,
-			);
-			path = Images;
-			sourceTree = "<group>";
-		};
-		65996CDB267EAB100080A9A5 /* Intro window */ = {
-			isa = PBXGroup;
-			children = (
-				65996CED267EAB670080A9A5 /* introButtons-close-HL.png */,
-				65996CE6267EAB660080A9A5 /* introButtons-close-HL@2x.png */,
-				65996CE4267EAB660080A9A5 /* introButtons-close.png */,
-				65996CF5267EAB670080A9A5 /* introButtons-close@2x.png */,
-				65996CEC267EAB660080A9A5 /* introButtons-next-HL.png */,
-				65996CF1267EAB670080A9A5 /* introButtons-next-HL@2x.png */,
-				65996CE0267EAB660080A9A5 /* introButtons-next.png */,
-				65996CE2267EAB660080A9A5 /* introButtons-next@2x.png */,
-				65996CF4267EAB670080A9A5 /* introButtons-prev-HL.png */,
-				65996CE5267EAB660080A9A5 /* introButtons-prev-HL@2x.png */,
-				65996CF3267EAB670080A9A5 /* introButtons-prev.png */,
-				65996CEA267EAB660080A9A5 /* introButtons-prev@2x.png */,
-				65996CF6267EAB670080A9A5 /* introButtons.ai */,
-				65996CF2267EAB670080A9A5 /* iTunes-arrow-1.png */,
-				65996CEE267EAB670080A9A5 /* iTunes-arrow-1@2x.png */,
-				65996CE9267EAB660080A9A5 /* iTunes-arrow-2.png */,
-				65996CEF267EAB670080A9A5 /* iTunes-arrow-2@2x.png */,
-				65996CE8267EAB660080A9A5 /* iTunes-screenshot.ai */,
-				65996CF0267EAB670080A9A5 /* iTunes-screenshot.png */,
-				65996CE7267EAB660080A9A5 /* iTunes-screenshot.psd */,
-				65996CDF267EAB660080A9A5 /* keyboard.png */,
-				65996CE3267EAB660080A9A5 /* keyboard.psd */,
-				65996CEB267EAB660080A9A5 /* keyboard@2x.png */,
-				65996CE1267EAB660080A9A5 /* statusbar-screenshot.png */,
-			);
-			path = "Intro window";
-			sourceTree = "<group>";
-		};
-		65996CDC267EAB280080A9A5 /* appicon */ = {
-			isa = PBXGroup;
-			children = (
-				65996CFA267EAB800080A9A5 /* icon_16x16.png */,
-				65996CF8267EAB800080A9A5 /* icon_16x16@2x.png */,
-				65996CF7267EAB800080A9A5 /* icon_32x32.png */,
-				65996CFB267EAB800080A9A5 /* icon_32x32@2x.png */,
-				65996CF9267EAB800080A9A5 /* icon_128x128.png */,
-			);
-			path = appicon;
 			sourceTree = "<group>";
 		};
 		65996D03267EAC1F0080A9A5 /* Sources */ = {
@@ -290,10 +212,6 @@
 			children = (
 				65996E14267EB14F0080A9A5 /* AppDelegate.h */,
 				65996E13267EB14F0080A9A5 /* AppDelegate.m */,
-				65996E11267EB14F0080A9A5 /* IntroWindowController.h */,
-				65996E12267EB14F0080A9A5 /* IntroWindowController.m */,
-				65996E17267EB14F0080A9A5 /* ISSoundAdditions.h */,
-				65996E0F267EB14F0080A9A5 /* ISSoundAdditions.m */,
 				65996E10267EB14F0080A9A5 /* OSD.h */,
 				65996E15267EB14F0080A9A5 /* SystemVolume.h */,
 				65996E16267EB14F0080A9A5 /* SystemVolume.m */,
@@ -376,6 +294,9 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				654FF5DA2EAD6C8E00B9C699 /* HUD */,
+			);
 			name = "Volume Control";
 			productName = VolumeControl;
 			productReference = 65996C55267EA86A0080A9A5 /* Volume Control.app */;
@@ -422,7 +343,6 @@
 				};
 			};
 			buildConfigurationList = 65996C50267EA86A0080A9A5 /* Build configuration list for PBXProject "Volume Control" */;
-			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -430,6 +350,7 @@
 				Base,
 			);
 			mainGroup = 65996C4C267EA86A0080A9A5;
+			preferredProjectObjectVersion = 50;
 			productRefGroup = 65996C56267EA86A0080A9A5 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -544,7 +465,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 0000000000;
+				DEVELOPMENT_TEAM = 9V3X7C8VCK;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -608,7 +529,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 0000000000;
+				DEVELOPMENT_TEAM = 9V3X7C8VCK;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -640,7 +561,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 0000000000;
+				DEVELOPMENT_TEAM = 9V3X7C8VCK;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
@@ -658,7 +579,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 0.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.your.company.VolumeControl;
+				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
@@ -667,6 +588,7 @@
 				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
 				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
 				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -682,7 +604,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 0000000000;
+				DEVELOPMENT_TEAM = 9V3X7C8VCK;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
@@ -700,7 +622,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 0.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.your.company.VolumeControl;
+				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
@@ -709,6 +631,7 @@
 				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
 				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
 				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
@@ -721,7 +644,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_TEAM = 0000000000;
+				DEVELOPMENT_TEAM = 9V3X7C8VCK;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -744,7 +667,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.your.company.VolumeControlHelper;
+				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControlHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -771,7 +694,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_TEAM = 0000000000;
+				DEVELOPMENT_TEAM = 9V3X7C8VCK;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -794,7 +717,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.your.company.VolumeControlHelper;
+				PRODUCT_BUNDLE_IDENTIFIER = io.alberti42.VolumeControlHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
