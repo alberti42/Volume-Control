@@ -741,7 +741,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     }
 
     if (@available(macOS 16.0, *)) {
-        iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.iTunes" andIcon:[NSImage imageNamed:@"AppleMusicTahoe"]];
+        iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.Music" andIcon:[NSImage imageNamed:@"AppleMusicTahoe"]];
     } else {
         iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.iTunes" andIcon:[NSImage imageNamed:@"AppleMusicSequoia"]];
     }

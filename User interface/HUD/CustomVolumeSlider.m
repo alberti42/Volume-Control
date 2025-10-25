@@ -23,11 +23,14 @@
     [fg fill];
 }
 
+// **MODIFIED:** The knob is now drawn only when the isHovered property is true.
 - (void)drawKnob:(NSRect)knobRect {
-    CGFloat d = 12;
-    knobRect = NSMakeRect(NSMidX(knobRect)-d/2.0, NSMidY(knobRect)-d/2.0, d, d);
-    [[NSColor whiteColor] setFill];
-    NSBezierPath *circle = [NSBezierPath bezierPathWithRoundedRect:knobRect xRadius:d/2 yRadius:d/2];
-    [circle fill];
+    if (self.isHovered) {
+        CGFloat d = 12;
+        knobRect = NSMakeRect(NSMidX(knobRect)-d/2.0, NSMidY(knobRect)-d/2.0, d, d);
+        [[NSColor whiteColor] setFill];
+        NSBezierPath *circle = [NSBezierPath bezierPathWithRoundedRect:knobRect xRadius:d/2 yRadius:d/2];
+        [circle fill];
+    }
 }
 @end

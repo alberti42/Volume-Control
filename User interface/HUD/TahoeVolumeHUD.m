@@ -33,11 +33,7 @@ static const CGFloat kHUDWidth       = 290.0;
 static const CGFloat kCornerRadius   = 24.0;
 static const CGFloat kBelowGap       = 14.0;
 static const NSTimeInterval kAutoHide = 2.0;
-static const CGFloat kTopInset = 10.0;
-static const CGFloat topMargin = 0.0; // you already use 12; keep or tweak
-static const CGFloat leftMargin = 20.0; // optional
 static const CGFloat kSideInset  = 12.0;  // left/right margin
-static const CGFloat kBottomInset = 8.0;  // optional breathing room at bottom
 
 @implementation TahoeVolumeHUD
 
@@ -103,35 +99,22 @@ static const CGFloat kBottomInset = 8.0;  // optional breathing room at bottom
     NSView *wrapper = [NSView new];
     wrapper.translatesAutoresizingMaskIntoConstraints = NO;
 
-    // Vertical stack container centered vertically inside wrapper
-    NSView *stack = [NSView new];
-    stack.translatesAutoresizingMaskIntoConstraints = NO;
-    [wrapper addSubview:stack];
-
-    // Center the whole stack vertically; stretch horizontally
-    [NSLayoutConstraint activateConstraints:@[
-        [stack.centerYAnchor constraintEqualToAnchor:wrapper.centerYAnchor],
-        [stack.leadingAnchor constraintEqualToAnchor:wrapper.leadingAnchor],
-        [stack.trailingAnchor constraintEqualToAnchor:wrapper.trailingAnchor],
-    ]];
-
     // Build header row (icon + label) and slider strip
     NSView *header = [self buildHeaderRow];
     NSView *strip  = [self buildSliderStrip];
 
-    [stack addSubview:header];
-    [stack addSubview:strip];
-
-    // Vertical layout: header on top, small spacing, then strip
+    [wrapper addSubview:header];
+    [wrapper addSubview:strip];
+    
+    // **MODIFIED:** Anchor header to top, strip to bottom. This is more robust.
     [NSLayoutConstraint activateConstraints:@[
-        [header.topAnchor constraintEqualToAnchor:stack.topAnchor],
-        [header.leadingAnchor constraintEqualToAnchor:stack.leadingAnchor constant:kSideInset],
-        [header.trailingAnchor constraintEqualToAnchor:stack.trailingAnchor constant:-kSideInset],
+        [header.topAnchor constraintEqualToAnchor:wrapper.topAnchor],
+        [header.leadingAnchor constraintEqualToAnchor:wrapper.leadingAnchor],
+        [header.trailingAnchor constraintEqualToAnchor:wrapper.trailingAnchor],
 
-        [strip.topAnchor constraintEqualToAnchor:header.bottomAnchor constant:kBottomInset],
-        [strip.leadingAnchor constraintEqualToAnchor:stack.leadingAnchor],
-        [strip.trailingAnchor constraintEqualToAnchor:stack.trailingAnchor],
-        [strip.bottomAnchor constraintEqualToAnchor:stack.bottomAnchor],
+        [strip.bottomAnchor constraintEqualToAnchor:wrapper.bottomAnchor],
+        [strip.leadingAnchor constraintEqualToAnchor:wrapper.leadingAnchor],
+        [strip.trailingAnchor constraintEqualToAnchor:wrapper.trailingAnchor],
     ]];
 
     // Install in glass (wrapper stretches to the glass edges via LiquidGlassView)
@@ -322,19 +305,25 @@ static const CGFloat kBottomInset = 8.0;  // optional breathing room at bottom
     [row addSubview:self.appIconView];
     [row addSubview:self.titleLabel];
 
+    // **MODIFIED:** New constraints for better padding and alignment.
+    CGFloat topPadding = 12.0; // Increased to provide more space at the top.
+    CGFloat bottomPadding = 4.0; // Defines space between header and slider strip.
+
     [NSLayoutConstraint activateConstraints:@[
-          // --- add margins here ---
-          [self.appIconView.leadingAnchor constraintEqualToAnchor:row.leadingAnchor constant:leftMargin],
-          [self.appIconView.topAnchor constraintEqualToAnchor:row.topAnchor constant:topMargin],
-          [self.appIconView.widthAnchor constraintEqualToConstant:18],
-          [self.appIconView.heightAnchor constraintEqualToConstant:18],
+        // Icon constraints define the layout and padding for the header row.
+        [self.appIconView.leadingAnchor constraintEqualToAnchor:row.leadingAnchor constant:kSideInset],
+        [self.appIconView.topAnchor constraintEqualToAnchor:row.topAnchor constant:topPadding],
+        [self.appIconView.widthAnchor constraintEqualToConstant:18],
+        [self.appIconView.heightAnchor constraintEqualToConstant:18],
+        
+        // The header row's height is determined by the icon's position and its own padding.
+        [row.bottomAnchor constraintEqualToAnchor:self.appIconView.bottomAnchor constant:bottomPadding],
 
-          [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.appIconView.trailingAnchor constant:8],
-          [self.titleLabel.centerYAnchor constraintEqualToAnchor:self.appIconView.centerYAnchor],
-          [self.titleLabel.trailingAnchor constraintLessThanOrEqualToAnchor:row.trailingAnchor constant:-kBottomInset],
-
-          [row.bottomAnchor constraintEqualToAnchor:self.appIconView.bottomAnchor constant:topMargin],
-      ]];
+        // Title label is positioned relative to the icon.
+        [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.appIconView.trailingAnchor constant:8],
+        [self.titleLabel.centerYAnchor constraintEqualToAnchor:self.appIconView.centerYAnchor],
+        [self.titleLabel.trailingAnchor constraintLessThanOrEqualToAnchor:row.trailingAnchor constant:-kSideInset],
+    ]];
 
     // Good contrast on glass
     row.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
