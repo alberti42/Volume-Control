@@ -3,12 +3,10 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 73;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		654FF5D52EAD630700B9C699 /* LiquidGlassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654FF5D42EAD612800B9C699 /* LiquidGlassView.swift */; };
-		654FF5D62EAD691B00B9C699 /* CustomVolumeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 654FF5D02EAD484F00B9C699 /* CustomVolumeSlider.m */; };
 		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
 		65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0F267EAD240080A9A5 /* CoreAudio.framework */; };
@@ -24,7 +22,6 @@
 		65996E09267EB0FF0080A9A5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E08267EB0FF0080A9A5 /* main.m */; };
 		65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E13267EB14F0080A9A5 /* AppDelegate.m */; };
 		65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E16267EB14F0080A9A5 /* SystemVolume.m */; };
-		65A0E3002EAC226C009B6CC0 /* TahoeVolumeHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 65A0E2FF2EAC2268009B6CC0 /* TahoeVolumeHUD.m */; };
 		65DBBEF22E89EB6000752329 /* Volume Control Helper.app in Embed Login Helper */ = {isa = PBXBuildFile; fileRef = 65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		65EF8F5A2E888C9500AAE7B7 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; };
 		65EF8F5B2E888C9500AAE7B7 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -60,9 +57,6 @@
 		65220C76267F49D4007BE316 /* sign_update.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = sign_update.rb; sourceTree = "<group>"; };
 		6546E1892E8C66FB0087E95F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6546E18A2E8C66FB0087E95F /* VolumeControl.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VolumeControl.entitlements; sourceTree = "<group>"; };
-		654FF5CF2EAD483B00B9C699 /* CustomVolumeSlider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomVolumeSlider.h; sourceTree = "<group>"; };
-		654FF5D02EAD484F00B9C699 /* CustomVolumeSlider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomVolumeSlider.m; sourceTree = "<group>"; };
-		654FF5D42EAD612800B9C699 /* LiquidGlassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassView.swift; sourceTree = "<group>"; };
 		65533216267F5D86004231D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		65996C55267EA86A0080A9A5 /* Volume Control.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65996CDF267EAB660080A9A5 /* keyboard.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = keyboard.png; sourceTree = "<group>"; };
@@ -117,23 +111,28 @@
 		65996E0B267EB1300080A9A5 /* AppleRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppleRemote.h; sourceTree = "<group>"; };
 		65996E0C267EB1300080A9A5 /* CompatibilityFixes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompatibilityFixes.h; sourceTree = "<group>"; };
 		65996E0D267EB1300080A9A5 /* AppleRemote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppleRemote.m; sourceTree = "<group>"; };
-		65996E0F267EB14F0080A9A5 /* ISSoundAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISSoundAdditions.m; sourceTree = "<group>"; };
 		65996E10267EB14F0080A9A5 /* OSD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSD.h; sourceTree = "<group>"; };
-		65996E11267EB14F0080A9A5 /* IntroWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IntroWindowController.h; sourceTree = "<group>"; };
-		65996E12267EB14F0080A9A5 /* IntroWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IntroWindowController.m; sourceTree = "<group>"; };
 		65996E13267EB14F0080A9A5 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		65996E14267EB14F0080A9A5 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		65996E15267EB14F0080A9A5 /* SystemVolume.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemVolume.h; sourceTree = "<group>"; };
 		65996E16267EB14F0080A9A5 /* SystemVolume.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemVolume.m; sourceTree = "<group>"; };
-		65996E17267EB14F0080A9A5 /* ISSoundAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISSoundAdditions.h; sourceTree = "<group>"; };
-		65A0E2FD2EAC2238009B6CC0 /* TahoeVolumeHUD.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TahoeVolumeHUD.h; sourceTree = "<group>"; };
-		65A0E2FF2EAC2268009B6CC0 /* TahoeVolumeHUD.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TahoeVolumeHUD.m; sourceTree = "<group>"; };
 		65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		BC20FAA128902EF500CF5CAF /* Doppler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Doppler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		654FF5DC2EAD6C9900B9C699 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 65996C53267EA86A0080A9A5 /* Resources */;
+			membershipExceptions = (
+				HUDPanel.h,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		654FF5DA2EAD6C8E00B9C699 /* HUD */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (654FF5DC2EAD6C9900B9C699 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = HUD; sourceTree = "<group>"; };
 		65DBBEDB2E89DE1800752329 /* Volume Control Helper */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Volume Control Helper"; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -296,17 +295,9 @@
 		65996D09267EACB50080A9A5 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				654FF5D42EAD612800B9C699 /* LiquidGlassView.swift */,
-				654FF5D02EAD484F00B9C699 /* CustomVolumeSlider.m */,
-				654FF5CF2EAD483B00B9C699 /* CustomVolumeSlider.h */,
-				65A0E2FF2EAC2268009B6CC0 /* TahoeVolumeHUD.m */,
-				65A0E2FD2EAC2238009B6CC0 /* TahoeVolumeHUD.h */,
+				654FF5DA2EAD6C8E00B9C699 /* HUD */,
 				65996E14267EB14F0080A9A5 /* AppDelegate.h */,
 				65996E13267EB14F0080A9A5 /* AppDelegate.m */,
-				65996E11267EB14F0080A9A5 /* IntroWindowController.h */,
-				65996E12267EB14F0080A9A5 /* IntroWindowController.m */,
-				65996E17267EB14F0080A9A5 /* ISSoundAdditions.h */,
-				65996E0F267EB14F0080A9A5 /* ISSoundAdditions.m */,
 				65996E10267EB14F0080A9A5 /* OSD.h */,
 				65996E15267EB14F0080A9A5 /* SystemVolume.h */,
 				65996E16267EB14F0080A9A5 /* SystemVolume.m */,
@@ -389,6 +380,9 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				654FF5DA2EAD6C8E00B9C699 /* HUD */,
+			);
 			name = "Volume Control";
 			productName = VolumeControl;
 			productReference = 65996C55267EA86A0080A9A5 /* Volume Control.app */;
@@ -435,7 +429,6 @@
 				};
 			};
 			buildConfigurationList = 65996C50267EA86A0080A9A5 /* Build configuration list for PBXProject "Volume Control" */;
-			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -443,6 +436,7 @@
 				Base,
 			);
 			mainGroup = 65996C4C267EA86A0080A9A5;
+			preferredProjectObjectVersion = 50;
 			productRefGroup = 65996C56267EA86A0080A9A5 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -506,10 +500,7 @@
 				65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */,
 				65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */,
 				65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */,
-				654FF5D62EAD691B00B9C699 /* CustomVolumeSlider.m in Sources */,
 				65996E09267EB0FF0080A9A5 /* main.m in Sources */,
-				65A0E3002EAC226C009B6CC0 /* TahoeVolumeHUD.m in Sources */,
-				654FF5D52EAD630700B9C699 /* LiquidGlassView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

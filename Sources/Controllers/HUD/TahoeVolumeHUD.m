@@ -1,22 +1,17 @@
-//
-//  TahoeVolumeHUD.m
-//
-//  Created by Andrea Alberti on 25.10.25.
-//
-
 // FILE: TahoeVolumeHUD.m
 
 #import "TahoeVolumeHUD.h"
 #import "CustomVolumeSlider.h"
 #import <AppKit/NSGlassEffectView.h>
+#import "HUDPanel.h"
 
-// Product Module Name: `Volume_Control`
-#import "Volume_Control-Swift.h"  // gives you LiquidGlassView in ObjC
+// Product Module Name: Volume_Control
+#import "Volume_Control-Swift.h"  // exposes LiquidGlassView to ObjC
 
 @interface TahoeVolumeHUD ()
 
 // Window + layout
-@property (strong) NSPanel *panel;
+@property (strong) HUDPanel *panel;
 @property (strong) NSView *root;
 @property (strong) LiquidGlassView *glass;
 
@@ -24,6 +19,9 @@
 @property (strong) NSSlider *slider;
 @property (strong) NSImageView *appIconView;
 @property (strong) NSTimer *hideTimer;
+
+// Constraints
+@property (strong) NSLayoutConstraint *contentFixedHeight;
 
 @end
 
@@ -51,10 +49,10 @@ static const NSTimeInterval kAutoHide = 2.0;
 
     // Panel
     NSRect frame = NSMakeRect(0, 0, kHUDWidth, kHUDHeight);
-    _panel = [[NSPanel alloc] initWithContentRect:frame
-                                        styleMask:(NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel)
-                                          backing:NSBackingStoreBuffered
-                                            defer:NO];
+    _panel = [[HUDPanel alloc] initWithContentRect:frame
+                                         styleMask:(NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel)
+                                           backing:NSBackingStoreBuffered
+                                             defer:NO];
     _panel.opaque = NO;
     _panel.backgroundColor = NSColor.clearColor;
     _panel.hasShadow = YES;
@@ -66,6 +64,8 @@ static const NSTimeInterval kAutoHide = 2.0;
                               | NSWindowCollectionBehaviorCanJoinAllSpaces;
     _panel.floatingPanel = YES;
     _panel.becomesKeyOnlyIfNeeded = YES;
+
+    // Size fences
     _panel.contentMinSize = NSMakeSize(kHUDWidth, kHUDHeight);
     _panel.contentMaxSize = NSMakeSize(FLT_MAX, kHUDHeight);
     [_panel setContentSize:NSMakeSize(kHUDWidth, kHUDHeight)];
@@ -77,22 +77,36 @@ static const NSTimeInterval kAutoHide = 2.0;
     _root.layer.backgroundColor = NSColor.clearColor.CGColor;
     _panel.contentView = _root;
 
-    NSLayoutConstraint *fixedH = [_root.heightAnchor constraintEqualToConstant:kHUDHeight];
-    fixedH.priority = 999;
+    // Hard height on the window contentView — guarantees kHUDHeight regardless of fitting sizes
+    self.contentFixedHeight = [_panel.contentView.heightAnchor constraintEqualToConstant:kHUDHeight];
+    self.contentFixedHeight.priority = 1000;
+    self.contentFixedHeight.active = YES;
+
     [NSLayoutConstraint activateConstraints:@[
         [_root.leadingAnchor constraintEqualToAnchor:_panel.contentView.leadingAnchor],
         [_root.trailingAnchor constraintEqualToAnchor:_panel.contentView.trailingAnchor],
         [_root.topAnchor constraintEqualToAnchor:_panel.contentView.topAnchor],
         [_root.bottomAnchor constraintEqualToAnchor:_panel.contentView.bottomAnchor],
-        fixedH
     ]];
 
     // Glass (Swift class)
     [self installGlassInto:_root cornerRadius:kCornerRadius];
 
-    // Content row
-    NSView *row = [self buildSliderRow];
-    self.glass.contentView = row; // native contentView property
+    // Content wrapper (fills the glass)
+    NSView *wrapper = [NSView new];
+    wrapper.translatesAutoresizingMaskIntoConstraints = NO;
+
+    // 36-pt tall strip centered vertically
+    NSView *strip = [self buildSliderStrip]; // renamed method below
+    [wrapper addSubview:strip];
+    [NSLayoutConstraint activateConstraints:@[
+        [strip.centerYAnchor constraintEqualToAnchor:wrapper.centerYAnchor],
+        [strip.leadingAnchor constraintEqualToAnchor:wrapper.leadingAnchor constant:0],
+        [strip.trailingAnchor constraintEqualToAnchor:wrapper.trailingAnchor constant:0],
+    ]];
+
+    // Install in glass (wrapper stretches to the glass edges via LiquidGlassView)
+    self.glass.contentView = wrapper;
 
     return self;
 }
@@ -103,12 +117,13 @@ static const NSTimeInterval kAutoHide = 2.0;
     if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
 
-    NSRect f = self.panel.frame;
-    f.size = NSMakeSize(MAX(kHUDWidth, f.size.width), kHUDHeight);
-    [self.panel setFrame:f display:NO];
+    // Clamp size every time (prevents any sneaky intrinsic size from NSGlassEffectView chains)
+    [_panel setContentSize:NSMakeSize(kHUDWidth, kHUDHeight)];
 
     [self positionPanelBelowStatusButton:button];
-    [self.panel makeKeyAndOrderFront:nil];
+
+    // No more warning: do not call makeKeyAndOrderFront on a (normally) non-key panel
+    [self.panel orderFront:nil];
 
     [self.hideTimer invalidate];
     self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:kAutoHide
@@ -150,7 +165,7 @@ static const NSTimeInterval kAutoHide = 2.0;
     NSRect buttonRectInWindow = [button convertRect:button.bounds toView:nil];
     NSRect buttonInScreen = [button.window convertRectToScreen:buttonRectInWindow];
 
-    NSSize size = self.panel.frame.size;
+    NSSize size = NSMakeSize(kHUDWidth, kHUDHeight);
     CGFloat x = NSMidX(buttonInScreen) - size.width / 2.0;
     CGFloat y = NSMinY(buttonInScreen) - size.height - kBelowGap;
 
@@ -162,7 +177,7 @@ static const NSTimeInterval kAutoHide = 2.0;
     CGFloat margin = 8.0;
     x = MAX(NSMinX(vis) + margin, MIN(x, NSMaxX(vis) - margin - size.width));
 
-    [self.panel setFrameOrigin:NSMakePoint(round(x), round(y))];
+    [self.panel setFrame:NSMakeRect(round(x), round(y), size.width, size.height) display:NO];
 }
 
 #pragma mark - Glass
@@ -193,9 +208,10 @@ static const NSTimeInterval kAutoHide = 2.0;
 
 #pragma mark - Content
 
-- (NSView *)buildSliderRow {
-    NSView *row = [NSView new];
-    row.translatesAutoresizingMaskIntoConstraints = NO;
+// FILE: TahoeVolumeHUD.m  (replace the old method entirely)
+- (NSView *)buildSliderStrip {
+    NSView *strip = [NSView new];
+    strip.translatesAutoresizingMaskIntoConstraints = NO;
 
     // App icon (left)
     self.appIconView = [NSImageView new];
@@ -223,34 +239,33 @@ static const NSTimeInterval kAutoHide = 2.0;
     cell.controlSize = NSControlSizeSmall;
     slider.cell = cell;
 
-    [slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
-    [slider setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
     self.slider = slider;
 
-    [row addSubview:self.appIconView];
-    [row addSubview:slider];
-    [row addSubview:iconRight];
+    [strip addSubview:self.appIconView];
+    [strip addSubview:slider];
+    [strip addSubview:iconRight];
 
+    // Layout: 36-pt *height on the STRIP*, not on a view that fills the glass
     [NSLayoutConstraint activateConstraints:@[
-        [self.appIconView.leadingAnchor constraintEqualToAnchor:row.leadingAnchor constant:12],
-        [self.appIconView.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
+        [strip.heightAnchor constraintEqualToConstant:36],
+
+        [self.appIconView.leadingAnchor constraintEqualToAnchor:strip.leadingAnchor constant:12],
+        [self.appIconView.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
         [self.appIconView.widthAnchor constraintEqualToConstant:18],
         [self.appIconView.heightAnchor constraintEqualToConstant:18],
 
-        [iconRight.trailingAnchor constraintEqualToAnchor:row.trailingAnchor constant:-12],
-        [iconRight.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
+        [iconRight.trailingAnchor constraintEqualToAnchor:strip.trailingAnchor constant:-12],
+        [iconRight.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
 
         [slider.leadingAnchor constraintEqualToAnchor:self.appIconView.trailingAnchor constant:8],
         [slider.trailingAnchor constraintEqualToAnchor:iconRight.leadingAnchor constant:-8],
-        [slider.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
-
-        [row.heightAnchor constraintEqualToConstant:36],
+        [slider.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
     ]];
 
-    // Ensure good contrast on glass
-    row.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
+    // Good contrast on glass
+    strip.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
 
-    return row;
+    return strip;
 }
 
 #pragma mark - Actions
@@ -268,7 +283,7 @@ static const NSTimeInterval kAutoHide = 2.0;
                                                      repeats:NO];
 }
 
-#pragma mark - Optional: App icon setter (call from AppDelegate)
+#pragma mark - Optional: App icon setter
 
 - (void)setAppIcon:(NSImage *)image {
     self.appIconView.image = image;
