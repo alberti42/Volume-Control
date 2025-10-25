@@ -23,7 +23,6 @@
     [fg fill];
 }
 
-// **MODIFIED:** The knob is now drawn only when the isHovered property is true.
 - (void)drawKnob:(NSRect)knobRect {
     if (self.isHovered) {
         CGFloat d = 12;

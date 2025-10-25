@@ -9,7 +9,7 @@
 
 @interface CustomVolumeSlider : NSSliderCell
 
-// Add a property to track the hover state
+// This property will control whether the knob is visible.
 @property (nonatomic, assign) BOOL isHovered;
 
 @end

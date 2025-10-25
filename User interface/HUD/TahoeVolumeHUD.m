@@ -4,6 +4,7 @@
 #import "CustomVolumeSlider.h"
 #import <AppKit/NSGlassEffectView.h>
 #import "HUDPanel.h"
+#import "HoverSlider.h"
 
 // Product Module Name: Volume_Control
 #import "Volume_Control-Swift.h"  // exposes LiquidGlassView to ObjC
@@ -217,12 +218,17 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
     [glass setVariantIfAvailable:5];
     [glass setScrimStateIfAvailable:0];
     [glass setSubduedStateIfAvailable:0];
+    
+//    [glass setValue:@(YES) forKey:@"_useReducedShadowRadius"]; // smaller or sharper rim
+//    [glass setValue:@(0)   forKey:@"_adaptiveAppearance"];      adapts rim contrast to dark/light mode
+//    [glass setValue:@(0)   forKey:@"_contentLensing"];         // if 1, simulates focus depth
 
     // Optional SwiftUI-like post-filters:
     //[glass applyVisualAdjustmentsWithSaturation:1.5 brightness:0.2 blur:0.25];
 }
 
 #pragma mark - Content
+
 
 - (NSView *)buildSliderStrip {
     NSView *strip = [NSView new];
@@ -246,12 +252,18 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
     [iconRight setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
     [iconRight setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-    // Slider (custom white cell)
-    NSSlider *slider = [NSSlider sliderWithValue:0.6 minValue:0.0 maxValue:1.0 target:self action:@selector(sliderChanged:)];
+    // <-- 2. USE THE NEW HoverSlider CLASS
+    HoverSlider *slider = [HoverSlider new];
+    slider.minValue = 0.0;
+    slider.maxValue = 1.0;
+    slider.doubleValue = 0.6; // initial value
+    slider.target = self;
+    slider.action = @selector(sliderChanged:);
+    
     slider.translatesAutoresizingMaskIntoConstraints = NO;
     slider.controlSize = NSControlSizeSmall;
 
-    CustomVolumeSlider *cell = [CustomVolumeSlider new]; // NSSliderCell subclass
+    CustomVolumeSlider *cell = [CustomVolumeSlider new];
     cell.minValue = 0.0;
     cell.maxValue = 1.0;
     cell.controlSize = NSControlSizeSmall;
