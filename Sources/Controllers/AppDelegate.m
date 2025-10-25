@@ -10,6 +10,7 @@
 #import "SystemVolume.h"
 #import "AccessibilityDialog.h"
 #import "TahoeVolumeHUD.h"
+#import "GlassDemoWindowController.h"
 
 #import <IOKit/hidsystem/ev_keymap.h>
 #import <ServiceManagement/ServiceManagement.h>
@@ -812,6 +813,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		accessibilityDialog = [[AccessibilityDialog alloc] initWithWindowNibName:@"AccessibilityDialog"];
 		[accessibilityDialog showWindow:self];
 	}
+    [GlassDemoWindowController present];
 }
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)sender hasVisibleWindows:(BOOL)flag
