@@ -1,4 +1,5 @@
 #import "TahoeVolumeHUD.h"
+#import <AppKit/NSGlassEffectView.h> // macOS 26 SDK
 
 @interface TahoeVolumeHUD ()
 // Properties
@@ -17,9 +18,82 @@
 - (void)positionPanelBelowStatusButton:(NSStatusBarButton *)button;
 - (NSView *)buildSliderRow;
 - (void)sliderChanged:(NSSlider *)sender;
+
+// … your existing properties …
+@property (strong, nonatomic) NSTimer *debugTimer;
+@property (assign, nonatomic) NSInteger debugVariantIndex;
+@property (assign, nonatomic) NSInteger debugScrim;
+@property (assign, nonatomic) NSInteger debugSubdued;
+
+- (void)startGlassDebugCycler;
+- (void)stopGlassDebugCycler;
+- (void)tickGlassDebugCycler:(NSTimer *)timer;
 @end
 
 @implementation TahoeVolumeHUD
+
+- (void)startGlassDebugCycler {
+    [self stopGlassDebugCycler];
+
+    // Initialize from current values if present (best effort)
+    @try {
+        id v = [self.glass valueForKey:@"_variant"];
+        id s = [self.glass valueForKey:@"_scrimState"];
+        id d = [self.glass valueForKey:@"_subduedState"];
+        self.debugVariantIndex = [v respondsToSelector:@selector(integerValue)] ? [v integerValue] : 0;
+        self.debugScrim        = [s respondsToSelector:@selector(integerValue)] ? [s integerValue] : 0;
+        self.debugSubdued      = [d respondsToSelector:@selector(integerValue)] ? [d integerValue] : 0;
+    } @catch (...) {
+        self.debugVariantIndex = 0;
+        self.debugScrim = 0;
+        self.debugSubdued = 0;
+    }
+
+    // Fire every second on the main run loop
+    self.debugTimer = [NSTimer scheduledTimerWithTimeInterval:1.0
+                                                       target:self
+                                                     selector:@selector(tickGlassDebugCycler:)
+                                                     userInfo:nil
+                                                      repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:self.debugTimer forMode:NSRunLoopCommonModes];
+}
+
+- (void)stopGlassDebugCycler {
+    [self.debugTimer invalidate];
+    self.debugTimer = nil;
+}
+
+- (void)tickGlassDebugCycler:(NSTimer *)timer {
+    // Only meaningful on NSGlassEffectView
+    if (![self.glass respondsToSelector:NSSelectorFromString(@"setContentView:")]) return;
+
+    // Cycle: 0..23 variants (based on the mapping you have), toggle scrim/subdued
+    self.debugVariantIndex = (self.debugVariantIndex + 1) % 30;
+    self.debugScrim   = (self.debugScrim == 0) ? 1 : 0;
+    self.debugSubdued = (self.debugSubdued == 0) ? 1 : 0;
+
+    @try {
+        [self.glass setValue:@(self.debugVariantIndex) forKey:@"_variant"];
+        [self.glass setValue:@(self.debugScrim)        forKey:@"_scrimState"];
+        [self.glass setValue:@(self.debugSubdued)      forKey:@"_subduedState"];
+    } @catch (...) {
+        // If any private key disappears in a future build, just ignore
+    }
+
+    // Read back (best effort) and log
+    NSInteger v = self.debugVariantIndex, s = self.debugScrim, d = self.debugSubdued;
+    @try {
+        id rv = [self.glass valueForKey:@"_variant"];
+        id rs = [self.glass valueForKey:@"_scrimState"];
+        id rd = [self.glass valueForKey:@"_subduedState"];
+        if ([rv respondsToSelector:@selector(integerValue)]) v = [rv integerValue];
+        if ([rs respondsToSelector:@selector(integerValue)]) s = [rs integerValue];
+        if ([rd respondsToSelector:@selector(integerValue)]) d = [rd integerValue];
+    } @catch (...) {}
+
+    NSLog(@"[GlassDebug] variant=%ld scrim=%ld subdued=%ld", (long)v, (long)s, (long)d);
+}
+
 
 + (TahoeVolumeHUD *)sharedManager {
     static TahoeVolumeHUD *instance;
@@ -78,6 +152,12 @@
 
     // Install glass
     [self installGlassInto:_root cornerRadius:24.0];
+    
+    // Start debug cycler only if this is a real NSGlassEffectView (macOS 26+)
+    if ([self.glass respondsToSelector:NSSelectorFromString(@"setContentView:")]) {
+//        [self startGlassDebugCycler];
+    }
+
 
     // Build slider row
     NSView *row = [self buildSliderRow];
@@ -125,11 +205,11 @@
 
     // Restart autohide timer (2s)
     [self.hideTimer invalidate];
-    self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
-                                                      target:self
-                                                    selector:@selector(hide)
-                                                    userInfo:nil
-                                                     repeats:NO];
+//    self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
+//                                                      target:self
+//                                                    selector:@selector(hide)
+//                                                    userInfo:nil
+//                                                     repeats:NO];
 }
 
 - (void)setVolume:(double)volume {
@@ -141,6 +221,9 @@
     [self.panel orderOut:nil];
     [self.hideTimer invalidate];
     self.hideTimer = nil;
+    
+    [self stopGlassDebugCycler];
+    
     if ([self.delegate respondsToSelector:@selector(hudDidHide:)]) {
         [self.delegate hudDidHide:self];
     }
@@ -197,10 +280,10 @@
             g.translatesAutoresizingMaskIntoConstraints = NO;
 
             // Public API: Clear style, radius, subtle tint
-            [g setValue:@(1) forKey:@"style"]; // Clear
+            [g setValue:@(NSGlassEffectViewStyleClear) forKey:@"style"]; // Clear
             [g setValue:@(radius) forKey:@"cornerRadius"];
-            [g setValue:[NSColor colorWithCalibratedWhite:1 alpha:1] forKey:@"tintColor"];
-
+            [g setValue:[NSColor colorWithWhite:1.0 alpha:0.25] forKey:@"tintColor"];
+            
             // Optional private tweaks (use at your own risk; see https://github.com/Meridius-Labs/electron-liquid-glass/blob/main/src/glass_effect.mm)
             /* From: https://github.com/Meridius-Labs/electron-liquid-glass/blob/main/js/variants.ts
              regular: 0,
@@ -230,9 +313,30 @@
              */
             [g setValue:@(19) forKey:@"_variant"];        // see mapping in
             [g setValue:@(0) forKey:@"_scrimState"];     // 0/1
-            [g setValue:@(1) forKey:@"_subduedState"];   // 0/1
+            [g setValue:@(0) forKey:@"_subduedState"];   // 0/1
+            
+            [g setValue:@(YES) forKey:@"_useReducedShadowRadius"]; // smaller or sharper rim
+            [g setValue:@(1)   forKey:@"_adaptiveAppearance"];     // adapts rim contrast to dark/light mode
+            [g setValue:@(1)   forKey:@"_contentLensing"];         // if 1, simulates focus depth
             
             glass = g;
+            
+            // Add an inner border layer to simulate light rim
+            CALayer *rim = [CALayer layer];
+            rim.frame = glass.bounds;
+            rim.cornerRadius = radius;
+            rim.borderWidth = 10.0; // very thin
+            rim.borderColor = [[NSColor colorWithWhite:1.0 alpha:0.25] CGColor]; // subtle white
+            rim.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
+            rim.masksToBounds = YES;
+
+            rim.shadowColor = [NSColor.whiteColor CGColor];
+            rim.shadowRadius = 4.0;
+            rim.shadowOpacity = 0;
+            rim.shadowOffset = CGSizeZero;
+
+            [glass.layer addSublayer:rim];
+
         }
     }
 
