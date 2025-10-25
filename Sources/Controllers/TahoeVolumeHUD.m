@@ -11,7 +11,8 @@
 
 #define HEIGHT_POPOVER 64
 #define WIDTH_POPOVER 290
-#define GAP_POPOVER 10
+#define GAP_POPOVER 8
+#define CORNER_RADIUS 24
 
 // Private methods (forward declarations)
 - (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius;
@@ -151,7 +152,7 @@
     ]];
 
     // Install glass
-    [self installGlassInto:_root cornerRadius:24.0];
+    [self installGlassInto:_root cornerRadius:CORNER_RADIUS];
     
     // Start debug cycler only if this is a real NSGlassEffectView (macOS 26+)
     if ([self.glass respondsToSelector:NSSelectorFromString(@"setContentView:")]) {
@@ -205,11 +206,11 @@
 
     // Restart autohide timer (2s)
     [self.hideTimer invalidate];
-//    self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
-//                                                      target:self
-//                                                    selector:@selector(hide)
-//                                                    userInfo:nil
-//                                                     repeats:NO];
+    self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
+                                                      target:self
+                                                    selector:@selector(hide)
+                                                    userInfo:nil
+                                                     repeats:NO];
 }
 
 - (void)setVolume:(double)volume {
@@ -276,67 +277,39 @@
     if (@available(macOS 26.0, *)) {
         Class GlassCls = NSClassFromString(@"NSGlassEffectView");
         if (GlassCls) {
-            NSView *g = [[GlassCls alloc] initWithFrame:host.bounds];
+            NSGlassEffectView *g = [[NSGlassEffectView alloc] initWithFrame:host.bounds];
             g.translatesAutoresizingMaskIntoConstraints = NO;
-
-            // Public API: Clear style, radius, subtle tint
-            [g setValue:@(NSGlassEffectViewStyleClear) forKey:@"style"]; // Clear
-            [g setValue:@(radius) forKey:@"cornerRadius"];
-            [g setValue:[NSColor colorWithWhite:1.0 alpha:0.25] forKey:@"tintColor"];
+        
+            // Public properties
+            g.style        = NSGlassEffectViewStyleClear;
+            g.cornerRadius = radius;
+            g.tintColor    = [NSColor colorWithCalibratedWhite:1 alpha:0.06];
             
-            // Optional private tweaks (use at your own risk; see https://github.com/Meridius-Labs/electron-liquid-glass/blob/main/src/glass_effect.mm)
-            /* From: https://github.com/Meridius-Labs/electron-liquid-glass/blob/main/js/variants.ts
-             regular: 0,
-             clear: 1,
-             dock: 2,
-             appIcons: 3,
-             widgets: 4,
-             text: 5,
-             avplayer: 6,
-             facetime: 7,
-             controlCenter: 8,
-             notificationCenter: 9,
-             monogram: 10,
-             bubbles: 11,
-             identity: 12,
-             focusBorder: 13,
-             focusPlatter: 14,
-             keyboard: 15,
-             sidebar: 16,
-             abuttedSidebar: 17,
-             inspector: 18,
-             control: 19,
-             loupe: 20,
-             slider: 21,
-             camera: 22,
-             cartouchePopover: 23,
-             */
-            [g setValue:@(19) forKey:@"_variant"];        // see mapping in
-            [g setValue:@(0) forKey:@"_scrimState"];     // 0/1
-            [g setValue:@(0) forKey:@"_subduedState"];   // 0/1
+            // Optional: private knobs
+            [g setValue:@(8) forKey:@"_variant"];      // cartouchePopover
+            //[g setValue:@(1)  forKey:@"_scrimState"];
+            [g setValue:@(0)  forKey:@"_subduedState"];
             
             [g setValue:@(YES) forKey:@"_useReducedShadowRadius"]; // smaller or sharper rim
-            [g setValue:@(1)   forKey:@"_adaptiveAppearance"];     // adapts rim contrast to dark/light mode
-            [g setValue:@(1)   forKey:@"_contentLensing"];         // if 1, simulates focus depth
-            
-            glass = g;
-            
-            // Add an inner border layer to simulate light rim
+            [g setValue:@(0)   forKey:@"_adaptiveAppearance"];     // adapts rim contrast to dark/light mode
+            [g setValue:@(0)   forKey:@"_contentLensing"];         // if 1, simulates focus depth
+
+            // Optional rim accent (very subtle)
+            g.wantsLayer = YES;
             CALayer *rim = [CALayer layer];
-            rim.frame = glass.bounds;
+            rim.frame = g.bounds;
             rim.cornerRadius = radius;
-            rim.borderWidth = 10.0; // very thin
-            rim.borderColor = [[NSColor colorWithWhite:1.0 alpha:0.25] CGColor]; // subtle white
+            rim.borderWidth = 1.0; // thin
+            rim.borderColor = [[NSColor colorWithWhite:1.0 alpha:0.20] CGColor];
             rim.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
             rim.masksToBounds = YES;
-
             rim.shadowColor = [NSColor.whiteColor CGColor];
             rim.shadowRadius = 4.0;
-            rim.shadowOpacity = 0;
+            rim.shadowOpacity = 0.12;
             rim.shadowOffset = CGSizeZero;
-
-            [glass.layer addSublayer:rim];
-
+            [g.layer addSublayer:rim];
+            
+            glass = g;
         }
     }
 
