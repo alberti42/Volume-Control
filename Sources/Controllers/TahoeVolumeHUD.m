@@ -8,6 +8,10 @@
 @property (strong) NSSlider *slider;
 @property (strong) NSTimer *hideTimer;
 
+#define HEIGHT_POPOVER 64
+#define WIDTH_POPOVER 290
+#define GAP_POPOVER 10
+
 // Private methods (forward declarations)
 - (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius;
 - (void)positionPanelBelowStatusButton:(NSStatusBarButton *)button;
@@ -31,7 +35,7 @@
     if (!self) return nil;
 
     // Window: borderless, non-opaque, menu-level, non-activating popover-like panel
-    NSRect frame = NSMakeRect(0, 0, 290, 64);
+    NSRect frame = NSMakeRect(0, 0, WIDTH_POPOVER, HEIGHT_POPOVER);
     _panel = [[NSPanel alloc] initWithContentRect:frame
                                         styleMask:(NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel)
                                           backing:NSBackingStoreBuffered
@@ -49,10 +53,10 @@
     _panel.floatingPanel = YES;
     _panel.becomesKeyOnlyIfNeeded = YES;
 
-    // Fix height to 64, allow free width if you ever want it
-    _panel.contentMinSize = NSMakeSize(290, 64);
-    _panel.contentMaxSize = NSMakeSize(FLT_MAX, 64);
-    [_panel setContentSize:NSMakeSize(290, 64)];
+    // Fix height to HEIGHT_POPOVER, allow free width if you ever want it
+    _panel.contentMinSize = NSMakeSize(WIDTH_POPOVER, HEIGHT_POPOVER);
+    _panel.contentMaxSize = NSMakeSize(FLT_MAX, HEIGHT_POPOVER);
+    [_panel setContentSize:NSMakeSize(WIDTH_POPOVER, HEIGHT_POPOVER)];
 
     // Root host (transparent)
     _root = [[NSView alloc] initWithFrame:_panel.contentView.bounds];
@@ -61,7 +65,7 @@
     _root.layer.backgroundColor = NSColor.clearColor.CGColor;
     _panel.contentView = _root;
 
-    NSLayoutConstraint *h = [_root.heightAnchor constraintEqualToConstant:64];
+    NSLayoutConstraint *h = [_root.heightAnchor constraintEqualToConstant:HEIGHT_POPOVER];
     h.priority = 999;
 
     [NSLayoutConstraint activateConstraints:@[
@@ -109,9 +113,9 @@
     if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
 
-    // Size (kept at 64 height)
+    // Size (kept at HEIGHT_POPOVER height)
     NSRect f = self.panel.frame;
-    f.size = NSMakeSize(MAX(290, f.size.width), 64);
+    f.size = NSMakeSize(MAX(WIDTH_POPOVER, f.size.width), HEIGHT_POPOVER);
     [self.panel setFrame:f display:NO];
 
     // Position directly beneath the status bar button
@@ -162,7 +166,7 @@
     NSRect buttonInScreen = [button.window convertRectToScreen:buttonRectInWindow];
 
     // Panel size and gap
-    const CGFloat gap = 14.0;
+    const CGFloat gap = 6.0 + GAP_POPOVER;
     NSSize panelSize = self.panel.frame.size;
 
     // Center under the button horizontally
@@ -195,12 +199,39 @@
             // Public API: Clear style, radius, subtle tint
             [g setValue:@(1) forKey:@"style"]; // Clear
             [g setValue:@(radius) forKey:@"cornerRadius"];
-            [g setValue:[NSColor colorWithCalibratedWhite:0 alpha:0.06] forKey:@"tintColor"];
+            [g setValue:[NSColor colorWithCalibratedWhite:1 alpha:1] forKey:@"tintColor"];
 
-            // Optional private tweaks (use at your own risk):
-            // [g setValue:@(23) forKey:@"_variant"];   // cartouchePopover
-            // [g setValue:@(1)  forKey:@"_scrimState"];
-
+            // Optional private tweaks (use at your own risk; see https://github.com/Meridius-Labs/electron-liquid-glass/blob/main/src/glass_effect.mm)
+            /* From: https://github.com/Meridius-Labs/electron-liquid-glass/blob/main/js/variants.ts
+             regular: 0,
+             clear: 1,
+             dock: 2,
+             appIcons: 3,
+             widgets: 4,
+             text: 5,
+             avplayer: 6,
+             facetime: 7,
+             controlCenter: 8,
+             notificationCenter: 9,
+             monogram: 10,
+             bubbles: 11,
+             identity: 12,
+             focusBorder: 13,
+             focusPlatter: 14,
+             keyboard: 15,
+             sidebar: 16,
+             abuttedSidebar: 17,
+             inspector: 18,
+             control: 19,
+             loupe: 20,
+             slider: 21,
+             camera: 22,
+             cartouchePopover: 23,
+             */
+            [g setValue:@(19) forKey:@"_variant"];        // see mapping in
+            [g setValue:@(0) forKey:@"_scrimState"];     // 0/1
+            [g setValue:@(1) forKey:@"_subduedState"];   // 0/1
+            
             glass = g;
         }
     }
