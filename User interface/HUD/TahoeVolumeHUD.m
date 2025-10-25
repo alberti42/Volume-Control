@@ -33,6 +33,11 @@ static const CGFloat kHUDWidth       = 290.0;
 static const CGFloat kCornerRadius   = 24.0;
 static const CGFloat kBelowGap       = 14.0;
 static const NSTimeInterval kAutoHide = 2.0;
+static const CGFloat kTopInset = 10.0;
+static const CGFloat topMargin = 0.0; // you already use 12; keep or tweak
+static const CGFloat leftMargin = 20.0; // optional
+static const CGFloat kSideInset  = 12.0;  // left/right margin
+static const CGFloat kBottomInset = 8.0;  // optional breathing room at bottom
 
 @implementation TahoeVolumeHUD
 
@@ -120,10 +125,10 @@ static const NSTimeInterval kAutoHide = 2.0;
     // Vertical layout: header on top, small spacing, then strip
     [NSLayoutConstraint activateConstraints:@[
         [header.topAnchor constraintEqualToAnchor:stack.topAnchor],
-        [header.leadingAnchor constraintEqualToAnchor:stack.leadingAnchor constant:12],
-        [header.trailingAnchor constraintEqualToAnchor:stack.trailingAnchor constant:-12],
+        [header.leadingAnchor constraintEqualToAnchor:stack.leadingAnchor constant:kSideInset],
+        [header.trailingAnchor constraintEqualToAnchor:stack.trailingAnchor constant:-kSideInset],
 
-        [strip.topAnchor constraintEqualToAnchor:header.bottomAnchor constant:6],
+        [strip.topAnchor constraintEqualToAnchor:header.bottomAnchor constant:kBottomInset],
         [strip.leadingAnchor constraintEqualToAnchor:stack.leadingAnchor],
         [strip.trailingAnchor constraintEqualToAnchor:stack.trailingAnchor],
         [strip.bottomAnchor constraintEqualToAnchor:stack.bottomAnchor],
@@ -138,13 +143,13 @@ static const NSTimeInterval kAutoHide = 2.0;
 
 #pragma mark - Public API
 
-- (void)showHUDWithVolume:(double)volume usingIcon:(NSImage*)icon anchoredToStatusButton:(NSStatusBarButton *)button {
+- (void)showHUDWithVolume:(double)volume usingIcon:(NSImage*)icon andLabel:(NSString*)label anchoredToStatusButton:(NSStatusBarButton *)button {
     if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
 
     // Update header
     self.appIconView.image = icon;
-    self.titleLabel.stringValue = @"Place holder"; // TODO: replace with actual source (player name, etc.)
+    self.titleLabel.stringValue = label; // TODO: replace with actual source (player name, etc.)
 
     // Size fence each time
     [_panel setContentSize:NSMakeSize(kHUDWidth, kHUDHeight)];
@@ -318,16 +323,18 @@ static const NSTimeInterval kAutoHide = 2.0;
     [row addSubview:self.titleLabel];
 
     [NSLayoutConstraint activateConstraints:@[
-        [self.appIconView.leadingAnchor constraintEqualToAnchor:row.leadingAnchor],
-        [self.appIconView.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
-        [self.appIconView.widthAnchor constraintEqualToConstant:18],
-        [self.appIconView.heightAnchor constraintEqualToConstant:18],
+          // --- add margins here ---
+          [self.appIconView.leadingAnchor constraintEqualToAnchor:row.leadingAnchor constant:leftMargin],
+          [self.appIconView.topAnchor constraintEqualToAnchor:row.topAnchor constant:topMargin],
+          [self.appIconView.widthAnchor constraintEqualToConstant:18],
+          [self.appIconView.heightAnchor constraintEqualToConstant:18],
 
-        [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.appIconView.trailingAnchor constant:8],
-        [self.titleLabel.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
+          [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.appIconView.trailingAnchor constant:8],
+          [self.titleLabel.centerYAnchor constraintEqualToAnchor:self.appIconView.centerYAnchor],
+          [self.titleLabel.trailingAnchor constraintLessThanOrEqualToAnchor:row.trailingAnchor constant:-kBottomInset],
 
-        [row.heightAnchor constraintEqualToConstant:20],
-    ]];
+          [row.bottomAnchor constraintEqualToAnchor:self.appIconView.bottomAnchor constant:topMargin],
+      ]];
 
     // Good contrast on glass
     row.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];

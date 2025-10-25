@@ -629,7 +629,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             if(!_hideVolumeWindow){
                 if (@available(macOS 16.0, *)) {
                     // On Tahoe, show the new popover HUD.
-                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:0 usingIcon:[runningPlayerPtr icon] anchoredToStatusButton:self.statusBar.button];
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:0 usingIcon:[runningPlayerPtr icon] andLabel:[systemAudio getDefaultOutputDeviceName]  anchoredToStatusButton:self.statusBar.button];
                 } else {
                     // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
@@ -651,7 +651,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             {
                 if (@available(macOS 16.0, *)) {
                     // On Tahoe, show the new popover HUD.
-                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:[runningPlayerPtr oldVolume] usingIcon:[runningPlayerPtr icon] anchoredToStatusButton:self.statusBar.button];
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:[runningPlayerPtr oldVolume] usingIcon:[runningPlayerPtr icon] andLabel:[systemAudio getDefaultOutputDeviceName] anchoredToStatusButton:self.statusBar.button];
                 } else {
                     // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
@@ -898,13 +898,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[self setLockSystemAndPlayerVolume:[preferences boolForKey:  @"LockSystemAndPlayerVolume"]];
 	[self setAutomaticUpdates:[preferences boolForKey:     @"AutomaticUpdates"]];
 	[self setHideFromStatusBar:[preferences boolForKey:    @"hideFromStatusBarPreference"]];
-    if (@available(macOS 16.0, *)) {
-        // Running on Tahoe (2026) or newer
-        NSMenuItem *item = [self.statusMenu itemWithTag:HIDE_VOLUME_WINDOW_ID];
-        [item setHidden:YES];
-    } else {
-        [self setHideVolumeWindow:[preferences boolForKey:     @"hideVolumeWindowPreference"]];
-    }
+    [self setHideVolumeWindow:[preferences boolForKey:     @"hideVolumeWindowPreference"]];
 	[[self iTunesBtn] setState:[preferences boolForKey:    @"iTunesControl"]];
 	if (@available(macOS 10.15, *)) {
 		[[self iTunesBtn] setTitle:@"Music"];
@@ -1178,7 +1172,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         NSInteger numQrtsBlks = 0;
         
         if (@available(macOS 16.0, *)) {
-            // Running on Tahoe (2026) or newer
+            // On Tahoe, show the new popover HUD anchored to the status item.
         } else {
             image = (volume > 0)? OSDGraphicSpeaker : OSDGraphicSpeakerMute;
             numFullBlks = floor(volume/6.25);
@@ -1191,7 +1185,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         {
             if (@available(macOS 16.0, *)) {
                 // On Tahoe, show the new popover HUD anchored to the status item.
-                [[TahoeVolumeHUD sharedManager] showHUDWithVolume:volume usingIcon:[runningPlayerPtr icon] anchoredToStatusButton:self.statusBar.button];
+                [[TahoeVolumeHUD sharedManager] showHUDWithVolume:volume usingIcon:[runningPlayerPtr icon] andLabel:[systemAudio getDefaultOutputDeviceName] anchoredToStatusButton:self.statusBar.button];
             } else {
                 if(image) {
                     id osdMgr = [self->OSDManager sharedManager];
