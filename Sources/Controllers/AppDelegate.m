@@ -10,7 +10,6 @@
 #import "SystemVolume.h"
 #import "AccessibilityDialog.h"
 #import "TahoeVolumeHUD.h"
-#import "GlassDemoWindowController.h"
 
 #import <IOKit/hidsystem/ev_keymap.h>
 #import <ServiceManagement/ServiceManagement.h>
@@ -96,7 +95,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
     // Decide here if it's a volume/mute event
     BOOL isMediaKey = (keyCode == NX_KEYTYPE_MUTE ||
-                       keyCode == NX_KEYTYPE_SOUND_UP ||
+                       //keyCode == NX_KEYTYPE_SOUND_UP ||
                        keyCode == NX_KEYTYPE_SOUND_DOWN);
     
     if(isMediaKey) {
@@ -628,7 +627,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             if(!_hideVolumeWindow){
                 if (@available(macOS 16.0, *)) {
                     // On Tahoe, show the new popover HUD.
-                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:0 anchoredToView:self.statusBar.button];
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:0 anchoredToStatusButton:self.statusBar.button];
                 } else {
                     // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
@@ -650,7 +649,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             {
                 if (@available(macOS 16.0, *)) {
                     // On Tahoe, show the new popover HUD.
-                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:[runningPlayerPtr oldVolume] anchoredToView:self.statusBar.button];
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:[runningPlayerPtr oldVolume] anchoredToStatusButton:self.statusBar.button];
                 } else {
                     // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
@@ -813,7 +812,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		accessibilityDialog = [[AccessibilityDialog alloc] initWithWindowNibName:@"AccessibilityDialog"];
 		[accessibilityDialog showWindow:self];
 	}
-    [GlassDemoWindowController present];
+    
+    [TahoeVolumeHUD sharedManager].delegate = self;
 }
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)sender hasVisibleWindows:(BOOL)flag
@@ -1192,7 +1192,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         {
             if (@available(macOS 16.0, *)) {
                 // On Tahoe, show the new popover HUD anchored to the status item.
-                [[TahoeVolumeHUD sharedManager] showHUDWithVolume:volume anchoredToView:self.statusBar.button];
+                [[TahoeVolumeHUD sharedManager] showHUDWithVolume:volume anchoredToStatusButton:self.statusBar.button];
             } else {
                 if(image) {
                     id osdMgr = [self->OSDManager sharedManager];

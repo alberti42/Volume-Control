@@ -1,159 +1,297 @@
-//
-//  TahoeVolumeHUD.m
-//  Volume Control
-//
-
 #import "TahoeVolumeHUD.h"
-#import "CustomGlassEffectView.h"
 
 @interface TahoeVolumeHUD ()
-@property (nonatomic, strong) NSPanel *panel;
-@property (nonatomic, strong) CustomGlassEffectView *glassContainer;
-@property (nonatomic, strong) NSSlider *slider;
-@property (nonatomic, strong) NSTimer *hideTimer;
+// Properties
+@property (strong) NSPanel *panel;
+@property (strong) NSView *root;
+@property (strong) NSView *glass;
+@property (strong) NSSlider *slider;
+@property (strong) NSTimer *hideTimer;
+
+// Private methods (forward declarations)
+- (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius;
+- (void)positionPanelBelowStatusButton:(NSStatusBarButton *)button;
+- (NSView *)buildSliderRow;
+- (void)sliderChanged:(NSSlider *)sender;
 @end
 
 @implementation TahoeVolumeHUD
 
-+ (instancetype)sharedManager {
-    static TahoeVolumeHUD *sharedInstance = nil;
++ (TahoeVolumeHUD *)sharedManager {
+    static TahoeVolumeHUD *instance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedInstance = [[self alloc] init];
+        instance = [[TahoeVolumeHUD alloc] initPrivate];
     });
-    return sharedInstance;
+    return instance;
 }
 
-- (instancetype)init {
+- (instancetype)initPrivate {
     self = [super init];
     if (!self) return nil;
 
-    NSPanel *panel = [[NSPanel alloc] initWithContentRect:NSMakeRect(0, 0, 290, 65)
-                                                styleMask:(NSWindowStyleMaskBorderless |
-                                                           NSWindowStyleMaskNonactivatingPanel)  // 👈 non-activating
-                                                  backing:NSBackingStoreBuffered
-                                                    defer:YES];
+    // Window: borderless, non-opaque, menu-level, non-activating popover-like panel
+    NSRect frame = NSMakeRect(0, 0, 290, 64);
+    _panel = [[NSPanel alloc] initWithContentRect:frame
+                                        styleMask:(NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel)
+                                          backing:NSBackingStoreBuffered
+                                            defer:NO];
 
-    panel.opaque = NO;
-    panel.backgroundColor = NSColor.clearColor;
-    panel.hasShadow = YES;
-    panel.hidesOnDeactivate = YES;
+    _panel.opaque = NO;
+    _panel.backgroundColor = NSColor.clearColor;
+    _panel.hasShadow = YES;
+    _panel.hidesOnDeactivate = YES;
+    _panel.level = NSPopUpMenuWindowLevel;
+    _panel.movableByWindowBackground = NO;
+    _panel.collectionBehavior = NSWindowCollectionBehaviorTransient |
+                                 NSWindowCollectionBehaviorIgnoresCycle |
+                                 NSWindowCollectionBehaviorFullScreenAuxiliary;
+    _panel.floatingPanel = YES;
+    _panel.becomesKeyOnlyIfNeeded = YES;
 
-    // Correct level constant:
-    panel.level = NSPopUpMenuWindowLevel;
+    // Fix height to 64, allow free width if you ever want it
+    _panel.contentMinSize = NSMakeSize(290, 64);
+    _panel.contentMaxSize = NSMakeSize(FLT_MAX, 64);
+    [_panel setContentSize:NSMakeSize(290, 64)];
 
-    panel.collectionBehavior = NSWindowCollectionBehaviorTransient |
-                               NSWindowCollectionBehaviorIgnoresCycle |
-                               NSWindowCollectionBehaviorFullScreenAuxiliary;
+    // Root host (transparent)
+    _root = [[NSView alloc] initWithFrame:_panel.contentView.bounds];
+    _root.translatesAutoresizingMaskIntoConstraints = NO;
+    _root.wantsLayer = YES;
+    _root.layer.backgroundColor = NSColor.clearColor.CGColor;
+    _panel.contentView = _root;
 
-    panel.movableByWindowBackground = NO;
-
-    // Also helps keep it from taking focus:
-    panel.floatingPanel = YES;
-    panel.becomesKeyOnlyIfNeeded = YES;
-
-    // Transparent root
-    NSView *root = [[NSView alloc] initWithFrame:panel.contentView.bounds];
-    root.translatesAutoresizingMaskIntoConstraints = NO;
-    root.wantsLayer = YES;
-    root.layer.backgroundColor = NSColor.clearColor.CGColor;
-    panel.contentView = root;
-
-    [NSLayoutConstraint activateConstraints:@[
-        [root.leadingAnchor constraintEqualToAnchor:panel.contentView.leadingAnchor],
-        [root.trailingAnchor constraintEqualToAnchor:panel.contentView.trailingAnchor],
-        [root.topAnchor constraintEqualToAnchor:panel.contentView.topAnchor],
-        [root.bottomAnchor constraintEqualToAnchor:panel.contentView.bottomAnchor],
-    ]];
-
-    // Glass backdrop
-    CustomGlassEffectView *glass = [[CustomGlassEffectView alloc]
-        initWithFrame:root.bounds
-              variant:2
-           scrimState:1
-         subduedState:0
-     interactionState:0
-       contentLensing:1
-   adaptiveAppearance:1
- useReducedShadowRadius:0
-                style:NSGlassEffectViewStyleClear
-         cornerRadius:14.0];
-    glass.translatesAutoresizingMaskIntoConstraints = NO;
-    [root addSubview:glass positioned:NSWindowBelow relativeTo:nil];
+    NSLayoutConstraint *h = [_root.heightAnchor constraintEqualToConstant:64];
+    h.priority = 999;
 
     [NSLayoutConstraint activateConstraints:@[
-        [glass.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],
-        [glass.trailingAnchor constraintEqualToAnchor:root.trailingAnchor],
-        [glass.topAnchor constraintEqualToAnchor:root.topAnchor],
-        [glass.bottomAnchor constraintEqualToAnchor:root.bottomAnchor],
+        [_root.leadingAnchor constraintEqualToAnchor:_panel.contentView.leadingAnchor],
+        [_root.trailingAnchor constraintEqualToAnchor:_panel.contentView.trailingAnchor],
+        [_root.topAnchor constraintEqualToAnchor:_panel.contentView.topAnchor],
+        [_root.bottomAnchor constraintEqualToAnchor:_panel.contentView.bottomAnchor],
+        h
     ]];
 
-    // Foreground content
-    NSSlider *slider = [NSSlider sliderWithValue:50 minValue:0 maxValue:100 target:nil action:NULL];
-    slider.translatesAutoresizingMaskIntoConstraints = NO;
-    slider.enabled = YES;
+    // Install glass
+    [self installGlassInto:_root cornerRadius:24.0];
 
-    NSView *contentContainer = [NSView new];
-    contentContainer.translatesAutoresizingMaskIntoConstraints = NO;
-    [contentContainer addSubview:slider];
+    // Build slider row
+    NSView *row = [self buildSliderRow];
 
-    [NSLayoutConstraint activateConstraints:@[
-        [slider.centerYAnchor constraintEqualToAnchor:contentContainer.centerYAnchor],
-        [slider.leadingAnchor constraintEqualToAnchor:contentContainer.leadingAnchor constant:20.0],
-        [slider.trailingAnchor constraintEqualToAnchor:contentContainer.trailingAnchor constant:-20.0],
-    ]];
-
-    // Let the glass own the content hierarchy
-    glass.contentView = contentContainer;
-
-    _panel = panel;
-    _glassContainer = glass;
-    _slider = slider;
+    if ([_glass respondsToSelector:NSSelectorFromString(@"setContentView:")]) {
+        // NSGlassEffectView path (macOS 26)
+        [_glass setValue:row forKey:@"contentView"];
+        row.translatesAutoresizingMaskIntoConstraints = NO;
+        [NSLayoutConstraint activateConstraints:@[
+            [row.leadingAnchor constraintEqualToAnchor:_glass.leadingAnchor],
+            [row.trailingAnchor constraintEqualToAnchor:_glass.trailingAnchor],
+            [row.topAnchor constraintEqualToAnchor:_glass.topAnchor],
+            [row.bottomAnchor constraintEqualToAnchor:_glass.bottomAnchor],
+        ]];
+    } else {
+        // Fallback path
+        [_glass addSubview:row];
+        [NSLayoutConstraint activateConstraints:@[
+            [row.leadingAnchor constraintEqualToAnchor:_glass.leadingAnchor],
+            [row.trailingAnchor constraintEqualToAnchor:_glass.trailingAnchor],
+            [row.topAnchor constraintEqualToAnchor:_glass.topAnchor],
+            [row.bottomAnchor constraintEqualToAnchor:_glass.bottomAnchor],
+        ]];
+    }
 
     return self;
 }
 
-- (void)showHUDWithVolume:(double)volume anchoredToView:(NSView *)view {
-    [self.hideTimer invalidate];
-    self.hideTimer = nil;
+#pragma mark - Public API
 
+- (void)showHUDWithVolume:(double)volume anchoredToStatusButton:(NSStatusBarButton *)button {
+    // Normalize volume (accept 0–100 or 0–1)
+    if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
 
-    // Ensure size
-    NSRect frame = self.panel.frame;
-    frame.size = NSMakeSize(290, 65);
-    [self.panel setFrame:frame display:NO];
+    // Size (kept at 64 height)
+    NSRect f = self.panel.frame;
+    f.size = NSMakeSize(MAX(290, f.size.width), 64);
+    [self.panel setFrame:f display:NO];
 
-    // Position like a popover under the anchor
-    if (view.window) {
-        NSRect anchorRectInWindow = [view convertRect:view.bounds toView:nil];
-        NSRect screenRect = [view.window convertRectToScreen:anchorRectInWindow];
-
-        CGFloat x = NSMidX(screenRect) - frame.size.width / 2.0;
-        CGFloat y = NSMinY(screenRect) - frame.size.height - 8.0;
-        [self.panel setFrameOrigin:NSMakePoint(round(x), round(y))];
-    } else {
-        NSScreen *screen = NSScreen.mainScreen ?: NSScreen.screens.firstObject;
-        if (screen) {
-            NSRect vis = screen.visibleFrame;
-            CGFloat x = NSMidX(vis) - frame.size.width/2.0;
-            CGFloat y = NSMidY(vis) - frame.size.height/2.0;
-            [self.panel setFrameOrigin:NSMakePoint(round(x), round(y))];
-        }
-    }
+    // Position directly beneath the status bar button
+    [self positionPanelBelowStatusButton:button];
 
     [self.panel orderFront:nil];
 
+    // Restart autohide timer (2s)
+    [self.hideTimer invalidate];
     self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
                                                       target:self
-                                                    selector:@selector(hideHUD)
+                                                    selector:@selector(hide)
                                                     userInfo:nil
                                                      repeats:NO];
 }
 
-- (void)hideHUD {
+- (void)setVolume:(double)volume {
+    if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
+    self.slider.doubleValue = volume;
+}
+
+- (void)hide {
     [self.panel orderOut:nil];
+    [self.hideTimer invalidate];
     self.hideTimer = nil;
+    if ([self.delegate respondsToSelector:@selector(hudDidHide:)]) {
+        [self.delegate hudDidHide:self];
+    }
+}
+
+#pragma mark - Layout / Anchoring
+
+- (void)positionPanelBelowStatusButton:(NSStatusBarButton *)button {
+    if (!button || !button.window) {
+        // Fallback: center on main screen
+        NSScreen *screen = NSScreen.mainScreen ?: NSScreen.screens.firstObject;
+        if (screen) {
+            NSRect vis = screen.visibleFrame;
+            CGFloat x = NSMidX(vis) - self.panel.frame.size.width/2.0;
+            CGFloat y = NSMidY(vis) - self.panel.frame.size.height/2.0;
+            [self.panel setFrameOrigin:NSMakePoint(round(x), round(y))];
+        }
+        return;
+    }
+
+    // Convert the button’s rect to screen coords
+    NSRect buttonRectInWindow = [button convertRect:button.bounds toView:nil];
+    NSRect buttonInScreen = [button.window convertRectToScreen:buttonRectInWindow];
+
+    // Panel size and gap
+    const CGFloat gap = 14.0;
+    NSSize panelSize = self.panel.frame.size;
+
+    // Center under the button horizontally
+    CGFloat x = NSMidX(buttonInScreen) - panelSize.width / 2.0;
+    CGFloat y = NSMinY(buttonInScreen) - panelSize.height - gap;
+
+    // Clamp to the visible frame of the *same* screen as the button
+    NSScreen *targetScreen = button.window.screen ?: NSScreen.mainScreen;
+    NSRect vis = targetScreen.visibleFrame;
+
+    if (y < NSMinY(vis)) y = NSMinY(vis) + 2.0; // prevent clipping at bottom
+
+    CGFloat margin = 8.0;
+    x = MAX(NSMinX(vis) + margin, MIN(x, NSMaxX(vis) - margin - panelSize.width));
+
+    [self.panel setFrameOrigin:NSMakePoint(round(x), round(y))];
+}
+
+#pragma mark - Glass
+
+- (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius {
+    NSView *glass = nil;
+
+    if (@available(macOS 26.0, *)) {
+        Class GlassCls = NSClassFromString(@"NSGlassEffectView");
+        if (GlassCls) {
+            NSView *g = [[GlassCls alloc] initWithFrame:host.bounds];
+            g.translatesAutoresizingMaskIntoConstraints = NO;
+
+            // Public API: Clear style, radius, subtle tint
+            [g setValue:@(1) forKey:@"style"]; // Clear
+            [g setValue:@(radius) forKey:@"cornerRadius"];
+            [g setValue:[NSColor colorWithCalibratedWhite:0 alpha:0.06] forKey:@"tintColor"];
+
+            // Optional private tweaks (use at your own risk):
+            // [g setValue:@(23) forKey:@"_variant"];   // cartouchePopover
+            // [g setValue:@(1)  forKey:@"_scrimState"];
+
+            glass = g;
+        }
+    }
+
+    if (!glass) {
+        // Fallback
+        NSVisualEffectView *vev = [[NSVisualEffectView alloc] initWithFrame:host.bounds];
+        vev.translatesAutoresizingMaskIntoConstraints = NO;
+        vev.material = NSVisualEffectMaterialUnderWindowBackground;
+        vev.blendingMode = NSVisualEffectBlendingModeBehindWindow;
+        vev.state = NSVisualEffectStateActive;
+        vev.wantsLayer = YES;
+        vev.layer.masksToBounds = YES;
+        vev.layer.cornerRadius = radius;
+        glass = vev;
+    }
+
+    self.glass = glass;
+    [host addSubview:glass];
+    [NSLayoutConstraint activateConstraints:@[
+        [glass.leadingAnchor constraintEqualToAnchor:host.leadingAnchor],
+        [glass.trailingAnchor constraintEqualToAnchor:host.trailingAnchor],
+        [glass.topAnchor constraintEqualToAnchor:host.topAnchor],
+        [glass.bottomAnchor constraintEqualToAnchor:host.bottomAnchor],
+    ]];
+}
+
+#pragma mark - Content
+
+- (NSView *)buildSliderRow {
+    NSView *row = [NSView new];
+    row.translatesAutoresizingMaskIntoConstraints = NO;
+    [row setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];
+    [row setContentCompressionResistancePriority:250 forOrientation:NSLayoutConstraintOrientationVertical];
+
+    NSImageView *iconLeft = [NSImageView new];
+    iconLeft.translatesAutoresizingMaskIntoConstraints = NO;
+    iconLeft.symbolConfiguration = [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
+    iconLeft.image = [NSImage imageWithSystemSymbolName:@"speaker.fill" accessibilityDescription:nil];
+    iconLeft.contentTintColor = NSColor.labelColor;
+    [iconLeft setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [iconLeft setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+    NSImageView *iconRight = [NSImageView new];
+    iconRight.translatesAutoresizingMaskIntoConstraints = NO;
+    iconRight.symbolConfiguration = [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
+    iconRight.image = [NSImage imageWithSystemSymbolName:@"speaker.wave.2.fill" accessibilityDescription:nil];
+    iconRight.contentTintColor = NSColor.labelColor;
+    [iconRight setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [iconRight setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+    NSSlider *slider = [NSSlider sliderWithValue:0.6 minValue:0.0 maxValue:1.0 target:self action:@selector(sliderChanged:)];
+    slider.translatesAutoresizingMaskIntoConstraints = NO;
+    slider.controlSize = NSControlSizeSmall;
+    [slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [slider setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+    self.slider = slider;
+
+    [row addSubview:iconLeft];
+    [row addSubview:slider];
+    [row addSubview:iconRight];
+
+    [NSLayoutConstraint activateConstraints:@[
+        [iconLeft.leadingAnchor constraintEqualToAnchor:row.leadingAnchor constant:12],
+        [iconLeft.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
+
+        [iconRight.trailingAnchor constraintEqualToAnchor:row.trailingAnchor constant:-12],
+        [iconRight.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
+
+        [slider.leadingAnchor constraintEqualToAnchor:iconLeft.trailingAnchor constant:8],
+        [slider.trailingAnchor constraintEqualToAnchor:iconRight.leadingAnchor constant:-8],
+        [slider.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
+    ]];
+
+    return row;
+}
+
+#pragma mark - Actions
+
+- (void)sliderChanged:(NSSlider *)sender {
+    double v = sender.doubleValue; // already 0..1
+    if ([self.delegate respondsToSelector:@selector(hud:didChangeVolume:)]) {
+        [self.delegate hud:self didChangeVolume:v];
+    }
+    // Keep the HUD visible a bit longer while interacting
+    [self.hideTimer invalidate];
+    self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:1.2
+                                                      target:self
+                                                    selector:@selector(hide)
+                                                    userInfo:nil
+                                                     repeats:NO];
 }
 
 @end

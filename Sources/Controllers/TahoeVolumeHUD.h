@@ -1,27 +1,31 @@
-//
-//  TahoeVolumeHUD.h
-//  Volume Control
-//
-
 #import <Cocoa/Cocoa.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-/// Displays a modern Tahoe-style translucent HUD for volume feedback.
-/// Uses a custom borderless NSPanel with NSGlassEffectView backdrop.
-API_AVAILABLE(macos(16.0))
+@class TahoeVolumeHUD;
+
+@protocol TahoeVolumeHUDDelegate <NSObject>
+@optional
+/// Called whenever the user changes the slider (0.0–1.0).
+- (void)hud:(TahoeVolumeHUD *)hud didChangeVolume:(double)volume;
+/// Called when the HUD hides (e.g., after timeout).
+- (void)hudDidHide:(TahoeVolumeHUD *)hud;
+@end
+
+/// A singleton, popover-like Tahoe glass HUD anchored to a status bar button.
 @interface TahoeVolumeHUD : NSObject
 
-/// Returns the shared singleton instance.
-+ (instancetype)sharedManager;
+@property (class, readonly, strong) TahoeVolumeHUD *sharedManager;
+@property (weak, nonatomic, nullable) id<TahoeVolumeHUDDelegate> delegate;
 
-/// Shows the HUD anchored visually beneath the given view.
-/// @param volume The current volume level (0.0–100.0).
-/// @param view   The view to anchor beneath, typically your status-bar item button.
-- (void)showHUDWithVolume:(double)volume anchoredToView:(NSView *)view;
+/// Show/update the HUD under a status bar button. `volume` is 0.0–1.0 (or 0–100; both accepted).
+- (void)showHUDWithVolume:(double)volume anchoredToStatusButton:(NSStatusBarButton *)button;
 
-/// Hides the HUD immediately (called automatically after timeout).
-- (void)hideHUD;
+/// Programmatically hide it immediately.
+- (void)hide;
+
+/// Optional: update the slider programmatically without showing/hiding.
+- (void)setVolume:(double)volume;
 
 @end
 

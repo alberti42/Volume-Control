@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		654FF5C92EAD0BEE00B9C699 /* GlassDemoWindowController.h in Sources */ = {isa = PBXBuildFile; fileRef = 654FF5C82EAD0BEC00B9C699 /* GlassDemoWindowController.h */; };
-		654FF5CB2EAD0C1D00B9C699 /* GlassDemoWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 654FF5CA2EAD0C1B00B9C699 /* GlassDemoWindowController.m */; };
 		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
 		65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0F267EAD240080A9A5 /* CoreAudio.framework */; };
@@ -25,7 +23,6 @@
 		65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E13267EB14F0080A9A5 /* AppDelegate.m */; };
 		65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996E16267EB14F0080A9A5 /* SystemVolume.m */; };
 		65A0E3002EAC226C009B6CC0 /* TahoeVolumeHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 65A0E2FF2EAC2268009B6CC0 /* TahoeVolumeHUD.m */; };
-		65A0E3032EAC2B13009B6CC0 /* CustomGlassEffectView.m in Sources */ = {isa = PBXBuildFile; fileRef = 65A0E3022EAC2B11009B6CC0 /* CustomGlassEffectView.m */; };
 		65DBBEF22E89EB6000752329 /* Volume Control Helper.app in Embed Login Helper */ = {isa = PBXBuildFile; fileRef = 65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		65EF8F5A2E888C9500AAE7B7 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; };
 		65EF8F5B2E888C9500AAE7B7 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -508,11 +505,8 @@
 			files = (
 				65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */,
 				65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */,
-				654FF5C92EAD0BEE00B9C699 /* GlassDemoWindowController.h in Sources */,
-				65A0E3032EAC2B13009B6CC0 /* CustomGlassEffectView.m in Sources */,
 				65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */,
 				65996E09267EB0FF0080A9A5 /* main.m in Sources */,
-				654FF5CB2EAD0C1D00B9C699 /* GlassDemoWindowController.m in Sources */,
 				65A0E3002EAC226C009B6CC0 /* TahoeVolumeHUD.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
