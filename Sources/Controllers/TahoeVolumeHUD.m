@@ -1,5 +1,7 @@
 #import "TahoeVolumeHUD.h"
+#import "CustomVolumeSlider.h"
 #import <AppKit/NSGlassEffectView.h> // macOS 26 SDK
+#import "VCLiquidGlassView.h"
 
 @interface TahoeVolumeHUD ()
 // Properties
@@ -123,8 +125,10 @@
     _panel.level = NSPopUpMenuWindowLevel;
     _panel.movableByWindowBackground = NO;
     _panel.collectionBehavior = NSWindowCollectionBehaviorTransient |
-                                 NSWindowCollectionBehaviorIgnoresCycle |
-                                 NSWindowCollectionBehaviorFullScreenAuxiliary;
+                                NSWindowCollectionBehaviorIgnoresCycle |
+                                NSWindowCollectionBehaviorFullScreenAuxiliary |
+                                NSWindowCollectionBehaviorCanJoinAllSpaces;
+
     _panel.floatingPanel = YES;
     _panel.becomesKeyOnlyIfNeeded = YES;
 
@@ -190,21 +194,18 @@
 #pragma mark - Public API
 
 - (void)showHUDWithVolume:(double)volume anchoredToStatusButton:(NSStatusBarButton *)button {
-    // Normalize volume (accept 0–100 or 0–1)
     if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
 
-    // Size (kept at HEIGHT_POPOVER height)
     NSRect f = self.panel.frame;
     f.size = NSMakeSize(MAX(WIDTH_POPOVER, f.size.width), HEIGHT_POPOVER);
     [self.panel setFrame:f display:NO];
 
-    // Position directly beneath the status bar button
+    // Position + show
     [self positionPanelBelowStatusButton:button];
+    [self.panel makeKeyAndOrderFront:nil];
 
-    [self.panel orderFront:nil];
-
-    // Restart autohide timer (2s)
+    // Restart autohide
     [self.hideTimer invalidate];
     self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
                                                       target:self
@@ -270,70 +271,28 @@
 }
 
 #pragma mark - Glass
-
 - (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius {
-    NSView *glass = nil;
-
-    if (@available(macOS 26.0, *)) {
-        Class GlassCls = NSClassFromString(@"NSGlassEffectView");
-        if (GlassCls) {
-            NSGlassEffectView *g = [[NSGlassEffectView alloc] initWithFrame:host.bounds];
-            g.translatesAutoresizingMaskIntoConstraints = NO;
-        
-            // Public properties
-            g.style        = NSGlassEffectViewStyleClear;
-            g.cornerRadius = radius;
-            g.tintColor    = [NSColor colorWithCalibratedWhite:1 alpha:0.06];
-            
-            // Optional: private knobs
-            [g setValue:@(8) forKey:@"_variant"];      // cartouchePopover
-            //[g setValue:@(1)  forKey:@"_scrimState"];
-            [g setValue:@(0)  forKey:@"_subduedState"];
-            
-            [g setValue:@(YES) forKey:@"_useReducedShadowRadius"]; // smaller or sharper rim
-            [g setValue:@(0)   forKey:@"_adaptiveAppearance"];     // adapts rim contrast to dark/light mode
-            [g setValue:@(0)   forKey:@"_contentLensing"];         // if 1, simulates focus depth
-
-            // Optional rim accent (very subtle)
-            g.wantsLayer = YES;
-            CALayer *rim = [CALayer layer];
-            rim.frame = g.bounds;
-            rim.cornerRadius = radius;
-            rim.borderWidth = 1.0; // thin
-            rim.borderColor = [[NSColor colorWithWhite:1.0 alpha:0.20] CGColor];
-            rim.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
-            rim.masksToBounds = YES;
-            rim.shadowColor = [NSColor.whiteColor CGColor];
-            rim.shadowRadius = 4.0;
-            rim.shadowOpacity = 0.12;
-            rim.shadowOffset = CGSizeZero;
-            [g.layer addSublayer:rim];
-            
-            glass = g;
-        }
-    }
-
-    if (!glass) {
-        // Fallback
-        NSVisualEffectView *vev = [[NSVisualEffectView alloc] initWithFrame:host.bounds];
-        vev.translatesAutoresizingMaskIntoConstraints = NO;
-        vev.material = NSVisualEffectMaterialUnderWindowBackground;
-        vev.blendingMode = NSVisualEffectBlendingModeBehindWindow;
-        vev.state = NSVisualEffectStateActive;
-        vev.wantsLayer = YES;
-        vev.layer.masksToBounds = YES;
-        vev.layer.cornerRadius = radius;
-        glass = vev;
-    }
-
-    self.glass = glass;
+    VCLiquidGlassView *glass = [VCLiquidGlassView glassWithStyle:1 /* Clear */
+                                                    cornerRadius:radius
+                                                       tintColor:[NSColor colorWithCalibratedWhite:1 alpha:0.06]];
+    self.glass = glass; // keep your ivar as NSView*; it’s a subclass of NSView
     [host addSubview:glass];
-    [NSLayoutConstraint activateConstraints:@[
-        [glass.leadingAnchor constraintEqualToAnchor:host.leadingAnchor],
-        [glass.trailingAnchor constraintEqualToAnchor:host.trailingAnchor],
-        [glass.topAnchor constraintEqualToAnchor:host.topAnchor],
-        [glass.bottomAnchor constraintEqualToAnchor:host.bottomAnchor],
-    ]];
+
+    // The wrapper autoconstraints itself to fill the host in -viewDidMoveToSuperview
+    // but if host isn’t using Auto Layout yet, pin manually:
+    if (glass.translatesAutoresizingMaskIntoConstraints == NO) {
+        [NSLayoutConstraint activateConstraints:@[
+            [glass.leadingAnchor constraintEqualToAnchor:host.leadingAnchor],
+            [glass.trailingAnchor constraintEqualToAnchor:host.trailingAnchor],
+            [glass.topAnchor constraintEqualToAnchor:host.topAnchor],
+            [glass.bottomAnchor constraintEqualToAnchor:host.bottomAnchor],
+        ]];
+    }
+
+    // OPTIONAL: private Tahoe look “variant”
+    [glass setVariantIfAvailable:8];         // cartouchePopover (as in your code)
+    // [glass setScrimStateIfAvailable:1];
+    [glass setSubduedStateIfAvailable:0];
 }
 
 #pragma mark - Content

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		654FF5D32EAD5D5900B9C699 /* VCLiquidGlassView.m in Sources */ = {isa = PBXBuildFile; fileRef = 654FF5D22EAD5C1E00B9C699 /* VCLiquidGlassView.m */; };
 		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
 		65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0F267EAD240080A9A5 /* CoreAudio.framework */; };
@@ -60,6 +61,10 @@
 		6546E18A2E8C66FB0087E95F /* VolumeControl.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VolumeControl.entitlements; sourceTree = "<group>"; };
 		654FF5C82EAD0BEC00B9C699 /* GlassDemoWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GlassDemoWindowController.h; sourceTree = "<group>"; };
 		654FF5CA2EAD0C1B00B9C699 /* GlassDemoWindowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GlassDemoWindowController.m; sourceTree = "<group>"; };
+		654FF5CF2EAD483B00B9C699 /* CustomVolumeSlider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomVolumeSlider.h; sourceTree = "<group>"; };
+		654FF5D02EAD484F00B9C699 /* CustomVolumeSlider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomVolumeSlider.m; sourceTree = "<group>"; };
+		654FF5D12EAD5C0800B9C699 /* VCLiquidGlassView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VCLiquidGlassView.h; sourceTree = "<group>"; };
+		654FF5D22EAD5C1E00B9C699 /* VCLiquidGlassView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VCLiquidGlassView.m; sourceTree = "<group>"; };
 		65533216267F5D86004231D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		65996C55267EA86A0080A9A5 /* Volume Control.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65996CDF267EAB660080A9A5 /* keyboard.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = keyboard.png; sourceTree = "<group>"; };
@@ -295,6 +300,10 @@
 		65996D09267EACB50080A9A5 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				654FF5D22EAD5C1E00B9C699 /* VCLiquidGlassView.m */,
+				654FF5D12EAD5C0800B9C699 /* VCLiquidGlassView.h */,
+				654FF5D02EAD484F00B9C699 /* CustomVolumeSlider.m */,
+				654FF5CF2EAD483B00B9C699 /* CustomVolumeSlider.h */,
 				654FF5CA2EAD0C1B00B9C699 /* GlassDemoWindowController.m */,
 				654FF5C82EAD0BEC00B9C699 /* GlassDemoWindowController.h */,
 				65A0E3022EAC2B11009B6CC0 /* CustomGlassEffectView.m */,
@@ -503,6 +512,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				654FF5D32EAD5D5900B9C699 /* VCLiquidGlassView.m in Sources */,
 				65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */,
 				65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */,
 				65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */,
