@@ -5,6 +5,10 @@
 //  Created by Andrea Alberti on 25.10.25.
 //
 
+#import "CustomVolumeSlider.h"
+#import <AppKit/NSColor.h>
+#import <AppKit/NSBezierPath.h>
+
 @implementation CustomVolumeSlider
 - (void)drawBarInside:(NSRect)rect flipped:(BOOL)flipped {
     rect = NSInsetRect(rect, 0, (NSHeight(rect)-4)/2.0);

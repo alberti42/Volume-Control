@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		654FF5D32EAD5D5900B9C699 /* VCLiquidGlassView.m in Sources */ = {isa = PBXBuildFile; fileRef = 654FF5D22EAD5C1E00B9C699 /* VCLiquidGlassView.m */; };
+		654FF5D52EAD630700B9C699 /* LiquidGlassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654FF5D42EAD612800B9C699 /* LiquidGlassView.swift */; };
+		654FF5D62EAD691B00B9C699 /* CustomVolumeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 654FF5D02EAD484F00B9C699 /* CustomVolumeSlider.m */; };
 		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
 		65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0F267EAD240080A9A5 /* CoreAudio.framework */; };
@@ -59,12 +60,9 @@
 		65220C76267F49D4007BE316 /* sign_update.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = sign_update.rb; sourceTree = "<group>"; };
 		6546E1892E8C66FB0087E95F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6546E18A2E8C66FB0087E95F /* VolumeControl.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VolumeControl.entitlements; sourceTree = "<group>"; };
-		654FF5C82EAD0BEC00B9C699 /* GlassDemoWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GlassDemoWindowController.h; sourceTree = "<group>"; };
-		654FF5CA2EAD0C1B00B9C699 /* GlassDemoWindowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GlassDemoWindowController.m; sourceTree = "<group>"; };
 		654FF5CF2EAD483B00B9C699 /* CustomVolumeSlider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomVolumeSlider.h; sourceTree = "<group>"; };
 		654FF5D02EAD484F00B9C699 /* CustomVolumeSlider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomVolumeSlider.m; sourceTree = "<group>"; };
-		654FF5D12EAD5C0800B9C699 /* VCLiquidGlassView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VCLiquidGlassView.h; sourceTree = "<group>"; };
-		654FF5D22EAD5C1E00B9C699 /* VCLiquidGlassView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VCLiquidGlassView.m; sourceTree = "<group>"; };
+		654FF5D42EAD612800B9C699 /* LiquidGlassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassView.swift; sourceTree = "<group>"; };
 		65533216267F5D86004231D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		65996C55267EA86A0080A9A5 /* Volume Control.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65996CDF267EAB660080A9A5 /* keyboard.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = keyboard.png; sourceTree = "<group>"; };
@@ -130,8 +128,6 @@
 		65996E17267EB14F0080A9A5 /* ISSoundAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISSoundAdditions.h; sourceTree = "<group>"; };
 		65A0E2FD2EAC2238009B6CC0 /* TahoeVolumeHUD.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TahoeVolumeHUD.h; sourceTree = "<group>"; };
 		65A0E2FF2EAC2268009B6CC0 /* TahoeVolumeHUD.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TahoeVolumeHUD.m; sourceTree = "<group>"; };
-		65A0E3012EAC2B00009B6CC0 /* CustomGlassEffectView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomGlassEffectView.h; sourceTree = "<group>"; };
-		65A0E3022EAC2B11009B6CC0 /* CustomGlassEffectView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomGlassEffectView.m; sourceTree = "<group>"; };
 		65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		BC20FAA128902EF500CF5CAF /* Doppler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Doppler.h; sourceTree = "<group>"; };
@@ -300,14 +296,9 @@
 		65996D09267EACB50080A9A5 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				654FF5D22EAD5C1E00B9C699 /* VCLiquidGlassView.m */,
-				654FF5D12EAD5C0800B9C699 /* VCLiquidGlassView.h */,
+				654FF5D42EAD612800B9C699 /* LiquidGlassView.swift */,
 				654FF5D02EAD484F00B9C699 /* CustomVolumeSlider.m */,
 				654FF5CF2EAD483B00B9C699 /* CustomVolumeSlider.h */,
-				654FF5CA2EAD0C1B00B9C699 /* GlassDemoWindowController.m */,
-				654FF5C82EAD0BEC00B9C699 /* GlassDemoWindowController.h */,
-				65A0E3022EAC2B11009B6CC0 /* CustomGlassEffectView.m */,
-				65A0E3012EAC2B00009B6CC0 /* CustomGlassEffectView.h */,
 				65A0E2FF2EAC2268009B6CC0 /* TahoeVolumeHUD.m */,
 				65A0E2FD2EAC2238009B6CC0 /* TahoeVolumeHUD.h */,
 				65996E14267EB14F0080A9A5 /* AppDelegate.h */,
@@ -512,12 +503,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				654FF5D32EAD5D5900B9C699 /* VCLiquidGlassView.m in Sources */,
 				65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */,
 				65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */,
 				65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */,
+				654FF5D62EAD691B00B9C699 /* CustomVolumeSlider.m in Sources */,
 				65996E09267EB0FF0080A9A5 /* main.m in Sources */,
 				65A0E3002EAC226C009B6CC0 /* TahoeVolumeHUD.m in Sources */,
+				654FF5D52EAD630700B9C699 /* LiquidGlassView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -691,6 +683,7 @@
 				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
 				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
 				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -733,6 +726,7 @@
 				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
 				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
 				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};

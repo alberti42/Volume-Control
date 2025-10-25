@@ -1,3 +1,10 @@
+//
+//  TahoeVolumeHUD.h
+//
+//  Created by Andrea Alberti on 25.10.25.
+//
+
+
 #import <Cocoa/Cocoa.h>
 
 NS_ASSUME_NONNULL_BEGIN
