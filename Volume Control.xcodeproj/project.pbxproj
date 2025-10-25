@@ -165,8 +165,8 @@
 			children = (
 				65996D04267EAC710080A9A5 /* XIBs */,
 				65996CD8267EAAD30080A9A5 /* Accessability */,
-				65996CD9267EAADB0080A9A5 /* Images */,
 				654FF5DA2EAD6C8E00B9C699 /* HUD */,
+				65996DF4267EAEF30080A9A5 /* Media.xcassets */,
 			);
 			path = "User interface";
 			sourceTree = "<group>";
@@ -179,14 +179,6 @@
 				65996DFA267EAF330080A9A5 /* AccessibilityDialog.xib */,
 			);
 			path = Accessability;
-			sourceTree = "<group>";
-		};
-		65996CD9267EAADB0080A9A5 /* Images */ = {
-			isa = PBXGroup;
-			children = (
-				65996DF4267EAEF30080A9A5 /* Media.xcassets */,
-			);
-			path = Images;
 			sourceTree = "<group>";
 		};
 		65996D03267EAC1F0080A9A5 /* Sources */ = {

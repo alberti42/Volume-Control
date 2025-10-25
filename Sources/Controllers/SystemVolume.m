@@ -170,7 +170,6 @@
         } else {
             [self setIcon:[NSImage imageNamed:@"FinderSequoia"]];
         }
-        NSLog(@"Icon: %@",[NSImage imageNamed:@"FinderTahoe"]);
 	}
 	return self;
 }
