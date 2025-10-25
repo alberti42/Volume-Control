@@ -14,6 +14,7 @@
 @implementation SystemApplication
 
 @synthesize currentVolume = _currentVolume;
+@synthesize icon = _icon;
 
 -(AudioDeviceID) getDefaultOutputDevice
 {
@@ -156,6 +157,40 @@
 	return ((double)volume) * 100.0;
 }
 
+- (NSString *)getDefaultOutputDeviceName
+{
+    AudioDeviceID defaultOutputDeviceID = [self getDefaultOutputDevice];
+    
+    if (defaultOutputDeviceID == kAudioObjectUnknown) {
+        return @"Unknown Device";
+    }
+    
+    CFStringRef deviceName = NULL;
+    UInt32 dataSize = sizeof(deviceName);
+    
+    AudioObjectPropertyAddress propertyAddress = {
+        kAudioObjectPropertyName,
+        kAudioObjectPropertyScopeGlobal,
+        kAudioObjectPropertyElementMain
+    };
+    
+    OSStatus result = AudioObjectGetPropertyData(defaultOutputDeviceID,
+                                                 &propertyAddress,
+                                                 0,
+                                                 NULL,
+                                                 &dataSize,
+                                                 &deviceName);
+    
+    if (result != kAudioHardwareNoError || deviceName == NULL) {
+        NSLog(@"Could not get device name for device 0x%0x", defaultOutputDeviceID);
+        return @"Unknown Device";
+    }
+    
+    NSString *name = [NSString stringWithString:(__bridge NSString *)deviceName];
+    CFRelease(deviceName);
+    return name;
+}
+
 
 -(void)dealloc
 {
@@ -164,6 +199,11 @@
 -(id)init{
 	if (self = [super init])  {
 		[self setOldVolume:[self currentVolume]];
+        if (@available(macOS 16.0, *)) {
+            [self setIcon:[NSImage imageNamed:@"FinderTahoe"]];
+        } else {
+            [self setIcon:[NSImage imageNamed:@"FinderSequoia"]];
+        }
 	}
 	return self;
 }

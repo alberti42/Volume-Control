@@ -1,4 +1,5 @@
 //
+//
 //  AppDelegate.m
 //  iTunes Volume Control
 //
@@ -95,10 +96,10 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
     // Decide here if it's a volume/mute event
     BOOL isMediaKey = (keyCode == NX_KEYTYPE_MUTE ||
-                       //keyCode == NX_KEYTYPE_SOUND_UP ||
+                       keyCode == NX_KEYTYPE_SOUND_UP ||
                        keyCode == NX_KEYTYPE_SOUND_DOWN);
     
-    if(isMediaKey) {
+    if(isMediaKey /*&& keyModifier==1114111*/) {
         // Hand off all actual logic to main thread
         dispatch_async(dispatch_get_main_queue(), ^{
             AppDelegate *app = (__bridge AppDelegate *)refcon;
@@ -161,6 +162,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 @implementation PlayerApplication
 
 @synthesize currentVolume = _currentVolume;
+@synthesize icon = _icon;
 
 - (void) setCurrentVolume:(double)currentVolume
 {
@@ -206,12 +208,12 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 	return [musicPlayer playerState];
 }
 
--(id)initWithBundleIdentifier:(NSString*) bundleIdentifier {
+-(id)initWithBundleIdentifier:(NSString*) bundleIdentifier andIcon:(NSImage*)icon {
 	if (self = [super init])  {
 		[self setCurrentVolume: -100];
 		[self setOldVolume: -1];
 		musicPlayer = [SBApplication applicationWithBundleIdentifier:bundleIdentifier];
-
+        [self setIcon:icon];
 	}
 	return self;
 }
@@ -627,7 +629,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             if(!_hideVolumeWindow){
                 if (@available(macOS 16.0, *)) {
                     // On Tahoe, show the new popover HUD.
-                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:0 anchoredToStatusButton:self.statusBar.button];
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:0 usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName]  anchoredToStatusButton:self.statusBar.button];
                 } else {
                     // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
@@ -649,7 +651,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             {
                 if (@available(macOS 16.0, *)) {
                     // On Tahoe, show the new popover HUD.
-                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:[runningPlayerPtr oldVolume] anchoredToStatusButton:self.statusBar.button];
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:[runningPlayerPtr oldVolume] usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName] anchoredToStatusButton:self.statusBar.button];
                 } else {
                     // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
@@ -738,18 +740,15 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         self->OSDManager = NSClassFromString(@"OSDManager");
     }
 
-	//[self checkSIPforAppIdentifier:@"com.apple.iTunes" promptIfNeeded:YES];
-	//[self checkSIPforAppIdentifier:@"com.spotify.client" promptIfNeeded:YES];
+    if (@available(macOS 16.0, *)) {
+        iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.Music" andIcon:[NSImage imageNamed:@"AppleMusicTahoe"]];
+    } else {
+        iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.iTunes" andIcon:[NSImage imageNamed:@"AppleMusicSequoia"]];
+    }
+	
+    spotify = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.spotify.client" andIcon:[NSImage imageNamed:@"spotify"]];
 
-	if (@available(macOS 10.15, *)) {
-		iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.Music"];
-	} else {
-		iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.iTunes"];
-	}
-
-	spotify = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.spotify.client"];
-
-	doppler = [[PlayerApplication alloc] initWithBundleIdentifier:@"co.brushedtype.doppler-macos"];
+    doppler = [[PlayerApplication alloc] initWithBundleIdentifier:@"co.brushedtype.doppler-macos" andIcon:[NSImage imageNamed:@"doppler"]];
 
 	// Force MacOS to ask for authorization to AppleEvents if this was not already given
 	if([iTunes isRunning])
@@ -899,13 +898,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[self setLockSystemAndPlayerVolume:[preferences boolForKey:  @"LockSystemAndPlayerVolume"]];
 	[self setAutomaticUpdates:[preferences boolForKey:     @"AutomaticUpdates"]];
 	[self setHideFromStatusBar:[preferences boolForKey:    @"hideFromStatusBarPreference"]];
-    if (@available(macOS 16.0, *)) {
-        // Running on Tahoe (2026) or newer
-        NSMenuItem *item = [self.statusMenu itemWithTag:HIDE_VOLUME_WINDOW_ID];
-        [item setHidden:YES];
-    } else {
-        [self setHideVolumeWindow:[preferences boolForKey:     @"hideVolumeWindowPreference"]];
-    }
+    [self setHideVolumeWindow:[preferences boolForKey:     @"hideVolumeWindowPreference"]];
 	[[self iTunesBtn] setState:[preferences boolForKey:    @"iTunesControl"]];
 	if (@available(macOS 10.15, *)) {
 		[[self iTunesBtn] setTitle:@"Music"];
@@ -1179,7 +1172,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         NSInteger numQrtsBlks = 0;
         
         if (@available(macOS 16.0, *)) {
-            // Running on Tahoe (2026) or newer
+            // On Tahoe, show the new popover HUD anchored to the status item.
         } else {
             image = (volume > 0)? OSDGraphicSpeaker : OSDGraphicSpeakerMute;
             numFullBlks = floor(volume/6.25);
@@ -1192,7 +1185,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         {
             if (@available(macOS 16.0, *)) {
                 // On Tahoe, show the new popover HUD anchored to the status item.
-                [[TahoeVolumeHUD sharedManager] showHUDWithVolume:volume anchoredToStatusButton:self.statusBar.button];
+                [[TahoeVolumeHUD sharedManager] showHUDWithVolume:volume usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName] anchoredToStatusButton:self.statusBar.button];
             } else {
                 if(image) {
                     id osdMgr = [self->OSDManager sharedManager];
@@ -1533,6 +1526,48 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		updateSystemVolumeTimer = nil;
 	}
 }
+
+#pragma mark - TahoeVolumeHUDDelegate
+
+- (void)hud:(TahoeVolumeHUD *)hud didChangeVolume:(double)volume forPlayer:(PlayerApplication*)controlledPlayer{
+    // This method is called every time the user drags the slider in the HUD.
+    // The received 'volume' is a value between 0.0 and 1.0.
+
+    // 1. Convert the 0.0-1.0 scale to the 0-100 scale our app uses.
+    double volumePercent = volume * 100.0;
+
+    // 2. Get the currently active player, just like we do for the volume keys.
+    id runningPlayerPtr = controlledPlayer;
+    
+    if (runningPlayerPtr != nil) {
+        // 3. Set the volume for the active player.
+        [runningPlayerPtr setCurrentVolume:volumePercent];
+        
+        // 4. If volume is locked, also set the system volume.
+        if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
+            [systemAudio setCurrentVolume:volumePercent];
+        }
+
+        // 5. Update the percentage labels in the status menu to reflect the change in real-time.
+        if (runningPlayerPtr == iTunes) {
+            [self setItunesVolume:volumePercent];
+        } else if (runningPlayerPtr == spotify) {
+            [self setSpotifyVolume:volumePercent];
+        } else if (runningPlayerPtr == doppler) {
+            [self setDopplerVolume:volumePercent];
+        }
+
+        if (_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio) {
+            [self setSystemVolume:volumePercent];
+        }
+    }
+}
+
+- (void)didChangeVolumeFinal:(TahoeVolumeHUD *)hud {
+    // This is called when the HUD fades out. We can play the feedback sound here
+    [self emitAcousticFeedback];
+}
+
 
 #pragma mark - Sparkle Delegates
 
