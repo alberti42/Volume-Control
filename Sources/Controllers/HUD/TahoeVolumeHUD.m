@@ -19,6 +19,8 @@
 @property (strong) NSSlider *slider;
 @property (strong) NSImageView *appIconView;
 @property (strong) NSTimer *hideTimer;
+@property (strong) NSTextField *titleLabel;
+
 
 // Constraints
 @property (strong) NSLayoutConstraint *contentFixedHeight;
@@ -96,17 +98,40 @@ static const NSTimeInterval kAutoHide = 2.0;
     NSView *wrapper = [NSView new];
     wrapper.translatesAutoresizingMaskIntoConstraints = NO;
 
-    // 36-pt tall strip centered vertically
-    NSView *strip = [self buildSliderStrip]; // renamed method below
-    [wrapper addSubview:strip];
+    // Vertical stack container centered vertically inside wrapper
+    NSView *stack = [NSView new];
+    stack.translatesAutoresizingMaskIntoConstraints = NO;
+    [wrapper addSubview:stack];
+
+    // Center the whole stack vertically; stretch horizontally
     [NSLayoutConstraint activateConstraints:@[
-        [strip.centerYAnchor constraintEqualToAnchor:wrapper.centerYAnchor],
-        [strip.leadingAnchor constraintEqualToAnchor:wrapper.leadingAnchor constant:0],
-        [strip.trailingAnchor constraintEqualToAnchor:wrapper.trailingAnchor constant:0],
+        [stack.centerYAnchor constraintEqualToAnchor:wrapper.centerYAnchor],
+        [stack.leadingAnchor constraintEqualToAnchor:wrapper.leadingAnchor],
+        [stack.trailingAnchor constraintEqualToAnchor:wrapper.trailingAnchor],
+    ]];
+
+    // Build header row (icon + label) and slider strip
+    NSView *header = [self buildHeaderRow];
+    NSView *strip  = [self buildSliderStrip];
+
+    [stack addSubview:header];
+    [stack addSubview:strip];
+
+    // Vertical layout: header on top, small spacing, then strip
+    [NSLayoutConstraint activateConstraints:@[
+        [header.topAnchor constraintEqualToAnchor:stack.topAnchor],
+        [header.leadingAnchor constraintEqualToAnchor:stack.leadingAnchor constant:12],
+        [header.trailingAnchor constraintEqualToAnchor:stack.trailingAnchor constant:-12],
+
+        [strip.topAnchor constraintEqualToAnchor:header.bottomAnchor constant:6],
+        [strip.leadingAnchor constraintEqualToAnchor:stack.leadingAnchor],
+        [strip.trailingAnchor constraintEqualToAnchor:stack.trailingAnchor],
+        [strip.bottomAnchor constraintEqualToAnchor:stack.bottomAnchor],
     ]];
 
     // Install in glass (wrapper stretches to the glass edges via LiquidGlassView)
     self.glass.contentView = wrapper;
+
 
     return self;
 }
@@ -117,12 +142,14 @@ static const NSTimeInterval kAutoHide = 2.0;
     if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
 
-    // Clamp size every time (prevents any sneaky intrinsic size from NSGlassEffectView chains)
+    // Update header
+    self.appIconView.image = icon;
+    self.titleLabel.stringValue = @"Place holder"; // TODO: replace with actual source (player name, etc.)
+
+    // Size fence each time
     [_panel setContentSize:NSMakeSize(kHUDWidth, kHUDHeight)];
 
     [self positionPanelBelowStatusButton:button];
-
-    // No more warning: do not call makeKeyAndOrderFront on a (normally) non-key panel
     [self.panel orderFront:nil];
 
     [self.hideTimer invalidate];
@@ -132,6 +159,7 @@ static const NSTimeInterval kAutoHide = 2.0;
                                                     userInfo:nil
                                                      repeats:NO];
 }
+
 
 - (void)setVolume:(double)volume {
     if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
@@ -212,15 +240,7 @@ static const NSTimeInterval kAutoHide = 2.0;
     NSView *strip = [NSView new];
     strip.translatesAutoresizingMaskIntoConstraints = NO;
 
-    // --- App icon (far left, optional) ---
-    self.appIconView = [NSImageView new];
-    self.appIconView.translatesAutoresizingMaskIntoConstraints = NO;
-    self.appIconView.imageScaling = NSImageScaleProportionallyUpOrDown;
-    self.appIconView.wantsLayer = YES;
-    self.appIconView.layer.cornerRadius = 6.0;
-    self.appIconView.layer.masksToBounds = YES;
-
-    // --- Left speaker glyph (like your original code) ---
+    // Left speaker glyph
     NSImageView *iconLeft = [NSImageView new];
     iconLeft.translatesAutoresizingMaskIntoConstraints = NO;
     iconLeft.symbolConfiguration = [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
@@ -229,7 +249,7 @@ static const NSTimeInterval kAutoHide = 2.0;
     [iconLeft setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
     [iconLeft setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-    // --- Right speaker glyph (unchanged) ---
+    // Right speaker glyph
     NSImageView *iconRight = [NSImageView new];
     iconRight.translatesAutoresizingMaskIntoConstraints = NO;
     iconRight.symbolConfiguration = [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
@@ -238,7 +258,7 @@ static const NSTimeInterval kAutoHide = 2.0;
     [iconRight setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
     [iconRight setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-    // --- Slider (uses your custom white cell) ---
+    // Slider (custom white cell)
     NSSlider *slider = [NSSlider sliderWithValue:0.6 minValue:0.0 maxValue:1.0 target:self action:@selector(sliderChanged:)];
     slider.translatesAutoresizingMaskIntoConstraints = NO;
     slider.controlSize = NSControlSizeSmall;
@@ -253,42 +273,68 @@ static const NSTimeInterval kAutoHide = 2.0;
     [slider setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
     self.slider = slider;
 
-    // Add subviews in visual order: [appIcon] [leftSpeaker] [slider] [rightSpeaker]
-    [strip addSubview:self.appIconView];
     [strip addSubview:iconLeft];
     [strip addSubview:slider];
     [strip addSubview:iconRight];
 
-    // Layout:
     [NSLayoutConstraint activateConstraints:@[
-        // strip height = 36 (centered vertically by the wrapper)
         [strip.heightAnchor constraintEqualToConstant:36],
 
-        // App icon (18x18) at far left
-        [self.appIconView.leadingAnchor constraintEqualToAnchor:strip.leadingAnchor constant:12],
-        [self.appIconView.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
-        [self.appIconView.widthAnchor constraintEqualToConstant:18],
-        [self.appIconView.heightAnchor constraintEqualToConstant:18],
-
-        // Left speaker just after app icon
-        [iconLeft.leadingAnchor constraintEqualToAnchor:self.appIconView.trailingAnchor constant:8],
+        [iconLeft.leadingAnchor constraintEqualToAnchor:strip.leadingAnchor constant:12],
         [iconLeft.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
 
-        // Right speaker at far right
         [iconRight.trailingAnchor constraintEqualToAnchor:strip.trailingAnchor constant:-12],
         [iconRight.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
 
-        // Slider between the two speakers
         [slider.leadingAnchor constraintEqualToAnchor:iconLeft.trailingAnchor constant:8],
         [slider.trailingAnchor constraintEqualToAnchor:iconRight.leadingAnchor constant:-8],
         [slider.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
     ]];
 
-    // Optional: ensure good contrast on glass
     strip.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
-
     return strip;
 }
+
+
+- (NSView *)buildHeaderRow {
+    NSView *row = [NSView new];
+    row.translatesAutoresizingMaskIntoConstraints = NO;
+
+    // Icon (uses the same appIconView instance so other code can update it)
+    self.appIconView = [NSImageView new];
+    self.appIconView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.appIconView.imageScaling = NSImageScaleProportionallyUpOrDown;
+    self.appIconView.wantsLayer = YES;
+    self.appIconView.layer.cornerRadius = 6.0;
+    self.appIconView.layer.masksToBounds = YES;
+
+    // Title label
+    self.titleLabel = [NSTextField labelWithString:@"Place holder"];
+    self.titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    self.titleLabel.font = [NSFont systemFontOfSize:12 weight:NSFontWeightSemibold];
+    self.titleLabel.textColor = [NSColor labelColor];
+
+    [row addSubview:self.appIconView];
+    [row addSubview:self.titleLabel];
+
+    [NSLayoutConstraint activateConstraints:@[
+        [self.appIconView.leadingAnchor constraintEqualToAnchor:row.leadingAnchor],
+        [self.appIconView.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
+        [self.appIconView.widthAnchor constraintEqualToConstant:18],
+        [self.appIconView.heightAnchor constraintEqualToConstant:18],
+
+        [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.appIconView.trailingAnchor constant:8],
+        [self.titleLabel.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
+
+        [row.heightAnchor constraintEqualToConstant:20],
+    ]];
+
+    // Good contrast on glass
+    row.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
+
+    return row;
+}
+
 
 
 #pragma mark - Actions
