@@ -14,6 +14,7 @@
 @implementation SystemApplication
 
 @synthesize currentVolume = _currentVolume;
+@synthesize icon = _icon;
 
 -(AudioDeviceID) getDefaultOutputDevice
 {
@@ -164,6 +165,7 @@
 -(id)init{
 	if (self = [super init])  {
 		[self setOldVolume:[self currentVolume]];
+        [self setIcon:[NSImage imageNamed:@"Finder"]];
 	}
 	return self;
 }

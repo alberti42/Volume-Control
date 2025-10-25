@@ -21,5 +21,6 @@
     
 @property (assign, nonatomic) double currentVolume;  // The sound output volume (0 = minimum, 100 = maximum)
 @property (assign, nonatomic) double oldVolume;
+@property (assign, nonatomic) NSImage* icon;
 
 @end

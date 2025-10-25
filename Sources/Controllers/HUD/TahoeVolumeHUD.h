@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic, nullable) id<TahoeVolumeHUDDelegate> delegate;
 
 /// Show/update the HUD under a status bar button. `volume` is 0.0–1.0 (or 0–100; both accepted).
-- (void)showHUDWithVolume:(double)volume anchoredToStatusButton:(NSStatusBarButton *)button;
+- (void)showHUDWithVolume:(double)volume usingIcon:(NSImage*)icon anchoredToStatusButton:(NSStatusBarButton *)button;
 
 /// Programmatically hide it immediately.
 - (void)hide;

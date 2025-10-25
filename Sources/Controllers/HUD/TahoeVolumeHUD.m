@@ -113,7 +113,7 @@ static const NSTimeInterval kAutoHide = 2.0;
 
 #pragma mark - Public API
 
-- (void)showHUDWithVolume:(double)volume anchoredToStatusButton:(NSStatusBarButton *)button {
+- (void)showHUDWithVolume:(double)volume usingIcon:(NSImage*)icon anchoredToStatusButton:(NSStatusBarButton *)button {
     if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
 
@@ -198,9 +198,9 @@ static const NSTimeInterval kAutoHide = 2.0;
     ]];
 
     // Optional Tahoe tuning:
-    [glass setVariantIfAvailable:8];
-    // [glass setScrimStateIfAvailable:1];
-    // [glass setSubduedStateIfAvailable:0];
+    [glass setVariantIfAvailable:5];
+    [glass setScrimStateIfAvailable:0];
+    [glass setSubduedStateIfAvailable:0];
 
     // Optional SwiftUI-like post-filters:
     [glass applyVisualAdjustmentsWithSaturation:1.5 brightness:0.2 blur:0.25];
@@ -208,12 +208,11 @@ static const NSTimeInterval kAutoHide = 2.0;
 
 #pragma mark - Content
 
-// FILE: TahoeVolumeHUD.m  (replace the old method entirely)
 - (NSView *)buildSliderStrip {
     NSView *strip = [NSView new];
     strip.translatesAutoresizingMaskIntoConstraints = NO;
 
-    // App icon (left)
+    // --- App icon (far left, optional) ---
     self.appIconView = [NSImageView new];
     self.appIconView.translatesAutoresizingMaskIntoConstraints = NO;
     self.appIconView.imageScaling = NSImageScaleProportionallyUpOrDown;
@@ -221,14 +220,25 @@ static const NSTimeInterval kAutoHide = 2.0;
     self.appIconView.layer.cornerRadius = 6.0;
     self.appIconView.layer.masksToBounds = YES;
 
-    // Right speaker glyph
+    // --- Left speaker glyph (like your original code) ---
+    NSImageView *iconLeft = [NSImageView new];
+    iconLeft.translatesAutoresizingMaskIntoConstraints = NO;
+    iconLeft.symbolConfiguration = [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
+    iconLeft.image = [NSImage imageWithSystemSymbolName:@"speaker.fill" accessibilityDescription:nil];
+    iconLeft.contentTintColor = NSColor.labelColor;
+    [iconLeft setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [iconLeft setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+    // --- Right speaker glyph (unchanged) ---
     NSImageView *iconRight = [NSImageView new];
     iconRight.translatesAutoresizingMaskIntoConstraints = NO;
     iconRight.symbolConfiguration = [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
     iconRight.image = [NSImage imageWithSystemSymbolName:@"speaker.wave.2.fill" accessibilityDescription:nil];
     iconRight.contentTintColor = NSColor.labelColor;
+    [iconRight setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [iconRight setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-    // Slider with custom white cell
+    // --- Slider (uses your custom white cell) ---
     NSSlider *slider = [NSSlider sliderWithValue:0.6 minValue:0.0 maxValue:1.0 target:self action:@selector(sliderChanged:)];
     slider.translatesAutoresizingMaskIntoConstraints = NO;
     slider.controlSize = NSControlSizeSmall;
@@ -239,34 +249,47 @@ static const NSTimeInterval kAutoHide = 2.0;
     cell.controlSize = NSControlSizeSmall;
     slider.cell = cell;
 
+    [slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [slider setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
     self.slider = slider;
 
+    // Add subviews in visual order: [appIcon] [leftSpeaker] [slider] [rightSpeaker]
     [strip addSubview:self.appIconView];
+    [strip addSubview:iconLeft];
     [strip addSubview:slider];
     [strip addSubview:iconRight];
 
-    // Layout: 36-pt *height on the STRIP*, not on a view that fills the glass
+    // Layout:
     [NSLayoutConstraint activateConstraints:@[
+        // strip height = 36 (centered vertically by the wrapper)
         [strip.heightAnchor constraintEqualToConstant:36],
 
+        // App icon (18x18) at far left
         [self.appIconView.leadingAnchor constraintEqualToAnchor:strip.leadingAnchor constant:12],
         [self.appIconView.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
         [self.appIconView.widthAnchor constraintEqualToConstant:18],
         [self.appIconView.heightAnchor constraintEqualToConstant:18],
 
+        // Left speaker just after app icon
+        [iconLeft.leadingAnchor constraintEqualToAnchor:self.appIconView.trailingAnchor constant:8],
+        [iconLeft.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
+
+        // Right speaker at far right
         [iconRight.trailingAnchor constraintEqualToAnchor:strip.trailingAnchor constant:-12],
         [iconRight.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
 
-        [slider.leadingAnchor constraintEqualToAnchor:self.appIconView.trailingAnchor constant:8],
+        // Slider between the two speakers
+        [slider.leadingAnchor constraintEqualToAnchor:iconLeft.trailingAnchor constant:8],
         [slider.trailingAnchor constraintEqualToAnchor:iconRight.leadingAnchor constant:-8],
         [slider.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
     ]];
 
-    // Good contrast on glass
+    // Optional: ensure good contrast on glass
     strip.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
 
     return strip;
 }
+
 
 #pragma mark - Actions
 
