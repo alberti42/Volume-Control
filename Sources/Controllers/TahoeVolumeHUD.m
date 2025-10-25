@@ -2,74 +2,18 @@
 //  TahoeVolumeHUD.m
 //  Volume Control
 //
-//  Created by AI Assistant on 24.10.25.
-//
 
 #import "TahoeVolumeHUD.h"
 #import "CustomGlassEffectView.h"
 
-#pragma mark - HUD Content View Controller
-
-// A private view controller to manage the content of our popover.
-API_AVAILABLE(macos(16.0))
-@interface HUDViewController : NSViewController
-@property (nonatomic, strong, readonly) NSSlider *volumeSlider;
+@interface TahoeVolumeHUD ()
+@property (nonatomic, strong) NSPanel *panel;
+@property (nonatomic, strong) CustomGlassEffectView *glassContainer;
+@property (nonatomic, strong) NSSlider *slider;
+@property (nonatomic, strong) NSTimer *hideTimer;
 @end
 
-@implementation HUDViewController
-
-// In TahoeVolumeHUD.m, inside @implementation HUDViewController
-
-
-- (void)loadView {
-    // 1. Create an instance of our component with the complete set of parameters.
-    CustomGlassEffectView *customGlassView = [[CustomGlassEffectView alloc]
-        initWithFrame:NSMakeRect(0, 0, 290, 65)
-              variant:19                      // Visual style
-           scrimState:0                       // No overlay
-         subduedState:0                       // Normal state
-     interactionState:0                       // Not interactive
-       contentLensing:1                       // <<< THE MAGIC: Turn ON the liquid/lensing effect
-   adaptiveAppearance:1                       // Good practice for light/dark mode
- useReducedShadowRadius:0                     // Use the full, default shadow
-                style:NSGlassEffectViewStyleClear // <<< CRITICAL: For translucency
-         cornerRadius:24.0];
-    
-    // 2. Set it as the main view for this controller.
-    self.view = customGlassView;
-
-    // 3. Create and configure the slider... (rest of the code is the same)
-    _volumeSlider = [[NSSlider alloc] init];
-    _volumeSlider.sliderType = NSSliderTypeLinear;
-    _volumeSlider.minValue = 0.0;
-    _volumeSlider.maxValue = 100.0;
-    _volumeSlider.translatesAutoresizingMaskIntoConstraints = NO;
-    _volumeSlider.enabled = NO;
-
-    NSView *contentContainer = [[NSView alloc] init];
-    [contentContainer addSubview:_volumeSlider];
-    
-    customGlassView.contentView = contentContainer;
-
-    [NSLayoutConstraint activateConstraints:@[
-        [_volumeSlider.centerYAnchor constraintEqualToAnchor:contentContainer.centerYAnchor],
-        [_volumeSlider.leadingAnchor constraintEqualToAnchor:contentContainer.leadingAnchor constant:20.0],
-        [_volumeSlider.trailingAnchor constraintEqualToAnchor:contentContainer.trailingAnchor constant:-20.0]
-    ]];
-}
-
-@end
-
-
-#pragma mark - TahoeVolumeHUD Implementation
-
-API_AVAILABLE(macos(16.0))
 @implementation TahoeVolumeHUD
-{
-    NSPopover *_popover;
-    HUDViewController *_hudVC;
-    NSTimer *_hideTimer;
-}
 
 + (instancetype)sharedManager {
     static TahoeVolumeHUD *sharedInstance = nil;
@@ -82,45 +26,134 @@ API_AVAILABLE(macos(16.0))
 
 - (instancetype)init {
     self = [super init];
-    if (self) {
-        _popover = [[NSPopover alloc] init];
-        _popover.behavior = NSPopoverBehaviorTransient;
-        _popover.animates = YES;
-        
-        // REMOVE THIS LINE. This was forcing the popover's window to be opaque.
-        // _popover.appearance = [NSAppearance appearanceNamed:NSAppearanceNameAqua];
-        
-        _hudVC = [[HUDViewController alloc] init];
-        _popover.contentViewController = _hudVC;
-    }
+    if (!self) return nil;
+
+    NSPanel *panel = [[NSPanel alloc] initWithContentRect:NSMakeRect(0, 0, 290, 65)
+                                                styleMask:(NSWindowStyleMaskBorderless |
+                                                           NSWindowStyleMaskNonactivatingPanel)  // 👈 non-activating
+                                                  backing:NSBackingStoreBuffered
+                                                    defer:YES];
+
+    panel.opaque = NO;
+    panel.backgroundColor = NSColor.clearColor;
+    panel.hasShadow = YES;
+    panel.hidesOnDeactivate = YES;
+
+    // Correct level constant:
+    panel.level = NSPopUpMenuWindowLevel;
+
+    panel.collectionBehavior = NSWindowCollectionBehaviorTransient |
+                               NSWindowCollectionBehaviorIgnoresCycle |
+                               NSWindowCollectionBehaviorFullScreenAuxiliary;
+
+    panel.movableByWindowBackground = NO;
+
+    // Also helps keep it from taking focus:
+    panel.floatingPanel = YES;
+    panel.becomesKeyOnlyIfNeeded = YES;
+
+    // Transparent root
+    NSView *root = [[NSView alloc] initWithFrame:panel.contentView.bounds];
+    root.translatesAutoresizingMaskIntoConstraints = NO;
+    root.wantsLayer = YES;
+    root.layer.backgroundColor = NSColor.clearColor.CGColor;
+    panel.contentView = root;
+
+    [NSLayoutConstraint activateConstraints:@[
+        [root.leadingAnchor constraintEqualToAnchor:panel.contentView.leadingAnchor],
+        [root.trailingAnchor constraintEqualToAnchor:panel.contentView.trailingAnchor],
+        [root.topAnchor constraintEqualToAnchor:panel.contentView.topAnchor],
+        [root.bottomAnchor constraintEqualToAnchor:panel.contentView.bottomAnchor],
+    ]];
+
+    // Glass backdrop
+    CustomGlassEffectView *glass = [[CustomGlassEffectView alloc]
+        initWithFrame:root.bounds
+              variant:2
+           scrimState:1
+         subduedState:0
+     interactionState:0
+       contentLensing:1
+   adaptiveAppearance:1
+ useReducedShadowRadius:0
+                style:NSGlassEffectViewStyleClear
+         cornerRadius:14.0];
+    glass.translatesAutoresizingMaskIntoConstraints = NO;
+    [root addSubview:glass positioned:NSWindowBelow relativeTo:nil];
+
+    [NSLayoutConstraint activateConstraints:@[
+        [glass.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],
+        [glass.trailingAnchor constraintEqualToAnchor:root.trailingAnchor],
+        [glass.topAnchor constraintEqualToAnchor:root.topAnchor],
+        [glass.bottomAnchor constraintEqualToAnchor:root.bottomAnchor],
+    ]];
+
+    // Foreground content
+    NSSlider *slider = [NSSlider sliderWithValue:50 minValue:0 maxValue:100 target:nil action:NULL];
+    slider.translatesAutoresizingMaskIntoConstraints = NO;
+    slider.enabled = YES;
+
+    NSView *contentContainer = [NSView new];
+    contentContainer.translatesAutoresizingMaskIntoConstraints = NO;
+    [contentContainer addSubview:slider];
+
+    [NSLayoutConstraint activateConstraints:@[
+        [slider.centerYAnchor constraintEqualToAnchor:contentContainer.centerYAnchor],
+        [slider.leadingAnchor constraintEqualToAnchor:contentContainer.leadingAnchor constant:20.0],
+        [slider.trailingAnchor constraintEqualToAnchor:contentContainer.trailingAnchor constant:-20.0],
+    ]];
+
+    // Let the glass own the content hierarchy
+    glass.contentView = contentContainer;
+
+    _panel = panel;
+    _glassContainer = glass;
+    _slider = slider;
+
     return self;
 }
 
-
 - (void)showHUDWithVolume:(double)volume anchoredToView:(NSView *)view {
-    // Invalidate any existing hide timer.
-    [_hideTimer invalidate];
-    _hideTimer = nil;
-    
-    // Update the slider's value.
-    _hudVC.volumeSlider.doubleValue = volume;
+    [self.hideTimer invalidate];
+    self.hideTimer = nil;
 
-    // Show the popover if it's not already visible.
-    if (!_popover.isShown) {
-        [_popover showRelativeToRect:view.bounds ofView:view preferredEdge:NSRectEdgeMinY];
+    self.slider.doubleValue = volume;
+
+    // Ensure size
+    NSRect frame = self.panel.frame;
+    frame.size = NSMakeSize(290, 65);
+    [self.panel setFrame:frame display:NO];
+
+    // Position like a popover under the anchor
+    if (view.window) {
+        NSRect anchorRectInWindow = [view convertRect:view.bounds toView:nil];
+        NSRect screenRect = [view.window convertRectToScreen:anchorRectInWindow];
+
+        CGFloat x = NSMidX(screenRect) - frame.size.width / 2.0;
+        CGFloat y = NSMinY(screenRect) - frame.size.height - 8.0;
+        [self.panel setFrameOrigin:NSMakePoint(round(x), round(y))];
+    } else {
+        NSScreen *screen = NSScreen.mainScreen ?: NSScreen.screens.firstObject;
+        if (screen) {
+            NSRect vis = screen.visibleFrame;
+            CGFloat x = NSMidX(vis) - frame.size.width/2.0;
+            CGFloat y = NSMidY(vis) - frame.size.height/2.0;
+            [self.panel setFrameOrigin:NSMakePoint(round(x), round(y))];
+        }
     }
-    
-    // Set a timer to automatically hide the popover after 2 seconds.
-    _hideTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
-                                                  target:self
-                                                selector:@selector(hideHUD)
-                                                userInfo:nil
-                                                 repeats:NO];
+
+    [self.panel orderFront:nil];
+
+    self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
+                                                      target:self
+                                                    selector:@selector(hideHUD)
+                                                    userInfo:nil
+                                                     repeats:NO];
 }
 
 - (void)hideHUD {
-    [_popover performClose:nil];
-    _hideTimer = nil;
+    [self.panel orderOut:nil];
+    self.hideTimer = nil;
 }
 
 @end

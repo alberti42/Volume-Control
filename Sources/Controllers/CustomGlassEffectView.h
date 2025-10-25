@@ -2,8 +2,6 @@
 //  CustomGlassEffectView.h
 //  Volume Control
 //
-//  Created by AI Assistant on 24.10.25.
-//
 
 #import <Cocoa/Cocoa.h>
 
@@ -12,9 +10,12 @@ NS_ASSUME_NONNULL_BEGIN
 API_AVAILABLE(macos(16.0))
 @interface CustomGlassEffectView : NSView
 
+/// The view displayed above the glass layer (your actual content).
 @property (nonatomic, strong, nullable) NSView *contentView;
 
-// A complete initializer based on the disassembled properties.
+/// Initializes a view backed by the private NSGlassEffectView (or fallback).
+/// The parameters correspond to internal Tahoe glass properties.
+///
 - (instancetype)initWithFrame:(NSRect)frameRect
                       variant:(NSInteger)variant
                    scrimState:(NSInteger)scrimState
@@ -24,7 +25,10 @@ API_AVAILABLE(macos(16.0))
            adaptiveAppearance:(NSInteger)adaptiveAppearance
        useReducedShadowRadius:(NSInteger)useReducedShadowRadius
                         style:(NSGlassEffectViewStyle)style
-                 cornerRadius:(CGFloat)cornerRadius;
+                 cornerRadius:(CGFloat)cornerRadius NS_DESIGNATED_INITIALIZER;
+
+- (instancetype)initWithCoder:(NSCoder *)coder NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 @end
 
