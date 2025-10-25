@@ -165,7 +165,12 @@
 -(id)init{
 	if (self = [super init])  {
 		[self setOldVolume:[self currentVolume]];
-        [self setIcon:[NSImage imageNamed:@"Finder"]];
+        if (@available(macOS 16.0, *)) {
+            [self setIcon:[NSImage imageNamed:@"FinderTahoe"]];
+        } else {
+            [self setIcon:[NSImage imageNamed:@"FinderSequoia"]];
+        }
+        NSLog(@"Icon: %@",[NSImage imageNamed:@"FinderTahoe"]);
 	}
 	return self;
 }

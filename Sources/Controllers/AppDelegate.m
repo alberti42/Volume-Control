@@ -96,7 +96,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
     // Decide here if it's a volume/mute event
     BOOL isMediaKey = (keyCode == NX_KEYTYPE_MUTE ||
-                       //keyCode == NX_KEYTYPE_SOUND_UP ||
+                       keyCode == NX_KEYTYPE_SOUND_UP ||
                        keyCode == NX_KEYTYPE_SOUND_DOWN);
     
     if(isMediaKey) {
@@ -740,7 +740,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         self->OSDManager = NSClassFromString(@"OSDManager");
     }
 
-    iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.iTunes" andIcon:[NSImage imageNamed:@"iTunes"]];
+    if (@available(macOS 16.0, *)) {
+        iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.iTunes" andIcon:[NSImage imageNamed:@"AppleMusicTahoe"]];
+    } else {
+        iTunes = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.apple.iTunes" andIcon:[NSImage imageNamed:@"AppleMusicSequoia"]];
+    }
 	
     spotify = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.spotify.client" andIcon:[NSImage imageNamed:@"spotify"]];
 
