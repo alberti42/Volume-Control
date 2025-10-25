@@ -2,7 +2,7 @@
 
 @interface GlassDemoWindowController ()
 @property (strong) NSView *root;
-@property (strong) NSView *glass; // NSGlassEffectView when available, else NSVisualEffectView
+@property (strong) NSView *glass; // NSGlassEffectView if present, else NSVisualEffectView
 @end
 
 @implementation GlassDemoWindowController
@@ -17,7 +17,8 @@
 }
 
 - (instancetype)init {
-    NSRect frame = NSMakeRect(0, 0, 290, 128);
+    // Start at 290×64
+    NSRect frame = NSMakeRect(0, 0, 290, 64);
     NSWindow *w = [[NSWindow alloc] initWithContentRect:frame
                                               styleMask:NSWindowStyleMaskBorderless
                                                 backing:NSBackingStoreBuffered
@@ -25,15 +26,21 @@
     self = [super initWithWindow:w];
     if (!self) return nil;
 
+    // Keep the content height exactly 64
+    [w setContentSize:NSMakeSize(290, 64)];
+    w.contentMinSize = NSMakeSize(290, 64);
+    // (Optional) lock the height completely; uncomment if desired:
+    // w.contentMaxSize = NSMakeSize(FLT_MAX, 64);
+
     // Critical for translucency
     w.opaque = NO;
     w.backgroundColor = NSColor.clearColor;
     w.hasShadow = YES;
-    w.level = NSStatusWindowLevel; // any normal level is fine here
-    w.movableByWindowBackground = YES; // drag anywhere
+    w.level = NSStatusWindowLevel;
+    w.movableByWindowBackground = YES;
 
     // Transparent root host
-    _root = [[NSView alloc] initWithFrame:frame];
+    _root = [[NSView alloc] initWithFrame:w.contentView.bounds];
     _root.translatesAutoresizingMaskIntoConstraints = NO;
     _root.wantsLayer = YES;
     _root.layer.backgroundColor = NSColor.clearColor.CGColor;
@@ -46,14 +53,29 @@
         [_root.bottomAnchor constraintEqualToAnchor:w.contentView.bottomAnchor],
     ]];
 
+    // Hard-target 64pt height on the host (avoid collapse)
+    NSLayoutConstraint *rootH = [_root.heightAnchor constraintEqualToConstant:64];
+    rootH.priority = 999;
+    rootH.active = YES;
+
     // Install liquid glass (NSGlassEffectView 26+) or fallback (NSVisualEffectView)
     [self installGlassFillingView:_root cornerRadius:24.0];
 
     // Demo content: a single slider row
     NSView *row = [self buildSliderRow];
+
     if ([self.glass respondsToSelector:NSSelectorFromString(@"setContentView:")]) {
         // Real NSGlassEffectView path (macOS 26)
         [self.glass setValue:row forKey:@"contentView"];
+
+        // Ensure the row fills the glass (edge-to-edge)
+        row.translatesAutoresizingMaskIntoConstraints = NO;
+        [NSLayoutConstraint activateConstraints:@[
+            [row.leadingAnchor constraintEqualToAnchor:self.glass.leadingAnchor],
+            [row.trailingAnchor constraintEqualToAnchor:self.glass.trailingAnchor],
+            [row.topAnchor constraintEqualToAnchor:self.glass.topAnchor],
+            [row.bottomAnchor constraintEqualToAnchor:self.glass.bottomAnchor],
+        ]];
     } else {
         // Fallback path
         [self.glass addSubview:row];
@@ -81,57 +103,26 @@
     NSView *glass = nil;
 
     if (@available(macOS 26.0, *)) {
-        // Look up class by name to keep the project building on earlier SDKs too.
         Class GlassCls = NSClassFromString(@"NSGlassEffectView");
         if (GlassCls) {
             NSView *g = [[GlassCls alloc] initWithFrame:host.bounds];
             g.translatesAutoresizingMaskIntoConstraints = NO;
 
-            // Public API (safe)
-            // style: 0=Regular, 1=Clear (matches popover vibe)
-            [g setValue:@(1) forKey:@"style"];
+            // Public API
+            [g setValue:@(1) forKey:@"style"];         // Clear
             [g setValue:@(radius) forKey:@"cornerRadius"];
-            // Subtle neutral tint helps “lift” the glass on busy backgrounds
             [g setValue:[NSColor colorWithCalibratedWhite:0 alpha:0.06] forKey:@"tintColor"];
 
-            // --- PRIVATE tweaks (see https://github.com/Meridius-Labs/electron-liquid-glass/blob/main/src/glass_effect.mm) ---
-            /* From: https://github.com/Meridius-Labs/electron-liquid-glass/blob/main/js/variants.ts
-               regular: 0,
-               clear: 1,
-               dock: 2,
-               appIcons: 3,
-               widgets: 4,
-               text: 5,
-               avplayer: 6,
-               facetime: 7,
-               controlCenter: 8,
-               notificationCenter: 9,
-               monogram: 10,
-               bubbles: 11,
-               identity: 12,
-               focusBorder: 13,
-               focusPlatter: 14,
-               keyboard: 15,
-               sidebar: 16,
-               abuttedSidebar: 17,
-               inspector: 18,
-               control: 19,
-               loupe: 20,
-               slider: 21,
-               camera: 22,
-               cartouchePopover: 23,
-            */
-            //[g setValue:@(2) forKey:@"_variant"];        // see mapping in
-            [g setValue:@(1) forKey:@"_scrimState"];     // 0/1
-            //[g setValue:@(0) forKey:@"_subduedState"];   // 0/1
-            // ----------------------------------------------
+            // PRIVATE (optional)
+            // [g setValue:@(23) forKey:@"_variant"];   // cartouchePopover
+            // [g setValue:@(1)  forKey:@"_scrimState"];
 
             glass = g;
         }
     }
 
     if (!glass) {
-        // Graceful fallback on macOS < 26
+        // Fallback on macOS < 26
         NSVisualEffectView *vev = [[NSVisualEffectView alloc] initWithFrame:host.bounds];
         vev.translatesAutoresizingMaskIntoConstraints = NO;
         vev.material = NSVisualEffectMaterialUnderWindowBackground;
@@ -158,13 +149,17 @@
     NSView *row = [NSView new];
     row.translatesAutoresizingMaskIntoConstraints = NO;
 
+    // Let it stretch vertically with the 64pt host
+    [row setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];
+    [row setContentCompressionResistancePriority:250 forOrientation:NSLayoutConstraintOrientationVertical];
+
     // Left icon (speaker base)
     NSImageView *iconLeft = [NSImageView new];
     iconLeft.translatesAutoresizingMaskIntoConstraints = NO;
     iconLeft.symbolConfiguration =
         [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
     iconLeft.image = [NSImage imageWithSystemSymbolName:@"speaker.fill" accessibilityDescription:nil];
-    iconLeft.contentTintColor = NSColor.labelColor; // ensure visible
+    iconLeft.contentTintColor = NSColor.labelColor;
     [iconLeft setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
     [iconLeft setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
@@ -174,7 +169,7 @@
     iconRight.symbolConfiguration =
         [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
     iconRight.image = [NSImage imageWithSystemSymbolName:@"speaker.wave.2.fill" accessibilityDescription:nil];
-    iconRight.contentTintColor = NSColor.labelColor; // ensure visible
+    iconRight.contentTintColor = NSColor.labelColor;
     [iconRight setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
     [iconRight setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
@@ -190,17 +185,13 @@
     [row addSubview:iconRight];
 
     [NSLayoutConstraint activateConstraints:@[
-        [row.heightAnchor constraintEqualToConstant:56],
-
-        // Left icon
+        // Horizontal layout
         [iconLeft.leadingAnchor constraintEqualToAnchor:row.leadingAnchor constant:12],
         [iconLeft.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
 
-        // Right icon
         [iconRight.trailingAnchor constraintEqualToAnchor:row.trailingAnchor constant:-12],
         [iconRight.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
 
-        // Slider in the middle, stretching
         [slider.leadingAnchor constraintEqualToAnchor:iconLeft.trailingAnchor constant:8],
         [slider.trailingAnchor constraintEqualToAnchor:iconRight.leadingAnchor constant:-8],
         [slider.centerYAnchor constraintEqualToAnchor:row.centerYAnchor],
