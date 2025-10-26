@@ -209,9 +209,9 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
 #pragma mark - Glass
 
 - (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius {
-    LiquidGlassView *glass = [LiquidGlassView glassWithStyle:1  // Clear
+    LiquidGlassView *glass = [LiquidGlassView glassWithStyle:0  // Clear
                                                 cornerRadius:radius
-                                                   tintColor:[NSColor colorWithCalibratedWhite:1 alpha:0.06]];
+                                                   tintColor:[NSColor colorWithCalibratedWhite:1 alpha:1]];
     self.glass = glass;
 
     [host addSubview:glass];
@@ -368,21 +368,6 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
                                                     selector:@selector(hide)
                                                     userInfo:nil
                                                      repeats:NO];
-}
-
-#pragma mark - Optional: App icon setter
-
-- (void)setAppIcon:(NSImage *)image {
-    self.appIconView.image = image;
-    if (self.appIconView.layer.sublayers.count == 0) {
-        CALayer *stroke = [CALayer layer];
-        stroke.frame = self.appIconView.bounds;
-        stroke.cornerRadius = 6.0;
-        stroke.borderWidth = 1.0;
-        stroke.borderColor = [[NSColor colorWithWhite:1 alpha:0.15] CGColor];
-        stroke.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
-        [self.appIconView.layer addSublayer:stroke];
-    }
 }
 
 @end
