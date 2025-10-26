@@ -283,11 +283,13 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 #pragma mark - Content
 
 
+// In TahoeVolumeHUD.m
+
 - (NSView *)buildSliderStrip {
     NSView *strip = [NSView new];
     strip.translatesAutoresizingMaskIntoConstraints = NO;
 
-    // Left speaker glyph
+    // Left and Right speaker glyphs are correct
     NSImageView *iconLeft = [NSImageView new];
     iconLeft.translatesAutoresizingMaskIntoConstraints = NO;
     iconLeft.symbolConfiguration = [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
@@ -296,7 +298,6 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     [iconLeft setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
     [iconLeft setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-    // Right speaker glyph
     NSImageView *iconRight = [NSImageView new];
     iconRight.translatesAutoresizingMaskIntoConstraints = NO;
     iconRight.symbolConfiguration = [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
@@ -305,15 +306,8 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     [iconRight setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
     [iconRight setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-    // 1. Create a dedicated view for the track's background.
-    NSView *trackBackgroundView = [NSView new];
-    trackBackgroundView.translatesAutoresizingMaskIntoConstraints = NO;
-    trackBackgroundView.wantsLayer = YES;
-    trackBackgroundView.layer.backgroundColor = [NSColor colorWithWhite:1.0 alpha:0.25].CGColor;
-    trackBackgroundView.layer.cornerRadius = 2.0; // The radius of our track
-
-    // 2. Create the slider.
-    VolumeSlider *slider = [VolumeSlider new];
+    // Create the slider
+    VolumeSlider *slider = [VolumeSlider new]; // Changed from HoverSlider
     slider.minValue = 0.0;
     slider.maxValue = 1.0;
     slider.doubleValue = 0.6;
@@ -321,18 +315,8 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     slider.translatesAutoresizingMaskIntoConstraints = NO;
     slider.controlSize = NSControlSizeSmall;
 
-    // 3. Configure the slider's appearance.
-    // Make the slider itself transparent. Only the filled portion will draw.
-    if (@available(macOS 10.12.2, *)) {
-        slider.sliderType = NSSliderTypeLinear;
-    }
-    slider.trackFillColor = [NSColor colorWithWhite:1.0 alpha:0.85];
-
-    // NOTE: We REMOVE the slider.wantsLayer and slider.layer.backgroundColor
-    // settings from the previous step.
-
-    // Still use our custom cell for the hover knob.
-    VolumeSliderCell *cell = [VolumeSliderCell new];
+    // Assign our custom cell that handles all the drawing
+    VolumeSliderCell *cell = [VolumeSliderCell new]; // Changed from CustomVolumeSlider
     cell.minValue = 0.0;
     cell.maxValue = 1.0;
     cell.controlSize = NSControlSizeSmall;
@@ -342,13 +326,12 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     [slider setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
     self.slider = slider;
 
-    // 4. Add views to the strip. The background goes in first (underneath).
+    // Add views to the strip - NO MORE trackBackgroundView
     [strip addSubview:iconLeft];
-    [strip addSubview:trackBackgroundView];
-    [strip addSubview:slider]; // Slider is added on top of the background
+    [strip addSubview:slider];
     [strip addSubview:iconRight];
 
-    // 5. Set up constraints.
+    // Set up constraints
     [NSLayoutConstraint activateConstraints:@[
         [strip.heightAnchor constraintEqualToConstant:36],
 
@@ -358,21 +341,12 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
         [iconRight.trailingAnchor constraintEqualToAnchor:strip.trailingAnchor constant:-12],
         [iconRight.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
 
-        // --- Constraints for the background view ---
-        [trackBackgroundView.leadingAnchor constraintEqualToAnchor:iconLeft.trailingAnchor constant:8],
-        [trackBackgroundView.trailingAnchor constraintEqualToAnchor:iconRight.leadingAnchor constant:-8],
-        [trackBackgroundView.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
-        // Give it the exact height of the bar from your original code.
-        [trackBackgroundView.heightAnchor constraintEqualToConstant:4.0],
-
-        // --- Constraints for the slider ---
-        // The slider overlays the background view perfectly horizontally.
-        [slider.leadingAnchor constraintEqualToAnchor:trackBackgroundView.leadingAnchor],
-        [slider.trailingAnchor constraintEqualToAnchor:trackBackgroundView.trailingAnchor],
-        // Vertically, it's centered in the whole strip to ensure its clickable area is large enough.
+        // Slider is now constrained directly between the icons
+        [slider.leadingAnchor constraintEqualToAnchor:iconLeft.trailingAnchor constant:8],
+        [slider.trailingAnchor constraintEqualToAnchor:iconRight.leadingAnchor constant:-8],
         [slider.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
     ]];
-    // strip.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
+    
     return strip;
 }
 

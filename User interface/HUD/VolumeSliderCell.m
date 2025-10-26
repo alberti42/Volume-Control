@@ -11,16 +11,23 @@
 
 @implementation VolumeSliderCell
 - (void)drawBarInside:(NSRect)rect flipped:(BOOL)flipped {
-    rect = NSInsetRect(rect, 0, (NSHeight(rect)-4)/2.0);
-    [[NSColor colorWithWhite:1.0 alpha:0.25] setFill]; // background “track”
-    NSBezierPath *bg = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:2 yRadius:2];
-    [bg fill];
+    // This rect is the area for the bar. We'll make it 4pt tall and centered.
+    rect = NSInsetRect(rect, 0, (NSHeight(rect) - 4.0) / 2.0);
 
-    CGFloat pct = (self.doubleValue - self.minValue) / (self.maxValue - self.minValue);
-    NSRect fillRect = rect; fillRect.size.width = round(NSWidth(rect)*pct);
-    [[NSColor colorWithWhite:1.0 alpha:0.85] setFill]; // active fill
-    NSBezierPath *fg = [NSBezierPath bezierPathWithRoundedRect:fillRect xRadius:2 yRadius:2];
-    [fg fill];
+    // 1. Draw the background "track"
+    [[NSColor colorWithWhite:1.0 alpha:0.25] setFill];
+    NSBezierPath *backgroundPath = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:2 yRadius:2];
+    [backgroundPath fill];
+
+    // 2. Calculate the width of the "filled" portion
+    CGFloat percentage = (self.doubleValue - self.minValue) / (self.maxValue - self.minValue);
+    NSRect fillRect = rect;
+    fillRect.size.width = round(NSWidth(rect) * percentage);
+
+    // 3. Draw the active "fill" portion
+    [[NSColor colorWithWhite:1.0 alpha:0.85] setFill];
+    NSBezierPath *fillPath = [NSBezierPath bezierPathWithRoundedRect:fillRect xRadius:2 yRadius:2];
+    [fillPath fill];
 }
 
 - (void)drawKnob:(NSRect)knobRect {
