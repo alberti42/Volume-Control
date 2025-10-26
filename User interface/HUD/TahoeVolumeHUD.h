@@ -7,9 +7,12 @@
 
 #import <Cocoa/Cocoa.h>
 
-NS_ASSUME_NONNULL_BEGIN
-
+// Do not import AppDelegate.h here to avoid circular imports.
+// Forward-declare the types we only need by pointer.
 @class TahoeVolumeHUD;
+@class PlayerApplication;
+
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol TahoeVolumeHUDDelegate <NSObject>
 @optional
@@ -26,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic, nullable) id<TahoeVolumeHUDDelegate> delegate;
 
 /// Show/update the HUD under a status bar button. `volume` is 0.0–1.0 (or 0–100; both accepted).
-- (void)showHUDWithVolume:(double)volume usingIcon:(NSImage*)icon andLabel:(NSString*)label anchoredToStatusButton:(NSStatusBarButton *)button;
+- (void)showHUDWithVolume:(double)volume usingMusicPlayer:(PlayerApplication*)controlledPlayer andLabel:(NSString*)label anchoredToStatusButton:(NSStatusBarButton *)button;
 
 /// Programmatically hide it immediately.
 - (void)hide;

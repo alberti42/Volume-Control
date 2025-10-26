@@ -5,6 +5,7 @@
 #import <AppKit/NSGlassEffectView.h>
 #import "HUDPanel.h"
 #import "VolumeSlider.h"
+#import "AppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
 
 // Product Module Name: Volume_Control
@@ -146,12 +147,12 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
 #pragma mark - Public API
 
-- (void)showHUDWithVolume:(double)volume usingIcon:(NSImage*)icon andLabel:(NSString*)label anchoredToStatusButton:(NSStatusBarButton *)button {
+- (void)showHUDWithVolume:(double)volume usingMusicPlayer:(PlayerApplication*)controlledPlayer andLabel:(NSString*)label anchoredToStatusButton:(NSStatusBarButton *)button {
     if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
 
     // Update header
-    self.appIconView.image = icon;
+    self.appIconView.image = [controlledPlayer icon];
     self.titleLabel.stringValue = label;
 
     // Size fence each time
@@ -315,6 +316,20 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     
     slider.translatesAutoresizingMaskIntoConstraints = NO;
     slider.controlSize = NSControlSizeSmall;
+    
+    // This tells the slider to use its layer-backed renderer.
+    slider.sliderType = NSSliderTypeLinear;
+    
+    // 1. Set the color for the filled part of the track (the "foreground").
+    // This is the modern equivalent of your custom drawing for the active fill.
+    //slider.trackFillColor = [NSColor colorWithWhite:1.0 alpha:1];
+    
+    // 2. You can also set the background track color. A subtle transparent
+    // white is a good choice for a dark glass background.
+    // To do this, you need to access the layer of the slider's cell.
+    slider.wantsLayer = YES;
+    slider.layer.backgroundColor = [NSColor colorWithWhite:1.0 alpha:0.25].CGColor;
+    slider.layer.cornerRadius = 2.0; // Matches your custom drawing's radius
 
     VolumeSliderCell *cell = [VolumeSliderCell new];
     cell.minValue = 0.0;
@@ -416,10 +431,9 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
                                                      repeats:NO];
 }
 
-- (void)volumeSliderDragged:(VolumeSlider *)slider {
-    // We update the volume
+- (void)hoverSliderDidEndDragging:(VolumeSlider *)slider {
     if ([self.delegate respondsToSelector:@selector(hudDidHide:)]) {
-        // We can reuse the hudDidHide: logic from AppDelegate, which plays the sound.
+        // We can reuse the hudDidHide: logic from AppDelegate
         [self.delegate hudDidHide:self];
     }
     
