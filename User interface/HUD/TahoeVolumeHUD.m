@@ -249,32 +249,36 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 #pragma mark - Glass
 
 - (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius {
-    LiquidGlassView *glass = [LiquidGlassView glassWithStyle:0  // Clear
-                                                cornerRadius:radius
-                                                   tintColor:[NSColor colorWithCalibratedWhite:1 alpha:1]];
-    self.glass = glass;
-    
-    // Enable the new vibrant rim here.
-    glass.hasVibrantRim = NO;
-
-    [host addSubview:glass];
-    glass.translatesAutoresizingMaskIntoConstraints = NO;
-    [NSLayoutConstraint activateConstraints:@[
-        [glass.leadingAnchor constraintEqualToAnchor:host.leadingAnchor],
-        [glass.trailingAnchor constraintEqualToAnchor:host.trailingAnchor],
-        [glass.topAnchor constraintEqualToAnchor:host.topAnchor],
-        [glass.bottomAnchor constraintEqualToAnchor:host.bottomAnchor],
-    ]];
-
-    // Optional Tahoe tuning:
-    [glass setVariantIfAvailable:5];
-    [glass setScrimStateIfAvailable:0];
-    [glass setSubduedStateIfAvailable:0];
-    
-    // Setting adaptive appearance to 0 is the key to keeping it dark.
-    [glass setAdaptiveAppearanceIfAvailable:0];
-    [glass setUseReducedShadowRadiusIfAvailable:YES];
-    [glass setContentLensingIfAvailable:0];
+    if (@available(macOS 26.0, *)) {
+        LiquidGlassView *glass = [LiquidGlassView glassWithStyle:NSGlassEffectViewStyleClear  // Clear
+                                                    cornerRadius:radius
+                                                       tintColor:[NSColor colorWithCalibratedWhite:0 alpha:1]];
+        self.glass = glass;
+        
+        // Enable the new vibrant rim here.
+        glass.hasVibrantRim = NO;
+        
+        [host addSubview:glass];
+        glass.translatesAutoresizingMaskIntoConstraints = NO;
+        [NSLayoutConstraint activateConstraints:@[
+            [glass.leadingAnchor constraintEqualToAnchor:host.leadingAnchor],
+            [glass.trailingAnchor constraintEqualToAnchor:host.trailingAnchor],
+            [glass.topAnchor constraintEqualToAnchor:host.topAnchor],
+            [glass.bottomAnchor constraintEqualToAnchor:host.bottomAnchor],
+        ]];
+        
+        // Optional Tahoe tuning:
+        [glass setVariantIfAvailable:5];
+        [glass setScrimStateIfAvailable:0];
+        [glass setSubduedStateIfAvailable:0];
+        
+        // Setting adaptive appearance to 0 is the key to keeping it dark.
+        [glass setAdaptiveAppearanceIfAvailable:0];
+        [glass setUseReducedShadowRadiusIfAvailable:YES];
+        [glass setContentLensingIfAvailable:0];
+    } else {
+        // Fallback on earlier versions
+    }
     
     // Optional SwiftUI-like post-filters:
     //[glass applyVisualAdjustmentsWithSaturation:1.5 brightness:0.2 blur:0.25];

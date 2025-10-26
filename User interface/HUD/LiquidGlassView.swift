@@ -265,13 +265,13 @@ public final class LiquidGlassView: NSView {
 
             let newRim = CAShapeLayer()
             
-            newRim.lineWidth = 1.5
+            newRim.lineWidth = 1
             newRim.strokeColor = NSColor(white: 1.0, alpha: 0.8).cgColor
             newRim.fillColor = NSColor.clear.cgColor
 
             // Configure the "vibrant" glow using the shadow property
             newRim.shadowColor = NSColor.white.cgColor
-            newRim.shadowRadius = 3.0
+            newRim.shadowRadius = 1.0
             newRim.shadowOpacity = 0.6
             newRim.shadowOffset = .zero
 
