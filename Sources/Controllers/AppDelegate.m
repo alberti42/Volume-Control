@@ -1563,12 +1563,9 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     }
 }
 
-- (void)hudDidHide:(TahoeVolumeHUD *)hud {
+- (void)didChangeVolumeFinal:(TahoeVolumeHUD *)hud {
     // This is called when the HUD fades out. We can play the feedback sound here
     [self emitAcousticFeedback];
-    
-    // Reset the current player so it's re-evaluated next time.
-    [self resetCurrentPlayer:nil];
 }
 
 

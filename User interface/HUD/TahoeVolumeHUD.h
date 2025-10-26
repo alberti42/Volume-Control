@@ -18,8 +18,9 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 /// Called whenever the user changes the slider (0.0–1.0).
 - (void)hud:(TahoeVolumeHUD *)hud didChangeVolume:(double)volume;
-/// Called when the HUD hides (e.g., after timeout).
-- (void)hudDidHide:(TahoeVolumeHUD *)hud;
+/// Called whenever the user changes the slider (0.0–1.0) for the last time releasing focus
+- (void)didChangeVolumeFinal:(TahoeVolumeHUD *)hud;
+
 @end
 
 /// A singleton, popover-like Tahoe glass HUD anchored to a status bar button.

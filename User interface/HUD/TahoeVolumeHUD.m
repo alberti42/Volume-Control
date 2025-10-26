@@ -208,11 +208,6 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
         // 2. AFTER the animation is complete, properly order the window out.
         // This is crucial for performance and correctness.
         [self.panel orderOut:nil];
-        
-        // 3. Notify the delegate only after the HUD is fully gone.
-        if ([self.delegate respondsToSelector:@selector(hudDidHide:)]) {
-            [self.delegate hudDidHide:self];
-        }
     }];
 }
 #pragma mark - Layout / Anchoring
@@ -446,9 +441,8 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 }
 
 - (void)volumeSliderDidEndDragging:(VolumeSlider *)slider {
-    if ([self.delegate respondsToSelector:@selector(hudDidHide:)]) {
-        // We can reuse the hudDidHide: logic from AppDelegate
-        [self.delegate hudDidHide:self];
+    if ([self.delegate respondsToSelector:@selector(didChangeVolumeFinal:)]) {
+        [self.delegate didChangeVolumeFinal:self];
     }
     
     // You might also want to reset the hide timer here with a standard delay.
