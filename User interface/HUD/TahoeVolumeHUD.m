@@ -11,7 +11,7 @@
 // Product Module Name: Volume_Control
 #import "Volume_Control-Swift.h"  // exposes LiquidGlassView to ObjC
 
-// **IMPROVEMENT 1: Add HoverSliderDelegate protocol conformance**
+// **IMPROVEMENT 1: Add VolumeSliderDelegate protocol conformance**
 @interface TahoeVolumeHUD () <VolumeSliderDelegate>
 
 // Window + layout
@@ -306,31 +306,33 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     [iconRight setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
     [iconRight setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
-    // <-- 2. USE THE NEW HoverSlider CLASS
+    // 1. Create a dedicated view for the track's background.
+    NSView *trackBackgroundView = [NSView new];
+    trackBackgroundView.translatesAutoresizingMaskIntoConstraints = NO;
+    trackBackgroundView.wantsLayer = YES;
+    trackBackgroundView.layer.backgroundColor = [NSColor colorWithWhite:1.0 alpha:0.25].CGColor;
+    trackBackgroundView.layer.cornerRadius = 2.0; // The radius of our track
+
+    // 2. Create the slider.
     VolumeSlider *slider = [VolumeSlider new];
     slider.minValue = 0.0;
     slider.maxValue = 1.0;
-    slider.doubleValue = 0.6; // initial value
-    
+    slider.doubleValue = 0.6;
     slider.trackingDelegate = self;
-    
     slider.translatesAutoresizingMaskIntoConstraints = NO;
     slider.controlSize = NSControlSizeSmall;
-    
-    // This tells the slider to use its layer-backed renderer.
-    slider.sliderType = NSSliderTypeLinear;
-    
-    // 1. Set the color for the filled part of the track (the "foreground").
-    // This is the modern equivalent of your custom drawing for the active fill.
-    //slider.trackFillColor = [NSColor colorWithWhite:1.0 alpha:1];
-    
-    // 2. You can also set the background track color. A subtle transparent
-    // white is a good choice for a dark glass background.
-    // To do this, you need to access the layer of the slider's cell.
-    slider.wantsLayer = YES;
-    slider.layer.backgroundColor = [NSColor colorWithWhite:1.0 alpha:0.25].CGColor;
-    slider.layer.cornerRadius = 2.0; // Matches your custom drawing's radius
 
+    // 3. Configure the slider's appearance.
+    // Make the slider itself transparent. Only the filled portion will draw.
+    if (@available(macOS 10.12.2, *)) {
+        slider.sliderType = NSSliderTypeLinear;
+    }
+    slider.trackFillColor = [NSColor colorWithWhite:1.0 alpha:0.85];
+
+    // NOTE: We REMOVE the slider.wantsLayer and slider.layer.backgroundColor
+    // settings from the previous step.
+
+    // Still use our custom cell for the hover knob.
     VolumeSliderCell *cell = [VolumeSliderCell new];
     cell.minValue = 0.0;
     cell.maxValue = 1.0;
@@ -341,10 +343,13 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     [slider setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
     self.slider = slider;
 
+    // 4. Add views to the strip. The background goes in first (underneath).
     [strip addSubview:iconLeft];
-    [strip addSubview:slider];
+    [strip addSubview:trackBackgroundView];
+    [strip addSubview:slider]; // Slider is added on top of the background
     [strip addSubview:iconRight];
 
+    // 5. Set up constraints.
     [NSLayoutConstraint activateConstraints:@[
         [strip.heightAnchor constraintEqualToConstant:36],
 
@@ -354,11 +359,20 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
         [iconRight.trailingAnchor constraintEqualToAnchor:strip.trailingAnchor constant:-12],
         [iconRight.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
 
-        [slider.leadingAnchor constraintEqualToAnchor:iconLeft.trailingAnchor constant:8],
-        [slider.trailingAnchor constraintEqualToAnchor:iconRight.leadingAnchor constant:-8],
+        // --- Constraints for the background view ---
+        [trackBackgroundView.leadingAnchor constraintEqualToAnchor:iconLeft.trailingAnchor constant:8],
+        [trackBackgroundView.trailingAnchor constraintEqualToAnchor:iconRight.leadingAnchor constant:-8],
+        [trackBackgroundView.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
+        // Give it the exact height of the bar from your original code.
+        [trackBackgroundView.heightAnchor constraintEqualToConstant:4.0],
+
+        // --- Constraints for the slider ---
+        // The slider overlays the background view perfectly horizontally.
+        [slider.leadingAnchor constraintEqualToAnchor:trackBackgroundView.leadingAnchor],
+        [slider.trailingAnchor constraintEqualToAnchor:trackBackgroundView.trailingAnchor],
+        // Vertically, it's centered in the whole strip to ensure its clickable area is large enough.
         [slider.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
     ]];
-
     // strip.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
     return strip;
 }
@@ -411,7 +425,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     return row;
 }
 
-#pragma mark - HoverSliderDelegate
+#pragma mark - VolumeSliderDelegate
 
 // 5. IMPLEMENT the new delegate methods.
 - (void)volumeSlider:(VolumeSlider *)slider didChangeValue:(double)value {
@@ -431,7 +445,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
                                                      repeats:NO];
 }
 
-- (void)hoverSliderDidEndDragging:(VolumeSlider *)slider {
+- (void)volumeSliderDidEndDragging:(VolumeSlider *)slider {
     if ([self.delegate respondsToSelector:@selector(hudDidHide:)]) {
         // We can reuse the hudDidHide: logic from AppDelegate
         [self.delegate hudDidHide:self];
@@ -447,4 +461,3 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 }
 
 @end
-

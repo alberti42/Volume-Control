@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 // 1. Define a delegate protocol to communicate value changes.
 @protocol VolumeSliderDelegate <NSObject>
 - (void)volumeSlider:(VolumeSlider *)slider didChangeValue:(double)value;
-- (void)hoverSliderDidEndDragging:(VolumeSlider *)slider;
+- (void)volumeSliderDidEndDragging:(VolumeSlider *)slider;
 @end
 
 /**

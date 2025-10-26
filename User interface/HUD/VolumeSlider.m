@@ -77,7 +77,7 @@
 }
 
 - (void)mouseUp:(NSEvent *)event {
-    [self.trackingDelegate hoverSliderDidEndDragging:self];
+    [self.trackingDelegate volumeSliderDidEndDragging:self];
 }
 
 
