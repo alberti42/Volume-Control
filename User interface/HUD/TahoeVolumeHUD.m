@@ -213,6 +213,9 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
                                                 cornerRadius:radius
                                                    tintColor:[NSColor colorWithCalibratedWhite:1 alpha:1]];
     self.glass = glass;
+    
+    // Enable the new vibrant rim here.
+    glass.hasVibrantRim = YES;
 
     [host addSubview:glass];
     glass.translatesAutoresizingMaskIntoConstraints = NO;

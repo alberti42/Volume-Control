@@ -13,9 +13,9 @@ import SwiftUI
 
 @objc(LiquidGlassView)
 public final class LiquidGlassView: NSView {
-    
+
     // MARK: - Public API (Objective-C visible)
-    
+
     /// Where your content goes. Replaces any previous content.
     @objc public var contentView: NSView? {
         get { contentHost.subviews.first }
@@ -32,20 +32,30 @@ public final class LiquidGlassView: NSView {
             ])
         }
     }
-    
+
     /// Corner radius applied to the glass.
     @objc public var cornerRadius: CGFloat = 14 {
-        didSet { applyCornerRadius() }
+        didSet {
+            applyCornerRadius()
+            updateRimPath() // Update rim to match new radius
+        }
     }
-    
+
     /// Tint color for the glass (native on 26+, fallback paints a faint layer color).
     @objc public var tintColor: NSColor? {
         didSet { applyTint() }
     }
-    
+
     /// NSGlassEffectView.Style (0 = Regular, 1 = Clear). Ignored on fallback.
     @objc public var style: Int = 1 { // default Clear
         didSet { applyStyle() }
+    }
+
+    /// Draws a vibrant, glowing white rim around the view.
+    @objc public var hasVibrantRim: Bool = false {
+        didSet {
+            updateRim()
+        }
     }
     
     /// Convenience builder
@@ -57,24 +67,24 @@ public final class LiquidGlassView: NSView {
         v.tintColor = tintColor
         return v
     }
-    
+
     // MARK: Optional private Tahoe knobs (no-ops if unavailable)
-    
+
     /// 0..N variants
     @objc public func setVariantIfAvailable(_ variant: Int) {
         setPrivate("_variant", value: variant)
     }
-    
+
     /// 0/1
     @objc public func setScrimStateIfAvailable(_ state: Int) {
         setPrivate("_scrimState", value: state)
     }
-    
+
     /// 0/1
     @objc public func setSubduedStateIfAvailable(_ state: Int) {
         setPrivate("_subduedState", value: state)
     }
-    
+
     /// Controls whether the glass adapts its appearance to light/dark mode.
     /// Set to 0 to force a consistent (darker) look.
     @objc public func setAdaptiveAppearanceIfAvailable(_ state: Int) {
@@ -90,7 +100,7 @@ public final class LiquidGlassView: NSView {
     @objc public func setContentLensingIfAvailable(_ state: Int) {
         setPrivate("_contentLensing", value: state)
     }
-    
+
     /// SwiftUI-like post-processing (applies CIFilters to the layer).
     /// Use sparingly; native glass already blurs/tints appropriately.
     @objc public func applyVisualAdjustments(saturation: CGFloat = 1.0,
@@ -98,14 +108,14 @@ public final class LiquidGlassView: NSView {
                                              blur: CGFloat = 0.0) {
         ensureLayerBacked()
         var filters: [CIFilter] = []
-        
+
         if blur > 0 {
             if let f = CIFilter(name: "CIGaussianBlur") {
                 f.setValue(blur, forKey: kCIInputRadiusKey)
                 filters.append(f)
             }
         }
-        
+
         if brightness != 0 || saturation != 1.0 {
             if let f = CIFilter(name: "CIColorControls") {
                 f.setValue(saturation, forKey: "inputSaturation")
@@ -113,25 +123,36 @@ public final class LiquidGlassView: NSView {
                 filters.append(f)
             }
         }
-        
+
         backingGlass.layer?.filters = filters.isEmpty ? nil : filters
     }
-    
+
     // MARK: - Internals
-    
+
     private let contentHost = NSView(frame: .zero)
-    private var backingGlass: NSView! // NSGlassEffectView (26+) or NSVisualEffectView (fallback)
-    
+    private var backingGlass: NSView!
+    private var rimLayer: CAShapeLayer?
+
     public override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
-        wantsLayer = false
+        // The root view must be layer-backed to host the rim layer.
+        wantsLayer = true
         buildBacking()
+        updateRim()
     }
-    
+
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
-        wantsLayer = false
+        // The root view must be layer-backed to host the rim layer.
+        wantsLayer = true
         buildBacking()
+        updateRim()
+    }
+
+    public override func layout() {
+        super.layout()
+        // Update the rim's path whenever the view's size changes.
+        updateRimPath()
     }
     
     public override func viewDidMoveToSuperview() {
@@ -144,11 +165,11 @@ public final class LiquidGlassView: NSView {
             bottomAnchor.constraint(equalTo: s.bottomAnchor)
         ])
     }
-    
+
     // Build NSGlassEffectView if available, else NSVisualEffectView
     private func buildBacking() {
         let glass: NSView
-        
+
         if #available(macOS 26.0, *), let GlassType = NSClassFromString("NSGlassEffectView") as? NSView.Type {
             let g = GlassType.init(frame: bounds)
             g.translatesAutoresizingMaskIntoConstraints = false
@@ -163,9 +184,9 @@ public final class LiquidGlassView: NSView {
             v.layer?.masksToBounds = true
             glass = v
         }
-        
+
         backingGlass = glass
-        
+
         addSubview(backingGlass)
         NSLayoutConstraint.activate([
             backingGlass.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -173,11 +194,11 @@ public final class LiquidGlassView: NSView {
             backingGlass.topAnchor.constraint(equalTo: topAnchor),
             backingGlass.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
-        
+
         // content host
         contentHost.translatesAutoresizingMaskIntoConstraints = false
         contentHost.wantsLayer = false
-        
+
         if backingGlass.responds(to: NSSelectorFromString("setContentView:")) {
             backingGlass.setValue(contentHost, forKey: "contentView") // NSGlassEffectView path
         } else {
@@ -189,19 +210,19 @@ public final class LiquidGlassView: NSView {
                 contentHost.bottomAnchor.constraint(equalTo: backingGlass.bottomAnchor)
             ])
         }
-        
+
         // Apply defaults
         style = 1
         cornerRadius = 14
         tintColor = nil
     }
-    
+
     private func applyStyle() {
         if backingGlass.responds(to: NSSelectorFromString("setStyle:")) {
             backingGlass.setValue(style, forKey: "style")
         }
     }
-    
+
     private func applyCornerRadius() {
         if backingGlass.responds(to: NSSelectorFromString("setCornerRadius:")) {
             backingGlass.setValue(cornerRadius, forKey: "cornerRadius")
@@ -211,7 +232,7 @@ public final class LiquidGlassView: NSView {
             backingGlass.layer?.masksToBounds = true
         }
     }
-    
+
     private func applyTint() {
         if backingGlass.responds(to: NSSelectorFromString("setTintColor:")) {
             backingGlass.setValue(tintColor, forKey: "tintColor")
@@ -222,19 +243,58 @@ public final class LiquidGlassView: NSView {
             backingGlass.layer?.backgroundColor = nil
         }
     }
-    
+
     private func setPrivate(_ key: String, value: Any) {
         guard backingGlass.responds(to: NSSelectorFromString("setContentView:")) else { return }
         // Best-effort, swallow future changes safely
         guard let glass = backingGlass else { return }
         (try? ObjcKVC.setValue(value, forKey: key, on: glass)) ?? ()
-        
     }
-    
+
     private func ensureLayerBacked() {
         if backingGlass.layer == nil {
             backingGlass.wantsLayer = true
             backingGlass.layer = CALayer()
+        }
+    }
+    
+    /// Creates, removes, or configures the rim layer based on the `hasVibrantRim` property.
+    private func updateRim() {
+        if hasVibrantRim {
+            guard rimLayer == nil else { return } // Already created
+
+            let newRim = CAShapeLayer()
+            // Configure the "glassy" stroke
+            newRim.lineWidth = 1.5
+            newRim.strokeColor = NSColor(white: 1.0, alpha: 0.5).cgColor
+            newRim.fillColor = NSColor.clear.cgColor
+
+            // Configure the "vibrant" glow using the shadow property
+            newRim.shadowColor = NSColor.white.cgColor
+            newRim.shadowRadius = 3.0
+            newRim.shadowOpacity = 0.6
+            newRim.shadowOffset = .zero
+
+            self.layer?.addSublayer(newRim)
+            self.rimLayer = newRim
+            updateRimPath() // Set its initial path
+
+        } else {
+            // Remove the rim if it exists
+            rimLayer?.removeFromSuperlayer()
+            rimLayer = nil
+        }
+    }
+    
+    /// Recalculates the rim's path to match the view's current bounds and corner radius.
+    private func updateRimPath() {
+        if #available(macOS 26.0, *) {
+            guard let rimLayer = rimLayer else { return }
+            
+            // Inset the drawing rect by half the line width to keep the stroke centered on the edge
+            let insetRect = bounds.insetBy(dx: rimLayer.lineWidth / 2, dy: rimLayer.lineWidth / 2)
+            let path = NSBezierPath(roundedRect: insetRect, xRadius: cornerRadius, yRadius: cornerRadius)
+            rimLayer.path = path.cgPath
         }
     }
 }
@@ -258,14 +318,16 @@ public struct CustomGlassEffectView<Content: View>: NSViewRepresentable {
     private let style: NSGlassEffectView.Style
     private let tint: NSColor?
     private let cornerRadius: CGFloat
+    private let hasVibrantRim: Bool
     private let content: Content
-    
+
     public init(variant: Int? = nil,
                 scrimState: Int? = nil,
                 subduedState: Int? = nil,
                 style: NSGlassEffectView.Style = .clear,
                 tint: NSColor? = nil,
                 cornerRadius: CGFloat = 14,
+                hasVibrantRim: Bool = false,
                 @ViewBuilder content: () -> Content)
     {
         self.variant = variant
@@ -274,24 +336,27 @@ public struct CustomGlassEffectView<Content: View>: NSViewRepresentable {
         self.style = style
         self.tint = tint
         self.cornerRadius = cornerRadius
+        self.hasVibrantRim = hasVibrantRim
         self.content = content()
     }
-    
+
     public func makeNSView(context: Context) -> LiquidGlassView {
         let v = LiquidGlassView.glass(withStyle: Int(style.rawValue),
                                       cornerRadius: cornerRadius,
                                       tintColor: tint)
+        v.hasVibrantRim = hasVibrantRim
+        
         let hosting = NSHostingView(rootView: content)
         hosting.translatesAutoresizingMaskIntoConstraints = false
         v.contentView = hosting
-        
+
         if let variant { v.setVariantIfAvailable(variant) }
         if let scrimState { v.setScrimStateIfAvailable(scrimState) }
         if let subduedState { v.setSubduedStateIfAvailable(subduedState) }
-        
+
         return v
     }
-    
+
     public func updateNSView(_ v: LiquidGlassView, context: Context) {
         if let hosting = v.contentView as? NSHostingView<Content> {
             hosting.rootView = content
@@ -299,6 +364,8 @@ public struct CustomGlassEffectView<Content: View>: NSViewRepresentable {
         v.style = Int(style.rawValue)
         v.cornerRadius = cornerRadius
         v.tintColor = tint
+        v.hasVibrantRim = hasVibrantRim
+        
         if let variant { v.setVariantIfAvailable(variant) }
         if let scrimState { v.setScrimStateIfAvailable(scrimState) }
         if let subduedState { v.setSubduedStateIfAvailable(subduedState) }
