@@ -10,7 +10,8 @@
 // Product Module Name: Volume_Control
 #import "Volume_Control-Swift.h"  // exposes LiquidGlassView to ObjC
 
-@interface TahoeVolumeHUD ()
+// **IMPROVEMENT 1: Add HoverSliderDelegate protocol conformance**
+@interface TahoeVolumeHUD () <HoverSliderDelegate>
 
 // Window + layout
 @property (strong) HUDPanel *panel;
@@ -18,7 +19,8 @@
 @property (strong) LiquidGlassView *glass;
 
 // UI
-@property (strong) NSSlider *slider;
+// **IMPROVEMENT 2: Change property type to be more specific**
+@property (strong) HoverSlider *slider;
 @property (strong) NSImageView *appIconView;
 @property (strong) NSTimer *hideTimer;
 @property (strong) NSTextField *titleLabel;
@@ -55,6 +57,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     self = [super init];
     if (!self) return nil;
 
+    // ... (this part is correct) ...
     // Panel
     NSRect frame = NSMakeRect(0, 0, kHUDWidth, kHUDHeight);
     _panel = [[HUDPanel alloc] initWithContentRect:frame
@@ -307,8 +310,8 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     slider.minValue = 0.0;
     slider.maxValue = 1.0;
     slider.doubleValue = 0.6; // initial value
-    //slider.target = self;
-    //slider.action = @selector(sliderChanged:);
+    
+    slider.trackingDelegate = self;
     
     slider.translatesAutoresizingMaskIntoConstraints = NO;
     slider.controlSize = NSControlSizeSmall;
@@ -414,9 +417,23 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 }
 
 - (void)hoverSliderDidEndDragging:(HoverSlider *)slider {
-    // This is called on mouseUp.
-    // The hide timer is already running, so nothing extra is needed here,
-    // but it's a useful hook if you need it in the future.
+    // This should now be called!
+    // This is a great place to commit the change, e.g., play the sound feedback.
+    if ([self.delegate respondsToSelector:@selector(hudDidHide:)]) {
+        // We can reuse the hudDidHide: logic from AppDelegate, which plays the sound.
+        [self.delegate hudDidHide:self];
+    }
+
+    NSLog(@"Dfd");
+    
+    // You might also want to reset the hide timer here with a standard delay.
+    [self.hideTimer invalidate];
+    self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:kAutoHide
+                                                      target:self
+                                                    selector:@selector(hide)
+                                                    userInfo:nil
+                                                     repeats:NO];
 }
 
 @end
+
