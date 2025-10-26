@@ -51,7 +51,7 @@ This app is the spiritual successor to _iTunes Volume Control_, offering a simpl
 
 ## Installation
 
-1. **Download** the [latest notarized release](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Volume%20Control.zip).
+1. **Download** the [latest notarized release](https://raw.githubusercontent.com/alberti42/Volume-Control/main/VolumeControl.zip).
 2. **Unzip** the archive.
 3. **Drag** the app into your `Applications` folder (or anywhere you like).
 4. **Launch** the app.
@@ -121,6 +121,7 @@ GitHub: [@alberti42](https://github.com/alberti42)
 
 You can download older versions here:
 
+- [2.1.0](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.1.0.zip): Brought back HUD for volume indication in Tahoe.
 - [2.0.1](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.1.zip): Fixed a bug preventing controlling volume of music players.
 - [2.0.0](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.0.zip): Notarized and compatible with Tahoe. Many improvements under the hood.
 - [1.7.7](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v1.7.7.zip): Added option for locking system and player volumes together.

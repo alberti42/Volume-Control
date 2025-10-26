@@ -8,7 +8,7 @@
             <sparkle:version>1.4.4.83</sparkle:version>
             <sparkle:shortVersionString>1.4.4</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>10.7</sparkle:minimumSystemVersion>
-            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.4.zip" length="501984" type="application/octet-stream" sparkle:dsaSignature="MC4CFQDhxMTOpuuyXNQB7+dZcsJwEAZIvgIVAJgkvsvGk6ZdOgAQMuuEWUXcrAVj"/>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.4.zip" length="501984" type="application/octet-stream" sparkle:dsaSignature="MC0CFQCV5s9VsSP5h0qLtNfJQQp0MdrYiAIUZSTA0QnK11z4ve2eKOzdYKkX27g="/>
         </item>
         <item>
             <title>1.4.3</title>
@@ -16,7 +16,7 @@
             <sparkle:version>1.4.3.81</sparkle:version>
             <sparkle:shortVersionString>1.4.3</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>10.7</sparkle:minimumSystemVersion>
-            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.3.zip" length="502054" type="application/octet-stream" sparkle:dsaSignature="MC0CFGNs9hEzeOizb+cQKHibkOAt2DARAhUAmIqve18ctVBYDVJ44jJPgvOSri0="/>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.3.zip" length="502054" type="application/octet-stream" sparkle:dsaSignature="MCwCFFQodXsHAa+amliyp99V7/+EzlftAhQKVB5sRMcRxMOvSAMZGkFaY3ZuYQ=="/>
         </item>
         <item>
             <title>1.4.2</title>
@@ -24,7 +24,7 @@
             <sparkle:version>1.4.2.72</sparkle:version>
             <sparkle:shortVersionString>1.4.2</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>10.7</sparkle:minimumSystemVersion>
-            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.2.zip" length="501693" type="application/octet-stream" sparkle:dsaSignature="MCwCFFZwImo3/UOH3YUJ/ZhRcFZ2wtuJAhQzyYGwBquPUkD09/t90qF+i9p0Cw=="/>
+            <enclosure url="https://dl.dropbox.com/u/3112358/iTunesVolumeControl/iTunesVolumeControl-v1.4.2.zip" length="501693" type="application/octet-stream" sparkle:dsaSignature="MCwCFAkC2f+oX8543RLw/C23g7POIFXfAhR+sLL+d9Yu4rlUSb3e8ZyNCnJ1PA=="/>
         </item>
     </channel>
 </rss>

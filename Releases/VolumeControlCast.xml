@@ -6,12 +6,35 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.1.0</title>
+            <pubDate>Sun, 26 Oct 2025 12:50:55 +0100</pubDate>
+            <sparkle:version>213</sparkle:version>
+            <sparkle:shortVersionString>2.1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.5</sparkle:minimumSystemVersion>
+            <enclosure url="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.1.0.zip" length="5792297" type="application/octet-stream" sparkle:edSignature="oBriP4pVyNvLIeSGaD3cvDpe3Zro3HiunUbCuoTMfmlCdnrn7/r9QoAvXRhEYONLLqTDg7Ab6euVtdU37hW7DQ==" sparkle:dsaSignature="MCwCFA/LDZIHwTnlUZkAySWA++G2B3B0AhQBjOYUFBSoX0QcI9+TRcB+LZCCgg=="/>
+            <description><![CDATA[
+            <h2>Version 2.1.0</h2>
+						<h3>New features</h3>
+						<ul>
+							<li>
+								Brought back the head-up display (HUD) showing the current volume in both the <b>Sequoia</b> and <b>Tahoe</b> macOS versions. Tahoe version also displays whether the music player or the system volume is being controlled.
+							</li>
+						</ul>
+						<h3>Bug fixes</h3>
+						<ul>
+							<li>
+								Improvements under the hood to make the app handle more gently the situation when the user revokes permissions. This should prevent situations where the keyboard freezes.
+							</li>
+						</ul>
+				]]></description>
+        </item>
+        <item>
             <title>2.0.1</title>
             <pubDate>Tue, 30 Sep 2025 21:53:20 +0200</pubDate>
             <sparkle:version>197</sparkle:version>
             <sparkle:shortVersionString>2.0.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>13.5</sparkle:minimumSystemVersion>
-            <enclosure url="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.1.zip" length="7683346" type="application/octet-stream" sparkle:edSignature="djIIq6HWDerkFYmmdHriCXMCPG6sXDSsAk/1+3LdkptT8pIS0lkW4sSi7EvgMAmzTXe1LTYArZuWmKbu7zuAAw==" sparkle:dsaSignature="MC4CFQCwo5O2dPiK8t5BbBtVnRRGAUWCzQIVANah+WEnJItoyXt4MuB8MTf4fofY"/>
+            <enclosure url="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.1.zip" length="7683346" type="application/octet-stream" sparkle:edSignature="djIIq6HWDerkFYmmdHriCXMCPG6sXDSsAk/1+3LdkptT8pIS0lkW4sSi7EvgMAmzTXe1LTYArZuWmKbu7zuAAw==" sparkle:dsaSignature="MC4CFQCQLICrUNepjeGv2qbjP9OXX9xsOQIVAIVQWJAigBZ1/9M2c4FvmkMv8QPY"/>
             <description><![CDATA[
             <p style="color:red; font-weight:bold;">
 			⚠️ Important: The version 2 release introduces a new bundle identifier and has been notarized by Apple.
@@ -48,7 +71,7 @@
             <sparkle:version>192</sparkle:version>
             <sparkle:shortVersionString>2.0.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>13.5</sparkle:minimumSystemVersion>
-            <enclosure url="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.0.zip" length="7681818" type="application/octet-stream" sparkle:edSignature="iSJWuW41JzNBWcm/Q9bein1KtrSM8Y/I/bIfs+NVnNQkzwJGkpNIrM/0X7MnvXKBtr4i34Rssgoq7xawAMMPDw==" sparkle:dsaSignature="MC4CFQCYewNdobymTI2+DFspOD6YpgrPhwIVAMKe6v7g86d7JwDPgcHnaR87kjIu"/>
+            <enclosure url="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.0.zip" length="7681818" type="application/octet-stream" sparkle:edSignature="iSJWuW41JzNBWcm/Q9bein1KtrSM8Y/I/bIfs+NVnNQkzwJGkpNIrM/0X7MnvXKBtr4i34Rssgoq7xawAMMPDw==" sparkle:dsaSignature="MC0CFA6LpAV0nNR9hlcIwNRg75KX1mZzAhUAlhxc7ufGMVnz6A2V+ysTXULK64g="/>
             <description><![CDATA[
 			<h2>Version 2.0.0 (Tahoe compatible &amp; notarized)</h2>
 
