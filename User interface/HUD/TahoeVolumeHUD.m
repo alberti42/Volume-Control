@@ -59,8 +59,10 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
                                              defer:NO];
     _panel.opaque = NO;
     _panel.backgroundColor = NSColor.clearColor;
-    
     _panel.hasShadow = NO;
+    
+    // This ensures all subviews inherit the correct look, regardless of system mode.
+    _panel.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
     
     _panel.hidesOnDeactivate = YES;
     _panel.level = NSPopUpMenuWindowLevel;
