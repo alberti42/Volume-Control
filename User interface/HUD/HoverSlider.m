@@ -19,7 +19,7 @@
         [self removeTrackingArea:area];
     }
     
-    // **MODIFIED:** Changed the tracking option to be always active.
+    // Tracking always active
     NSTrackingAreaOptions options = NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways;
     NSTrackingArea *trackingArea = [[NSTrackingArea alloc] initWithRect:self.bounds
                                                                 options:options

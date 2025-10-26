@@ -402,7 +402,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 - (void)hoverSlider:(HoverSlider *)slider didChangeValue:(double)value {
     // This is now the method that gets called during a drag.
     
-    // **MODIFIED:** Corrected the selector to match the protocol definition.
+    // Selector to match the protocol definition.
     if ([self.delegate respondsToSelector:@selector(hud:didChangeVolume:)]) {
         [self.delegate hud:self didChangeVolume:value];
     }
