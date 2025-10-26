@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol TahoeVolumeHUDDelegate <NSObject>
 @optional
 /// Called whenever the user changes the slider (0.0–1.0).
-- (void)hud:(TahoeVolumeHUD *)hud didChangeVolume:(double)volume;
+- (void)hud:(TahoeVolumeHUD *)hud didChangeVolume:(double)volume forPlayer:(PlayerApplication*)controlledPlayer;
 /// Called whenever the user changes the slider (0.0–1.0) for the last time releasing focus
 - (void)didChangeVolumeFinal:(TahoeVolumeHUD *)hud;
 

@@ -26,9 +26,11 @@
 @property (strong) NSTimer *hideTimer;
 @property (strong) NSTextField *titleLabel;
 
-
 // Constraints
 @property (strong) NSLayoutConstraint *contentFixedHeight;
+
+// Player
+@property (strong) PlayerApplication *controlledPlayer;
 
 @end
 
@@ -147,19 +149,21 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
 #pragma mark - Public API
 
-- (void)showHUDWithVolume:(double)volume usingMusicPlayer:(PlayerApplication*)controlledPlayer andLabel:(NSString*)label anchoredToStatusButton:(NSStatusBarButton *)button {
+- (void)showHUDWithVolume:(double)volume usingMusicPlayer:(PlayerApplication*)player andLabel:(NSString*)label anchoredToStatusButton:(NSStatusBarButton *)button {
+    self.controlledPlayer = player;
+    
     if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
-
+    
     // Update header
-    self.appIconView.image = [controlledPlayer icon];
+    self.appIconView.image = [player icon];
     self.titleLabel.stringValue = label;
-
+    
     // Size fence each time
     [_panel setContentSize:NSMakeSize(kHUDWidth, kHUDHeight)];
-
+    
     [self positionPanelBelowStatusButton:button];
-
+    
     // Animate the fade-in
     
     // 1. If the panel is already visible, just update it.
@@ -427,8 +431,8 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     // This is now the method that gets called during a drag.
     
     // Selector to match the protocol definition.
-    if ([self.delegate respondsToSelector:@selector(hud:didChangeVolume:)]) {
-        [self.delegate hud:self didChangeVolume:value];
+    if ([self.delegate respondsToSelector:@selector(hud:didChangeVolume:forPlayer:)]) {
+        [self.delegate hud:self didChangeVolume:value forPlayer:self.controlledPlayer];
     }
     
     // Reset the auto-hide timer on every value change.

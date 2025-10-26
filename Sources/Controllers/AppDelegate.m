@@ -1529,7 +1529,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 #pragma mark - TahoeVolumeHUDDelegate
 
-- (void)hud:(TahoeVolumeHUD *)hud didChangeVolume:(double)volume {
+- (void)hud:(TahoeVolumeHUD *)hud didChangeVolume:(double)volume forPlayer:(PlayerApplication*)controlledPlayer{
     // This method is called every time the user drags the slider in the HUD.
     // The received 'volume' is a value between 0.0 and 1.0.
 
@@ -1537,7 +1537,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     double volumePercent = volume * 100.0;
 
     // 2. Get the currently active player, just like we do for the volume keys.
-    id runningPlayerPtr = [self runningPlayer];
+    id runningPlayerPtr = controlledPlayer;
     
     if (runningPlayerPtr != nil) {
         // 3. Set the volume for the active player.
