@@ -1527,6 +1527,52 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	}
 }
 
+#pragma mark - TahoeVolumeHUDDelegate
+
+- (void)hud:(TahoeVolumeHUD *)hud didChangeVolume:(double)volume {
+    // This method is called every time the user drags the slider in the HUD.
+    // The received 'volume' is a value between 0.0 and 1.0.
+
+    // 1. Convert the 0.0-1.0 scale to the 0-100 scale our app uses.
+    double volumePercent = volume * 100.0;
+
+    // 2. Get the currently active player, just like we do for the volume keys.
+    id runningPlayerPtr = [self runningPlayer];
+    
+    if (runningPlayerPtr != nil) {
+        // 3. Set the volume for the active player.
+        [runningPlayerPtr setCurrentVolume:volumePercent];
+        
+        // 4. If volume is locked, also set the system volume.
+        if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
+            [systemAudio setCurrentVolume:volumePercent];
+        }
+
+        // 5. Update the percentage labels in the status menu to reflect the change in real-time.
+        if (runningPlayerPtr == iTunes) {
+            [self setItunesVolume:volumePercent];
+        } else if (runningPlayerPtr == spotify) {
+            [self setSpotifyVolume:volumePercent];
+        } else if (runningPlayerPtr == doppler) {
+            [self setDopplerVolume:volumePercent];
+        }
+
+        if (_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio) {
+            [self setSystemVolume:volumePercent];
+        }
+    }
+}
+
+- (void)hudDidHide:(TahoeVolumeHUD *)hud {
+    // This is called when the HUD fades out. We can play the feedback sound here
+    // to signal that the volume change is "committed".
+    [self emitAcousticFeedback];
+    
+    // Reset the current player so it's re-evaluated next time.
+    [self resetCurrentPlayer:nil];
+}
+
+
 #pragma mark - Sparkle Delegates
 
 // This is the Objective-C equivalent of the Swift property 'supportsGentleScheduledUpdateReminders'

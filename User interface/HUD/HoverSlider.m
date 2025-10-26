@@ -50,4 +50,35 @@
     }
 }
 
+- (void)updateValueWithEvent:(NSEvent *)event {
+    // Convert the mouse click location to a point within the slider's bounds.
+    NSPoint point = [self convertPoint:[event locationInWindow] fromView:nil];
+    
+    // Calculate the percentage value based on the horizontal position.
+    CGFloat percentage = point.x / self.bounds.size.width;
+    
+    // Clamp the value between 0.0 and 1.0.
+    percentage = MAX(0.0, MIN(1.0, percentage));
+    
+    // Calculate the actual slider value based on its min/max range.
+    double newValue = self.minValue + (percentage * (self.maxValue - self.minValue));
+    
+    // Update the slider's own value and notify the delegate.
+    self.doubleValue = newValue;
+    [self.trackingDelegate hoverSlider:self didChangeValue:self.doubleValue];
+}
+
+- (void)mouseDown:(NSEvent *)event {
+    [self updateValueWithEvent:event];
+}
+
+- (void)mouseDragged:(NSEvent *)event {
+    [self updateValueWithEvent:event];
+}
+
+- (void)mouseUp:(NSEvent *)event {
+    [self.trackingDelegate hoverSliderDidEndDragging:self];
+}
+
+
 @end

@@ -307,8 +307,8 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     slider.minValue = 0.0;
     slider.maxValue = 1.0;
     slider.doubleValue = 0.6; // initial value
-    slider.target = self;
-    slider.action = @selector(sliderChanged:);
+    //slider.target = self;
+    //slider.action = @selector(sliderChanged:);
     
     slider.translatesAutoresizingMaskIntoConstraints = NO;
     slider.controlSize = NSControlSizeSmall;
@@ -393,21 +393,30 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     return row;
 }
 
+#pragma mark - HoverSliderDelegate
 
-
-#pragma mark - Actions
-
-- (void)sliderChanged:(NSSlider *)sender {
-    double v = sender.doubleValue; // 0..1
+// 5. IMPLEMENT the new delegate methods.
+- (void)hoverSlider:(HoverSlider *)slider didChangeValue:(double)value {
+    // This is now the method that gets called during a drag.
+    
+    // **MODIFIED:** Corrected the selector to match the protocol definition.
     if ([self.delegate respondsToSelector:@selector(hud:didChangeVolume:)]) {
-        [self.delegate hud:self didChangeVolume:v];
+        [self.delegate hud:self didChangeVolume:value];
     }
+    
+    // Reset the auto-hide timer on every value change.
     [self.hideTimer invalidate];
     self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:1.2
                                                       target:self
                                                     selector:@selector(hide)
                                                     userInfo:nil
                                                      repeats:NO];
+}
+
+- (void)hoverSliderDidEndDragging:(HoverSlider *)slider {
+    // This is called on mouseUp.
+    // The hide timer is already running, so nothing extra is needed here,
+    // but it's a useful hook if you need it in the future.
 }
 
 @end
