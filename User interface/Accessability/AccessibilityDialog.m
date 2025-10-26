@@ -45,7 +45,7 @@
     //this will be the path to the .app bundle,
     //not the executable inside it; exactly what `open` wants
     NSString *pathToUs = [[NSBundle mainBundle] bundlePath];
-    NSLog(@"%@",pathToUs);
+    //NSLog(@"%@",pathToUs);
 
     NSArray *shArgs = @[
         @"-c",  // -c tells sh to execute the next argument, passing it the remaining arguments.
