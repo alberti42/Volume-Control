@@ -59,7 +59,9 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
                                              defer:NO];
     _panel.opaque = NO;
     _panel.backgroundColor = NSColor.clearColor;
-    _panel.hasShadow = YES;
+    
+    _panel.hasShadow = NO;
+    
     _panel.hidesOnDeactivate = YES;
     _panel.level = NSPopUpMenuWindowLevel;
     _panel.movableByWindowBackground = NO;
@@ -68,6 +70,7 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
                               | NSWindowCollectionBehaviorCanJoinAllSpaces;
     _panel.floatingPanel = YES;
     _panel.becomesKeyOnlyIfNeeded = YES;
+
 
     // Size fences
     _panel.contentMinSize = NSMakeSize(kHUDWidth, kHUDHeight);
@@ -95,19 +98,23 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
 
     // Glass (Swift class)
     [self installGlassInto:_root cornerRadius:kCornerRadius];
-
+    
     // Content wrapper (fills the glass)
     NSView *wrapper = [NSView new];
     wrapper.translatesAutoresizingMaskIntoConstraints = NO;
-
+    
+    // 1 of 3: Set the appearance for the entire content view.
+    // This forces all subviews (labels, icons) to use their dark variants.
+    wrapper.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
+    
     // Build header row (icon + label) and slider strip
     NSView *header = [self buildHeaderRow];
     NSView *strip  = [self buildSliderStrip];
-
+    
     [wrapper addSubview:header];
     [wrapper addSubview:strip];
     
-    // **MODIFIED:** Anchor header to top, strip to bottom. This is more robust.
+    // Anchor header to top, strip to bottom. This is more robust.
     [NSLayoutConstraint activateConstraints:@[
         [header.topAnchor constraintEqualToAnchor:wrapper.topAnchor],
         [header.leadingAnchor constraintEqualToAnchor:wrapper.leadingAnchor],
@@ -292,7 +299,7 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
         [slider.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
     ]];
 
-    strip.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
+    // strip.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
     return strip;
 }
 
@@ -339,7 +346,7 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
     ]];
 
     // Good contrast on glass
-    row.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
+    // row.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
 
     return row;
 }
