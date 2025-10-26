@@ -5,10 +5,10 @@
 //  Created by Andrea Alberti on 26.10.25.
 //
 
-#import "HoverSlider.h"
-#import "CustomVolumeSlider.h" // We need this to access the 'isHovered' property
+#import "VolumeSlider.h"
+#import "VolumeSliderCell.h" // We need this to access the 'isHovered' property
 
-@implementation HoverSlider
+@implementation VolumeSlider
 
 // This method sets up the tracking area that allows us to receive mouse events.
 - (void)updateTrackingAreas {
@@ -31,9 +31,9 @@
 // Called when the mouse cursor enters the slider's bounds.
 - (void)mouseEntered:(NSEvent *)event {
     [super mouseEntered:event];
-    if ([self.cell isKindOfClass:[CustomVolumeSlider class]]) {
+    if ([self.cell isKindOfClass:[VolumeSliderCell class]]) {
         // Tell our custom cell that it's being hovered
-        ((CustomVolumeSlider *)self.cell).isHovered = YES;
+        ((VolumeSliderCell *)self.cell).isHovered = YES;
         // Trigger a redraw to show the knob
         [self setNeedsDisplay:YES];
     }
@@ -42,9 +42,9 @@
 // Called when the mouse cursor leaves the slider's bounds.
 - (void)mouseExited:(NSEvent *)event {
     [super mouseExited:event];
-    if ([self.cell isKindOfClass:[CustomVolumeSlider class]]) {
+    if ([self.cell isKindOfClass:[VolumeSliderCell class]]) {
         // Tell our custom cell that the hover is over
-        ((CustomVolumeSlider *)self.cell).isHovered = NO;
+        ((VolumeSliderCell *)self.cell).isHovered = NO;
         // Trigger a redraw to hide the knob
         [self setNeedsDisplay:YES];
     }
@@ -65,7 +65,7 @@
     
     // Update the slider's own value and notify the delegate.
     self.doubleValue = newValue;
-    [self.trackingDelegate hoverSlider:self didChangeValue:self.doubleValue];
+    [self.trackingDelegate volumeSlider:self didChangeValue:self.doubleValue];
 }
 
 - (void)mouseDown:(NSEvent *)event {
@@ -77,7 +77,7 @@
 }
 
 - (void)mouseUp:(NSEvent *)event {
-    [self.trackingDelegate hoverSliderDidEndDragging:self];
+    [self.trackingDelegate volumeSliderDragged:self];
 }
 
 

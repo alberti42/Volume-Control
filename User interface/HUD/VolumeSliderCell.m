@@ -5,11 +5,11 @@
 //  Created by Andrea Alberti on 25.10.25.
 //
 
-#import "CustomVolumeSlider.h"
+#import "VolumeSliderCell.h"
 #import <AppKit/NSColor.h>
 #import <AppKit/NSBezierPath.h>
 
-@implementation CustomVolumeSlider
+@implementation VolumeSliderCell
 - (void)drawBarInside:(NSRect)rect flipped:(BOOL)flipped {
     rect = NSInsetRect(rect, 0, (NSHeight(rect)-4)/2.0);
     [[NSColor colorWithWhite:1.0 alpha:0.25] setFill]; // background “track”

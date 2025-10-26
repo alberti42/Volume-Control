@@ -1,17 +1,17 @@
 // FILE: TahoeVolumeHUD.m
 
 #import "TahoeVolumeHUD.h"
-#import "CustomVolumeSlider.h"
+#import "VolumeSliderCell.h"
 #import <AppKit/NSGlassEffectView.h>
 #import "HUDPanel.h"
-#import "HoverSlider.h"
+#import "VolumeSlider.h"
 #import <QuartzCore/QuartzCore.h>
 
 // Product Module Name: Volume_Control
 #import "Volume_Control-Swift.h"  // exposes LiquidGlassView to ObjC
 
 // **IMPROVEMENT 1: Add HoverSliderDelegate protocol conformance**
-@interface TahoeVolumeHUD () <HoverSliderDelegate>
+@interface TahoeVolumeHUD () <VolumeSliderDelegate>
 
 // Window + layout
 @property (strong) HUDPanel *panel;
@@ -20,7 +20,7 @@
 
 // UI
 // **IMPROVEMENT 2: Change property type to be more specific**
-@property (strong) HoverSlider *slider;
+@property (strong) VolumeSlider *slider;
 @property (strong) NSImageView *appIconView;
 @property (strong) NSTimer *hideTimer;
 @property (strong) NSTextField *titleLabel;
@@ -306,7 +306,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     [iconRight setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
 
     // <-- 2. USE THE NEW HoverSlider CLASS
-    HoverSlider *slider = [HoverSlider new];
+    VolumeSlider *slider = [VolumeSlider new];
     slider.minValue = 0.0;
     slider.maxValue = 1.0;
     slider.doubleValue = 0.6; // initial value
@@ -316,7 +316,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     slider.translatesAutoresizingMaskIntoConstraints = NO;
     slider.controlSize = NSControlSizeSmall;
 
-    CustomVolumeSlider *cell = [CustomVolumeSlider new];
+    VolumeSliderCell *cell = [VolumeSliderCell new];
     cell.minValue = 0.0;
     cell.maxValue = 1.0;
     cell.controlSize = NSControlSizeSmall;
@@ -399,7 +399,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 #pragma mark - HoverSliderDelegate
 
 // 5. IMPLEMENT the new delegate methods.
-- (void)hoverSlider:(HoverSlider *)slider didChangeValue:(double)value {
+- (void)volumeSlider:(VolumeSlider *)slider didChangeValue:(double)value {
     // This is now the method that gets called during a drag.
     
     // Selector to match the protocol definition.
@@ -416,15 +416,12 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
                                                      repeats:NO];
 }
 
-- (void)hoverSliderDidEndDragging:(HoverSlider *)slider {
-    // This should now be called!
-    // This is a great place to commit the change, e.g., play the sound feedback.
+- (void)volumeSliderDragged:(VolumeSlider *)slider {
+    // We update the volume
     if ([self.delegate respondsToSelector:@selector(hudDidHide:)]) {
         // We can reuse the hudDidHide: logic from AppDelegate, which plays the sound.
         [self.delegate hudDidHide:self];
     }
-
-    NSLog(@"Dfd");
     
     // You might also want to reset the hide timer here with a standard delay.
     [self.hideTimer invalidate];

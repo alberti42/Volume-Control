@@ -7,7 +7,7 @@
 
 #import <AppKit/NSSliderCell.h>
 
-@interface CustomVolumeSlider : NSSliderCell
+@interface VolumeSliderCell : NSSliderCell
 
 // This property will control whether the knob is visible.
 @property (nonatomic, assign) BOOL isHovered;
