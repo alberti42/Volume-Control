@@ -97,6 +97,7 @@ If you prefer or need to compile the app yourself using Xcode, see the instructi
 - Apple Remote integration adapted from `iremotepipe` by **Steven Wittens**
 - Native HUD overlay by **Benno Krauss** and reverse-engineered use of `OSDUIHelper`
 - Doppler support by **Ed Wellbrook**
+- Insightful discussions and support by [**waydabber**](https://github.com/waydabber) for the Liquid Glass effect for Tahoe HUD
 
 ---
 
