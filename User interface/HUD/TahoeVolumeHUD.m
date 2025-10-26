@@ -219,10 +219,11 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
     [glass setScrimStateIfAvailable:0];
     [glass setSubduedStateIfAvailable:0];
     
-//    [glass setValue:@(YES) forKey:@"_useReducedShadowRadius"]; // smaller or sharper rim
-//    [glass setValue:@(0)   forKey:@"_adaptiveAppearance"];      adapts rim contrast to dark/light mode
-//    [glass setValue:@(0)   forKey:@"_contentLensing"];         // if 1, simulates focus depth
-
+    // Setting adaptive appearance to 0 is the key to keeping it dark.
+    [glass setAdaptiveAppearanceIfAvailable:0];
+    [glass setUseReducedShadowRadiusIfAvailable:YES];
+    [glass setContentLensingIfAvailable:0];
+    
     // Optional SwiftUI-like post-filters:
     //[glass applyVisualAdjustmentsWithSaturation:1.5 brightness:0.2 blur:0.25];
 }

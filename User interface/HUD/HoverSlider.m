@@ -30,7 +30,6 @@
 
 // Called when the mouse cursor enters the slider's bounds.
 - (void)mouseEntered:(NSEvent *)event {
-    NSLog(@"DFd");
     [super mouseEntered:event];
     if ([self.cell isKindOfClass:[CustomVolumeSlider class]]) {
         // Tell our custom cell that it's being hovered

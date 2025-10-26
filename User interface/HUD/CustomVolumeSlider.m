@@ -25,11 +25,14 @@
 
 - (void)drawKnob:(NSRect)knobRect {
     if (self.isHovered) {
+        /*
         CGFloat d = 12;
         knobRect = NSMakeRect(NSMidX(knobRect)-d/2.0, NSMidY(knobRect)-d/2.0, d, d);
         [[NSColor whiteColor] setFill];
         NSBezierPath *circle = [NSBezierPath bezierPathWithRoundedRect:knobRect xRadius:d/2 yRadius:d/2];
         [circle fill];
+        */
+        [super drawKnob:knobRect]; // Draws Apple's standard system knob
     }
 }
 @end
