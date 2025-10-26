@@ -99,7 +99,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
                        keyCode == NX_KEYTYPE_SOUND_UP ||
                        keyCode == NX_KEYTYPE_SOUND_DOWN);
     
-    if(isMediaKey && keyModifier==1114111) {
+    if(isMediaKey /*&& keyModifier==1114111*/) {
         // Hand off all actual logic to main thread
         dispatch_async(dispatch_get_main_queue(), ^{
             AppDelegate *app = (__bridge AppDelegate *)refcon;
