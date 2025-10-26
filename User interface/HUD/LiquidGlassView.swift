@@ -264,9 +264,9 @@ public final class LiquidGlassView: NSView {
             guard rimLayer == nil else { return } // Already created
 
             let newRim = CAShapeLayer()
-            // Configure the "glassy" stroke
+            
             newRim.lineWidth = 1.5
-            newRim.strokeColor = NSColor(white: 1.0, alpha: 0.5).cgColor
+            newRim.strokeColor = NSColor(white: 1.0, alpha: 0.8).cgColor
             newRim.fillColor = NSColor.clear.cgColor
 
             // Configure the "vibrant" glow using the shadow property
@@ -371,3 +371,4 @@ public struct CustomGlassEffectView<Content: View>: NSViewRepresentable {
         if let subduedState { v.setSubduedStateIfAvailable(subduedState) }
     }
 }
+

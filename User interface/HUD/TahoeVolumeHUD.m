@@ -5,6 +5,7 @@
 #import <AppKit/NSGlassEffectView.h>
 #import "HUDPanel.h"
 #import "HoverSlider.h"
+#import <QuartzCore/QuartzCore.h>
 
 // Product Module Name: Volume_Control
 #import "Volume_Control-Swift.h"  // exposes LiquidGlassView to ObjC
@@ -33,8 +34,11 @@ static const CGFloat kHUDHeight      = 64.0;
 static const CGFloat kHUDWidth       = 290.0;
 static const CGFloat kCornerRadius   = 24.0;
 static const CGFloat kBelowGap       = 14.0;
-static const NSTimeInterval kAutoHide = 2.0;
+static const NSTimeInterval kAutoHide = 1.5;
 static const CGFloat kSideInset  = 12.0;  // left/right margin
+
+static const NSTimeInterval kFadeInDuration  = 0.25; // seconds
+static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
 @implementation TahoeVolumeHUD
 
@@ -60,19 +64,22 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
     _panel.opaque = NO;
     _panel.backgroundColor = NSColor.clearColor;
     _panel.hasShadow = NO;
-    
-    // This ensures all subviews inherit the correct look, regardless of system mode.
     _panel.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
+
+    // Set to NO to prevent the panel from hiding when the app is not active.
+    _panel.hidesOnDeactivate = NO;
     
-    _panel.hidesOnDeactivate = YES;
     _panel.level = NSPopUpMenuWindowLevel;
     _panel.movableByWindowBackground = NO;
+
+    // Ensure the panel can appear on any space.
+    // This makes it a true system-wide HUD.
     _panel.collectionBehavior = NSWindowCollectionBehaviorTransient
                               | NSWindowCollectionBehaviorFullScreenAuxiliary
                               | NSWindowCollectionBehaviorCanJoinAllSpaces;
+
     _panel.floatingPanel = YES;
     _panel.becomesKeyOnlyIfNeeded = YES;
-
 
     // Size fences
     _panel.contentMinSize = NSMakeSize(kHUDWidth, kHUDHeight);
@@ -142,14 +149,31 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
 
     // Update header
     self.appIconView.image = icon;
-    self.titleLabel.stringValue = label; // TODO: replace with actual source (player name, etc.)
+    self.titleLabel.stringValue = label;
 
     // Size fence each time
     [_panel setContentSize:NSMakeSize(kHUDWidth, kHUDHeight)];
 
     [self positionPanelBelowStatusButton:button];
-    [self.panel orderFront:nil];
 
+    // Animate the fade-in
+    
+    // 1. If the panel is already visible, just update it.
+    // Otherwise, prepare for a fade-in animation.
+    if (!self.panel.isVisible) {
+        // Set the panel to be fully transparent before showing it
+        self.panel.alphaValue = 0.0;
+        [self.panel orderFront:nil];
+    }
+
+    // 2. Animate the alpha value to 1.0 (fully opaque)
+    [NSAnimationContext runAnimationGroup:^(NSAnimationContext * _Nonnull context) {
+        context.duration = kFadeInDuration;
+        context.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+        [[self.panel animator] setAlphaValue:1.0];
+    }];
+
+    // Reset the auto-hide timer
     [self.hideTimer invalidate];
     self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:kAutoHide
                                                       target:self
@@ -165,15 +189,28 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
 }
 
 - (void)hide {
-    [self.panel orderOut:nil];
+    // Invalidate the timer to prevent this method from being called again
     [self.hideTimer invalidate];
     self.hideTimer = nil;
 
-    if ([self.delegate respondsToSelector:@selector(hudDidHide:)]) {
-        [self.delegate hudDidHide:self];
-    }
+    // Animate the fade-out
+    
+    // 1. Animate the alpha value down to 0.0 (fully transparent)
+    [NSAnimationContext runAnimationGroup:^(NSAnimationContext * _Nonnull context) {
+        context.duration = kFadeOutDuration;
+        context.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
+        [[self.panel animator] setAlphaValue:0.0];
+    } completionHandler:^{
+        // 2. AFTER the animation is complete, properly order the window out.
+        // This is crucial for performance and correctness.
+        [self.panel orderOut:nil];
+        
+        // 3. Notify the delegate only after the HUD is fully gone.
+        if ([self.delegate respondsToSelector:@selector(hudDidHide:)]) {
+            [self.delegate hudDidHide:self];
+        }
+    }];
 }
-
 #pragma mark - Layout / Anchoring
 
 - (void)positionPanelBelowStatusButton:(NSStatusBarButton *)button {
@@ -215,7 +252,7 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
     self.glass = glass;
     
     // Enable the new vibrant rim here.
-    glass.hasVibrantRim = YES;
+    glass.hasVibrantRim = NO;
 
     [host addSubview:glass];
     glass.translatesAutoresizingMaskIntoConstraints = NO;
@@ -330,7 +367,7 @@ static const CGFloat kSideInset  = 12.0;  // left/right margin
     [row addSubview:self.appIconView];
     [row addSubview:self.titleLabel];
 
-    // **MODIFIED:** New constraints for better padding and alignment.
+    // New constraints for better padding and alignment.
     CGFloat topPadding = 12.0; // Increased to provide more space at the top.
     CGFloat bottomPadding = 4.0; // Defines space between header and slider strip.
 
