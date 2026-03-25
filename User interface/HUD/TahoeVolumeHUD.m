@@ -40,7 +40,9 @@ static const CGFloat kHUDWidth       = 290.0;
 static const CGFloat kCornerRadius   = 24.0;
 static const CGFloat kBelowGap       = 14.0;
 static const NSTimeInterval kAutoHide = 1.5;
-static const CGFloat kSideInset  = 12.0;  // left/right margin
+static const CGFloat kSideInset  = 12.0;  // left/right internal padding
+static const CGFloat kTopMargin  = 40.0;  // gap from true screen top edge
+static const CGFloat kSideMargin = 20.0;  // gap from left/right screen edges
 
 static const NSTimeInterval kFadeInDuration  = 0.25; // seconds
 static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
@@ -243,8 +245,9 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     if (!screen) return;
 
     NSRect vis = screen.visibleFrame;
+    NSRect full = screen.frame;
     NSSize size = NSMakeSize(kHUDWidth, kHUDHeight);
-    static const CGFloat kEdgeMargin = 24.0;
+
 
     CGFloat x, y;
 
@@ -253,12 +256,12 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
         case HUDPositionTopLeft:
         case HUDPositionCenterLeft:
         case HUDPositionBottomLeft:
-            x = NSMinX(vis) + kEdgeMargin;
+            x = NSMinX(vis) + kSideMargin;
             break;
         case HUDPositionTopRight:
         case HUDPositionCenterRight:
         case HUDPositionBottomRight:
-            x = NSMaxX(vis) - size.width - kEdgeMargin;
+            x = NSMaxX(vis) - size.width - kSideMargin;
             break;
         default: // center column
             x = NSMidX(vis) - size.width / 2.0;
@@ -270,13 +273,13 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
         case HUDPositionTopLeft:
         case HUDPositionTopCenter:
         case HUDPositionTopRight:
-            // Place just below the menu bar (top of visibleFrame is already below it)
-            y = NSMaxY(vis) - size.height - kEdgeMargin;
+            // Measure from the true screen top so kTopMargin = exact px from top edge
+            y = NSMaxY(full) - size.height - kTopMargin;
             break;
         case HUDPositionBottomLeft:
         case HUDPositionBottomCenter:
         case HUDPositionBottomRight:
-            y = NSMinY(vis) + kEdgeMargin;
+            y = NSMinY(vis) + kSideMargin;
             break;
         default: // middle row
             y = NSMidY(vis) - size.height / 2.0;
