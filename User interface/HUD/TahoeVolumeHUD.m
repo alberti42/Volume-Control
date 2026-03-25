@@ -28,6 +28,9 @@
 
 // Constraints
 @property (strong) NSLayoutConstraint *contentFixedHeight;
+@property (strong) NSLayoutConstraint *titleLeadingWithIcon;
+@property (strong) NSLayoutConstraint *titleLeadingWithoutIcon;
+@property (strong) NSLayoutConstraint *iconWidthConstraint;
 
 // Player
 @property (strong) PlayerApplication *controlledPlayer;
@@ -41,7 +44,7 @@ static const CGFloat kCornerRadius   = 24.0;
 static const CGFloat kBelowGap       = 14.0;
 static const NSTimeInterval kAutoHide = 1.5;
 static const CGFloat kSideInset  = 12.0;  // left/right internal padding
-static const CGFloat kTopMargin  = 40.0;  // gap from true screen top edge
+static const CGFloat kTopMargin  = 38.0;  // gap from true screen top edge
 static const CGFloat kSideMargin = 20.0;  // gap from left/right screen edges
 
 static const NSTimeInterval kFadeInDuration  = 0.25; // seconds
@@ -76,7 +79,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
     // Set to NO to prevent the panel from hiding when the app is not active.
     _panel.hidesOnDeactivate = NO;
-    
+
     _panel.level = NSPopUpMenuWindowLevel;
     _panel.movableByWindowBackground = NO;
 
@@ -115,22 +118,22 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
     // Glass (Swift class)
     [self installGlassInto:_root cornerRadius:kCornerRadius];
-    
+
     // Content wrapper (fills the glass)
     NSView *wrapper = [NSView new];
     wrapper.translatesAutoresizingMaskIntoConstraints = NO;
-    
+
     // 1 of 3: Set the appearance for the entire content view.
     // This forces all subviews (labels, icons) to use their dark variants.
     wrapper.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
-    
+
     // Build header row (icon + label) and slider strip
     NSView *header = [self buildHeaderRow];
     NSView *strip  = [self buildSliderStrip];
-    
+
     [wrapper addSubview:header];
     [wrapper addSubview:strip];
-    
+
     // Anchor header to top, strip to bottom. This is more robust.
     [NSLayoutConstraint activateConstraints:@[
         [header.topAnchor constraintEqualToAnchor:wrapper.topAnchor],
@@ -153,21 +156,37 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
 - (void)showHUDWithVolume:(double)volume usingMusicPlayer:(nullable PlayerApplication*)player andLabel:(NSString*)label anchoredToStatusButton:(nullable NSStatusBarButton *)button position:(HUDPosition)position {
     self.controlledPlayer = player;
-    
+
     if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
-    
-    // Update header
-    self.appIconView.image = player ? [player icon] : nil;
+
+    // Update header: show icon and adjust title leading constraint accordingly.
+    NSImage *icon = player ? [player icon] : nil;
+    self.appIconView.image = icon;
+
+    if (icon) {
+        // Icon is present — give it its full width and anchor title to its trailing edge.
+        self.appIconView.hidden = NO;
+        self.iconWidthConstraint.constant = 18;
+        self.titleLeadingWithoutIcon.active = NO;
+        self.titleLeadingWithIcon.active    = YES;
+    } else {
+        // No icon — hide and collapse the icon view, anchor title directly to the left edge.
+        self.appIconView.hidden = YES;
+        self.iconWidthConstraint.constant = 0;
+        self.titleLeadingWithIcon.active    = NO;
+        self.titleLeadingWithoutIcon.active = YES;
+    }
+
     self.titleLabel.stringValue = label;
-    
+
     // Size fence each time
     [_panel setContentSize:NSMakeSize(kHUDWidth, kHUDHeight)];
-    
+
     [self positionPanel:button position:position];
-    
+
     // Animate the fade-in
-    
+
     // 1. If the panel is already visible, just update it.
     // Otherwise, prepare for a fade-in animation.
     if (!self.panel.isVisible) {
@@ -204,7 +223,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     self.hideTimer = nil;
 
     // Animate the fade-out
-    
+
     // 1. Animate the alpha value down to 0.0 (fully transparent)
     [NSAnimationContext runAnimationGroup:^(NSAnimationContext * _Nonnull context) {
         context.duration = kFadeOutDuration;
@@ -297,10 +316,10 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
                                                     cornerRadius:radius
                                                        tintColor:[NSColor colorWithCalibratedWhite:0 alpha:0]];
         self.glass = glass;
-        
+
         // Enable the new vibrant rim here.
         glass.hasVibrantRim = NO;
-        
+
         [host addSubview:glass];
         glass.translatesAutoresizingMaskIntoConstraints = NO;
         [NSLayoutConstraint activateConstraints:@[
@@ -309,12 +328,12 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
             [glass.topAnchor constraintEqualToAnchor:host.topAnchor],
             [glass.bottomAnchor constraintEqualToAnchor:host.bottomAnchor],
         ]];
-        
+
         // Optional Tahoe tuning:
         [glass setVariantIfAvailable:5];
         [glass setScrimStateIfAvailable:0];
         [glass setSubduedStateIfAvailable:0];
-        
+
         // Setting adaptive appearance to 0 is the key to keeping it dark.
         [glass setAdaptiveAppearanceIfAvailable:0];
         [glass setUseReducedShadowRadiusIfAvailable:YES];
@@ -322,7 +341,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     } else {
         // Fallback on earlier versions
     }
-    
+
     // Optional SwiftUI-like post-filters:
     //[glass applyVisualAdjustmentsWithSaturation:1.5 brightness:0.2 blur:0.25];
 }
@@ -393,7 +412,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
         [slider.trailingAnchor constraintEqualToAnchor:iconRight.leadingAnchor constant:-8],
         [slider.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
     ]];
-    
+
     return strip;
 }
 
@@ -423,18 +442,26 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     CGFloat topPadding = 12.0; // Increased to provide more space at the top.
     CGFloat bottomPadding = 4.0; // Defines space between header and slider strip.
 
+    // Build the two alternative leading constraints for the title label.
+    // Only one will be active at a time, toggled in showHUDWithVolume:...
+    self.titleLeadingWithIcon    = [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.appIconView.trailingAnchor constant:8];
+    self.titleLeadingWithoutIcon = [self.titleLabel.leadingAnchor constraintEqualToAnchor:row.leadingAnchor constant:kSideInset];
+
+    // Width constraint for the icon — set to 0 and deactivated when no icon is present.
+    self.iconWidthConstraint = [self.appIconView.widthAnchor constraintEqualToConstant:18];
+
     [NSLayoutConstraint activateConstraints:@[
         // Icon constraints define the layout and padding for the header row.
         [self.appIconView.leadingAnchor constraintEqualToAnchor:row.leadingAnchor constant:kSideInset],
         [self.appIconView.topAnchor constraintEqualToAnchor:row.topAnchor constant:topPadding],
-        [self.appIconView.widthAnchor constraintEqualToConstant:18],
+        self.iconWidthConstraint,
         [self.appIconView.heightAnchor constraintEqualToConstant:18],
-        
+
         // The header row's height is determined by the icon's position and its own padding.
         [row.bottomAnchor constraintEqualToAnchor:self.appIconView.bottomAnchor constant:bottomPadding],
 
-        // Title label is positioned relative to the icon.
-        [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.appIconView.trailingAnchor constant:8],
+        // Start with no-icon layout; showHUDWithVolume:... will switch as needed.
+        self.titleLeadingWithoutIcon,
         [self.titleLabel.centerYAnchor constraintEqualToAnchor:self.appIconView.centerYAnchor],
         [self.titleLabel.trailingAnchor constraintLessThanOrEqualToAnchor:row.trailingAnchor constant:-kSideInset],
     ]];
@@ -450,12 +477,12 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 // 5. IMPLEMENT the new delegate methods.
 - (void)volumeSlider:(VolumeSlider *)slider didChangeValue:(double)value {
     // This is now the method that gets called during a drag.
-    
+
     // Selector to match the protocol definition.
     if ([self.delegate respondsToSelector:@selector(hud:didChangeVolume:forPlayer:)]) {
         [self.delegate hud:self didChangeVolume:value forPlayer:self.controlledPlayer];
     }
-    
+
     // Reset the auto-hide timer on every value change.
     [self.hideTimer invalidate];
     self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:1.2
@@ -469,7 +496,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     if ([self.delegate respondsToSelector:@selector(didChangeVolumeFinal:)]) {
         [self.delegate didChangeVolumeFinal:self];
     }
-    
+
     // You might also want to reset the hide timer here with a standard delay.
     [self.hideTimer invalidate];
     self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:kAutoHide
