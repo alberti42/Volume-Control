@@ -12,6 +12,20 @@
 @class TahoeVolumeHUD;
 @class PlayerApplication;
 
+/// Where to place the HUD on screen when not anchored to a status-bar button.
+/// The nine values form a 3×3 grid; the default is TopCenter (below the menu bar).
+typedef NS_ENUM(NSInteger, HUDPosition) {
+    HUDPositionTopLeft      = 0,
+    HUDPositionTopCenter    = 1,
+    HUDPositionTopRight     = 2,
+    HUDPositionCenterLeft   = 3,
+    HUDPositionCenter       = 4,
+    HUDPositionCenterRight  = 5,
+    HUDPositionBottomLeft   = 6,
+    HUDPositionBottomCenter = 7,
+    HUDPositionBottomRight  = 8,
+};
+
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol TahoeVolumeHUDDelegate <NSObject>
@@ -30,7 +44,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic, nullable) id<TahoeVolumeHUDDelegate> delegate;
 
 /// Show/update the HUD under a status bar button. `volume` is 0.0–1.0 (or 0–100; both accepted).
-- (void)showHUDWithVolume:(double)volume usingMusicPlayer:(PlayerApplication*)controlledPlayer andLabel:(NSString*)label anchoredToStatusButton:(NSStatusBarButton *)button;
+/// When `button` is nil the HUD is placed on screen according to `position`.
+- (void)showHUDWithVolume:(double)volume usingMusicPlayer:(nullable PlayerApplication*)controlledPlayer andLabel:(NSString*)label anchoredToStatusButton:(nullable NSStatusBarButton *)button position:(HUDPosition)position;
 
 /// Programmatically hide it immediately.
 - (void)hide;

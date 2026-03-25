@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA01000000000001 /* main_cli.m in Sources */ = {isa = PBXBuildFile; fileRef = AA01000100000001 /* main_cli.m */; };
+		AA01000000000002 /* HUDPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = AA01000100000002 /* HUDPanel.m */; };
+		AA01000000000003 /* VolumeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = AA01000100000003 /* VolumeSlider.m */; };
+		AA01000000000004 /* VolumeSliderCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AA01000100000004 /* VolumeSliderCell.m */; };
+		AA01000000000005 /* TahoeVolumeHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = AA01000100000005 /* TahoeVolumeHUD.m */; };
+		AA01000000000006 /* LiquidGlassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01000100000006 /* LiquidGlassView.swift */; };
+		AA01000000000007 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D17267EAD470080A9A5 /* Cocoa.framework */; };
+		AA01000000000008 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D15267EAD410080A9A5 /* QuartzCore.framework */; };
 		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
 		65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0F267EAD240080A9A5 /* CoreAudio.framework */; };
@@ -26,6 +34,40 @@
 		65EF8F5A2E888C9500AAE7B7 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; };
 		65EF8F5B2E888C9500AAE7B7 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXGroup section (OSD) */
+		AA01000300000001 /* volume-control-osd */ = {
+			isa = PBXGroup;
+			children = (
+				AA01000300000002 /* Sources */,
+				AA01000300000003 /* OSD */,
+			);
+			name = "volume-control-osd";
+			sourceTree = "<group>";
+		};
+		AA01000300000002 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				AA01000100000001 /* main_cli.m */,
+				AA01000100000002 /* HUDPanel.m */,
+				AA01000100000003 /* VolumeSlider.m */,
+				AA01000100000004 /* VolumeSliderCell.m */,
+				AA01000100000005 /* TahoeVolumeHUD.m */,
+				AA01000100000006 /* LiquidGlassView.swift */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		AA01000300000003 /* OSD */ = {
+			isa = PBXGroup;
+			children = (
+				AA01000100000008 /* Info.plist */,
+			);
+			name = OSD;
+			path = OSD;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section (OSD) */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		65DBBEF12E89EB4D00752329 /* Embed Login Helper */ = {
@@ -52,7 +94,47 @@
 		};
 /* End PBXCopyFilesBuildPhase section */
 
+/* Begin PBXBuildPhase section (OSD) */
+		AA01000200000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA01000000000001 /* main_cli.m in Sources */,
+				AA01000000000002 /* HUDPanel.m in Sources */,
+				AA01000000000003 /* VolumeSlider.m in Sources */,
+				AA01000000000004 /* VolumeSliderCell.m in Sources */,
+				AA01000000000005 /* TahoeVolumeHUD.m in Sources */,
+				AA01000000000006 /* LiquidGlassView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA01000200000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA01000000000007 /* Cocoa.framework in Frameworks */,
+				AA01000000000008 /* QuartzCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA01000200000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXBuildPhase section (OSD) */
+
 /* Begin PBXFileReference section */
+		AA01000100000001 /* main_cli.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main_cli.m; path = "Sources/CLI/main_cli.m"; sourceTree = SOURCE_ROOT; };
+		AA01000100000002 /* HUDPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = HUDPanel.m; path = "User interface/HUD/HUDPanel.m"; sourceTree = SOURCE_ROOT; };
+		AA01000100000003 /* VolumeSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VolumeSlider.m; path = "User interface/HUD/VolumeSlider.m"; sourceTree = SOURCE_ROOT; };
+		AA01000100000004 /* VolumeSliderCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VolumeSliderCell.m; path = "User interface/HUD/VolumeSliderCell.m"; sourceTree = SOURCE_ROOT; };
+		AA01000100000005 /* TahoeVolumeHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TahoeVolumeHUD.m; path = "User interface/HUD/TahoeVolumeHUD.m"; sourceTree = SOURCE_ROOT; };
+		AA01000100000006 /* LiquidGlassView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LiquidGlassView.swift; path = "User interface/HUD/LiquidGlassView.swift"; sourceTree = SOURCE_ROOT; };
+		AA01000100000007 /* volume-control-osd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "volume-control-osd.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA01000100000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "OSD/Info.plist"; sourceTree = SOURCE_ROOT; };
 		65220C75267F49CB007BE316 /* generate_keys.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = generate_keys.rb; sourceTree = "<group>"; };
 		65220C76267F49D4007BE316 /* sign_update.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = sign_update.rb; sourceTree = "<group>"; };
 		6546E1892E8C66FB0087E95F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -146,6 +228,7 @@
 				65996D1C267EADAA0080A9A5 /* Resources */,
 				6546E18B2E8C66FB0087E95F /* VolumeControl */,
 				65DBBEDB2E89DE1800752329 /* Volume Control Helper */,
+				AA01000300000001 /* volume-control-osd */,
 				65996D0C267EACE30080A9A5 /* Frameworks */,
 				65996C56267EA86A0080A9A5 /* Products */,
 			);
@@ -156,6 +239,7 @@
 			children = (
 				65996C55267EA86A0080A9A5 /* Volume Control.app */,
 				65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */,
+				AA01000100000007 /* volume-control-osd */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -302,6 +386,23 @@
 			productReference = 65996C55267EA86A0080A9A5 /* Volume Control.app */;
 			productType = "com.apple.product-type.application";
 		};
+		AA01000400000001 /* volume-control-osd */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA01000500000001 /* Build configuration list for PBXNativeTarget "volume-control-osd" */;
+			buildPhases = (
+				AA01000200000001 /* Sources */,
+				AA01000200000002 /* Frameworks */,
+				AA01000200000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "volume-control-osd";
+			productName = "volume-control-osd";
+			productReference = AA01000100000007 /* volume-control-osd */;
+			productType = "com.apple.product-type.application";
+		};
 		65DBBED92E89DE1800752329 /* Volume Control Helper */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 65DBBEE22E89DE1A00752329 /* Build configuration list for PBXNativeTarget "Volume Control Helper" */;
@@ -334,13 +435,16 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
-					65996C54267EA86A0080A9A5 = {
-						CreatedOnToolsVersion = 12.5;
+						65996C54267EA86A0080A9A5 = {
+							CreatedOnToolsVersion = 12.5;
+						};
+						65DBBED92E89DE1800752329 = {
+							CreatedOnToolsVersion = 26.0;
+						};
+						AA01000400000001 = {
+							CreatedOnToolsVersion = 26.0;
+						};
 					};
-					65DBBED92E89DE1800752329 = {
-						CreatedOnToolsVersion = 26.0;
-					};
-				};
 			};
 			buildConfigurationList = 65996C50267EA86A0080A9A5 /* Build configuration list for PBXProject "Volume Control" */;
 			developmentRegion = en;
@@ -357,6 +461,7 @@
 			targets = (
 				65996C54267EA86A0080A9A5 /* Volume Control */,
 				65DBBED92E89DE1800752329 /* Volume Control Helper */,
+				AA01000400000001 /* volume-control-osd */,
 			);
 		};
 /* End PBXProject section */
@@ -736,6 +841,102 @@
 		};
 /* End XCBuildConfiguration section */
 
+		AA01000600000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 0000000000;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = OSD/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "volume-control-osd";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.your.company.VolumeControlOSD;
+				PRODUCT_NAME = "volume-control-osd";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Sources/Controllers",
+					"$(PROJECT_DIR)/Sources/Supporting files",
+					"$(PROJECT_DIR)/User interface/HUD",
+				);
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Volume_Control-Swift.h";
+				SWIFT_VERSION = 6.0;
+				ONLY_ACTIVE_ARCH = YES;
+			};
+			name = Debug;
+		};
+		AA01000600000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 0000000000;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = OSD/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "volume-control-osd";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.your.company.VolumeControlOSD;
+				PRODUCT_NAME = "volume-control-osd";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Sources/Controllers",
+					"$(PROJECT_DIR)/Sources/Supporting files",
+					"$(PROJECT_DIR)/User interface/HUD",
+				);
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Volume_Control-Swift.h";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
 /* Begin XCConfigurationList section */
 		65996C50267EA86A0080A9A5 /* Build configuration list for PBXProject "Volume Control" */ = {
 			isa = XCConfigurationList;
@@ -760,6 +961,15 @@
 			buildConfigurations = (
 				65DBBEE32E89DE1A00752329 /* Debug */,
 				65DBBEE42E89DE1A00752329 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA01000500000001 /* Build configuration list for PBXNativeTarget "volume-control-osd" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA01000600000001 /* Debug */,
+				AA01000600000002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

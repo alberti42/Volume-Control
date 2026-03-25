@@ -149,20 +149,20 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
 #pragma mark - Public API
 
-- (void)showHUDWithVolume:(double)volume usingMusicPlayer:(PlayerApplication*)player andLabel:(NSString*)label anchoredToStatusButton:(NSStatusBarButton *)button {
+- (void)showHUDWithVolume:(double)volume usingMusicPlayer:(nullable PlayerApplication*)player andLabel:(NSString*)label anchoredToStatusButton:(nullable NSStatusBarButton *)button position:(HUDPosition)position {
     self.controlledPlayer = player;
     
     if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
     
     // Update header
-    self.appIconView.image = [player icon];
+    self.appIconView.image = player ? [player icon] : nil;
     self.titleLabel.stringValue = label;
     
     // Size fence each time
     [_panel setContentSize:NSMakeSize(kHUDWidth, kHUDHeight)];
     
-    [self positionPanelBelowStatusButton:button];
+    [self positionPanel:button position:position];
     
     // Animate the fade-in
     
@@ -216,32 +216,72 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 }
 #pragma mark - Layout / Anchoring
 
-- (void)positionPanelBelowStatusButton:(NSStatusBarButton *)button {
-    if (!button || !button.window) {
-        NSScreen *screen = NSScreen.mainScreen ?: NSScreen.screens.firstObject;
-        if (screen) {
-            NSRect vis = screen.visibleFrame;
-            CGFloat x = NSMidX(vis) - self.panel.frame.size.width/2.0;
-            CGFloat y = NSMidY(vis) - self.panel.frame.size.height/2.0;
-            [self.panel setFrameOrigin:NSMakePoint(round(x), round(y))];
-        }
+- (void)positionPanel:(nullable NSStatusBarButton *)button position:(HUDPosition)position {
+    // If anchored to a real status-bar button, keep the original drop-down behaviour.
+    if (button && button.window) {
+        NSRect buttonRectInWindow = [button convertRect:button.bounds toView:nil];
+        NSRect buttonInScreen = [button.window convertRectToScreen:buttonRectInWindow];
+
+        NSSize size = NSMakeSize(kHUDWidth, kHUDHeight);
+        CGFloat x = NSMidX(buttonInScreen) - size.width / 2.0;
+        CGFloat y = NSMinY(buttonInScreen) - size.height - kBelowGap;
+
+        NSScreen *target = button.window.screen ?: NSScreen.mainScreen;
+        NSRect vis = target.visibleFrame;
+
+        if (y < NSMinY(vis)) y = NSMinY(vis) + 2.0;
+
+        CGFloat margin = 8.0;
+        x = MAX(NSMinX(vis) + margin, MIN(x, NSMaxX(vis) - margin - size.width));
+
+        [self.panel setFrame:NSMakeRect(round(x), round(y), size.width, size.height) display:NO];
         return;
     }
 
-    NSRect buttonRectInWindow = [button convertRect:button.bounds toView:nil];
-    NSRect buttonInScreen = [button.window convertRectToScreen:buttonRectInWindow];
+    // No status button — place the HUD according to the requested position.
+    NSScreen *screen = NSScreen.mainScreen ?: NSScreen.screens.firstObject;
+    if (!screen) return;
 
+    NSRect vis = screen.visibleFrame;
     NSSize size = NSMakeSize(kHUDWidth, kHUDHeight);
-    CGFloat x = NSMidX(buttonInScreen) - size.width / 2.0;
-    CGFloat y = NSMinY(buttonInScreen) - size.height - kBelowGap;
+    static const CGFloat kEdgeMargin = 24.0;
 
-    NSScreen *target = button.window.screen ?: NSScreen.mainScreen;
-    NSRect vis = target.visibleFrame;
+    CGFloat x, y;
 
-    if (y < NSMinY(vis)) y = NSMinY(vis) + 2.0;
+    // Horizontal component
+    switch (position) {
+        case HUDPositionTopLeft:
+        case HUDPositionCenterLeft:
+        case HUDPositionBottomLeft:
+            x = NSMinX(vis) + kEdgeMargin;
+            break;
+        case HUDPositionTopRight:
+        case HUDPositionCenterRight:
+        case HUDPositionBottomRight:
+            x = NSMaxX(vis) - size.width - kEdgeMargin;
+            break;
+        default: // center column
+            x = NSMidX(vis) - size.width / 2.0;
+            break;
+    }
 
-    CGFloat margin = 8.0;
-    x = MAX(NSMinX(vis) + margin, MIN(x, NSMaxX(vis) - margin - size.width));
+    // Vertical component
+    switch (position) {
+        case HUDPositionTopLeft:
+        case HUDPositionTopCenter:
+        case HUDPositionTopRight:
+            // Place just below the menu bar (top of visibleFrame is already below it)
+            y = NSMaxY(vis) - size.height - kEdgeMargin;
+            break;
+        case HUDPositionBottomLeft:
+        case HUDPositionBottomCenter:
+        case HUDPositionBottomRight:
+            y = NSMinY(vis) + kEdgeMargin;
+            break;
+        default: // middle row
+            y = NSMidY(vis) - size.height / 2.0;
+            break;
+    }
 
     [self.panel setFrame:NSMakeRect(round(x), round(y), size.width, size.height) display:NO];
 }
@@ -252,7 +292,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
     if (@available(macOS 26.0, *)) {
         LiquidGlassView *glass = [LiquidGlassView glassWithStyle:NSGlassEffectViewStyleClear  // Clear
                                                     cornerRadius:radius
-                                                       tintColor:[NSColor colorWithCalibratedWhite:0 alpha:1]];
+                                                       tintColor:[NSColor colorWithCalibratedWhite:0 alpha:0]];
         self.glass = glass;
         
         // Enable the new vibrant rim here.
