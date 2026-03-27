@@ -50,11 +50,6 @@ static const NSTimeInterval kTotalLifetime = 0.25 + 1.5 + 0.45 + 0.15;
 @implementation CLIAppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
-    // Activate the app so the window server sets up a compositing surface for
-    // this process. Without this, NSGlassEffectView / NSVisualEffectView cannot
-    // see through the window to the content behind it and renders opaque/solid.
-    [NSApp activateIgnoringOtherApps:YES];
-
     // Show the HUD.  Passing nil for the status button → centers on screen.
     CLIPlayerApplication *player = [[CLIPlayerApplication alloc] init];
     player.currentVolume = self.volume;
