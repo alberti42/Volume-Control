@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="24128" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="24765" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24128"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24765"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -23,6 +23,8 @@
                 <outlet property="spotifyBtn" destination="hrb-gt-hEq" id="9Cf-nW-Vli"/>
                 <outlet property="spotifyPerc" destination="q1C-RX-nra" id="cJQ-q7-Hwo"/>
                 <outlet property="statusMenu" destination="5" id="34"/>
+                <outlet property="swinsianBtn" destination="hv4-nY-et4" id="XTg-lv-nbh"/>
+                <outlet property="swinsianPerc" destination="SWy-tG-Uaq" id="n6s-oY-ul5"/>
                 <outlet property="systemBtn" destination="0bg-hh-XNT" id="OGo-XQ-z8N"/>
                 <outlet property="systemPerc" destination="tqe-nv-xjS" id="ZpI-lj-eHB"/>
                 <outlet property="volumeIncrementsSlider" destination="99" id="196"/>
@@ -193,14 +195,14 @@
                     </sliderCell>
                 </slider>
             </subviews>
-            <point key="canvasLocation" x="-142" y="113"/>
+            <point key="canvasLocation" x="-249" y="361"/>
         </customView>
         <customView id="516" userLabel="Select music player">
-            <rect key="frame" x="0.0" y="0.0" width="200" height="151"/>
+            <rect key="frame" x="0.0" y="0.0" width="200" height="237"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="526">
-                    <rect key="frame" x="13" y="132" width="151" height="17"/>
+                    <rect key="frame" x="13" y="218" width="151" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Controlled music player:" id="527">
                         <font key="font" metaFont="system"/>
@@ -209,7 +211,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0bg-hh-XNT">
-                    <rect key="frame" x="13" y="105" width="72" height="19"/>
+                    <rect key="frame" x="13" y="191" width="72" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="System" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="gn3-1v-oHN">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -219,13 +221,13 @@
                         <action selector="toggleMusicPlayer:" target="3" id="n7h-KJ-PhQ"/>
                     </connections>
                 </button>
-                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="N1r-k3-3vR" userLabel="System Icon">
-                    <rect key="frame" x="92" y="71" width="24" height="24"/>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6Dq-gA-3QC" userLabel="System icon">
+                    <rect key="frame" x="96" y="189" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="AppleMusicTahoe" id="iGx-TR-YJX"/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="FinderTahoe" id="ZtE-IF-hUt"/>
                 </imageView>
-                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tqe-nv-xjS">
-                    <rect key="frame" x="123" y="106" width="48" height="17"/>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tqe-nv-xjS" userLabel="System volume">
+                    <rect key="frame" x="127" y="192" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(100%)" id="dks-w9-Z2B">
                         <font key="font" metaFont="system"/>
@@ -233,8 +235,8 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="i0t-Ei-94H">
-                    <rect key="frame" x="13" y="73" width="72" height="19"/>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="i0t-Ei-94H" userLabel="Apple Music checkbox">
+                    <rect key="frame" x="13" y="159" width="72" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="iTunes" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="4RS-28-iPU">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -244,13 +246,13 @@
                         <action selector="toggleMusicPlayer:" target="3" id="oGf-MV-PO8"/>
                     </connections>
                 </button>
-                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6Dq-gA-3QC" userLabel="iTunes Icon">
-                    <rect key="frame" x="92" y="103" width="24" height="24"/>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="N1r-k3-3vR" userLabel="Apple Music icon">
+                    <rect key="frame" x="96" y="157" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="FinderTahoe" id="ZtE-IF-hUt"/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="AppleMusicTahoe" id="iGx-TR-YJX"/>
                 </imageView>
-                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Gbm-9b-kdp">
-                    <rect key="frame" x="124" y="74" width="48" height="17"/>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Gbm-9b-kdp" userLabel="Apple Music volume">
+                    <rect key="frame" x="128" y="160" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="Slf-tf-lOn">
                         <font key="font" metaFont="system"/>
@@ -258,8 +260,8 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hrb-gt-hEq">
-                    <rect key="frame" x="13" y="40" width="72" height="19"/>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hrb-gt-hEq" userLabel="Spotify checkbox">
+                    <rect key="frame" x="13" y="126" width="72" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Spotify" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="WHM-96-Dj4">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -269,8 +271,13 @@
                         <action selector="toggleMusicPlayer:" target="3" id="tdI-5n-OrG"/>
                     </connections>
                 </button>
-                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="q1C-RX-nra">
-                    <rect key="frame" x="124" y="41" width="48" height="17"/>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Q1i-LR-meS" userLabel="Spotify icon">
+                    <rect key="frame" x="96" y="123" width="24" height="24"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="spotify" id="5hJ-Vf-wie"/>
+                </imageView>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="q1C-RX-nra" userLabel="Spotify volume">
+                    <rect key="frame" x="128" y="127" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="9Qg-R9-iWN">
                         <font key="font" metaFont="system"/>
@@ -278,8 +285,8 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rCx-x9-wJV">
-                    <rect key="frame" x="13" y="7" width="72" height="19"/>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rCx-x9-wJV" userLabel="Doppler checkbox">
+                    <rect key="frame" x="13" y="93" width="72" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Doppler" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="FG1-ge-5gW">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -289,13 +296,13 @@
                         <action selector="toggleMusicPlayer:" target="3" id="clx-P9-1Sn"/>
                     </connections>
                 </button>
-                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Q1i-LR-meS" userLabel="Doppler Icon">
-                    <rect key="frame" x="92" y="37" width="24" height="24"/>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="smK-tF-oAo" userLabel="Doppler icon">
+                    <rect key="frame" x="96" y="91" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="spotify" id="5hJ-Vf-wie"/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="doppler" id="Nkd-GN-UZ9"/>
                 </imageView>
-                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="f3g-HZ-QsT">
-                    <rect key="frame" x="124" y="8" width="48" height="17"/>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="f3g-HZ-QsT" userLabel="Doppler volume">
+                    <rect key="frame" x="128" y="94" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="moD-8s-vgH">
                         <font key="font" metaFont="system"/>
@@ -303,19 +310,40 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="smK-tF-oAo" userLabel="Spotify Icon">
-                    <rect key="frame" x="92" y="5" width="24" height="24"/>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="INf-Ag-UuH" userLabel="Swinsian icon">
+                    <rect key="frame" x="96" y="58" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="doppler" id="Nkd-GN-UZ9"/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" image="swinsian" id="Y9R-4r-oa0"/>
                 </imageView>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SWy-tG-Uaq" userLabel="Swinsian volume">
+                    <rect key="frame" x="128" y="61" width="48" height="17"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="XbY-ie-kYg">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hv4-nY-et4" userLabel="Swinsian checkbox">
+                    <rect key="frame" x="13" y="61" width="76" height="19"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="check" title="Swinsian" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="5FX-NT-3my">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="toggleMusicPlayer:" target="3" id="twf-Xr-ah3"/>
+                    </connections>
+                </button>
             </subviews>
-            <point key="canvasLocation" x="-138" y="-119.5"/>
+            <point key="canvasLocation" x="-245" y="4"/>
         </customView>
     </objects>
     <resources>
-        <image name="AppleMusicTahoe" width="16" height="16"/>
-        <image name="FinderTahoe" width="16" height="16"/>
-        <image name="doppler" width="32" height="32"/>
-        <image name="spotify" width="128" height="128"/>
+        <image name="AppleMusicTahoe" width="24" height="24"/>
+        <image name="FinderTahoe" width="24" height="24"/>
+        <image name="doppler" width="24" height="24"/>
+        <image name="spotify" width="24" height="24"/>
+        <image name="swinsian" width="24" height="24"/>
     </resources>
 </document>

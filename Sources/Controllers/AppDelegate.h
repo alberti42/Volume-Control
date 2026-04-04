@@ -16,6 +16,7 @@
 // #import "Music.h"
 #import "Spotify.h"
 #import "Doppler.h"
+#import "Swinsian.h"
 
 @class IntroWindowController, AccessibilityDialog, StatusBarItem, PlayerApplication, SystemApplication;
 
@@ -52,7 +53,8 @@
     PlayerApplication* spotify;
     SystemApplication* systemAudio;
     PlayerApplication* doppler;
-    
+    PlayerApplication* swinsian;
+
     IntroWindowController *introWindowController;
     AccessibilityDialog *accessibilityDialog;
 }
@@ -64,11 +66,13 @@
 @property (nonatomic, assign) IBOutlet NSButton* spotifyBtn;
 @property (nonatomic, assign) IBOutlet NSButton* systemBtn;
 @property (nonatomic, assign) IBOutlet NSButton* dopplerBtn;
+@property (nonatomic, assign) IBOutlet NSButton* swinsianBtn;
 
 @property (nonatomic, assign) IBOutlet NSTextField* iTunesPerc;
 @property (nonatomic, assign) IBOutlet NSTextField* spotifyPerc;
 @property (nonatomic, assign) IBOutlet NSTextField* systemPerc;
 @property (nonatomic, assign) IBOutlet NSTextField* dopplerPerc;
+@property (nonatomic, assign) IBOutlet NSTextField* swinsianPerc;
 
 @property (assign, nonatomic) IBOutlet SPUStandardUpdaterController* sparkle_updater;
 
@@ -112,6 +116,8 @@
 
 @interface PlayerApplication : NSObject {
     id musicPlayer;
+    NSString *_bundleIdentifier;
+    NSAppleScript *_playerStateScript;
 }
 
 - (BOOL) isRunning;
