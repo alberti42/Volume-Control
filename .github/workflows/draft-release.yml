@@ -4,25 +4,11 @@ name: Build, Notarize and Draft Release
 # Pipeline:
 #   1. Build universal binary (arm64 + x86_64)
 #   2. Sign with Developer ID Application certificate
-#   3. Notarize with Apple + staple ticket
-#   4. Update appcast via generate_appcast (EdDSA-signed, new entry only)
-#   5. Commit appcast + ZIP back to main
-#   6. Create a draft GitHub release with the ZIP attached
+#   3. Notarize with Apple + staple ticket (Temporarily disabled)
+#   4. Create a draft GitHub release with the ZIP attached
 #
-# Required repository secrets (Settings → Secrets and variables → Actions):
-#   DEVELOPER_ID_CERTIFICATE_P12      Base64-encoded .p12 export of the
-#                                     "Developer ID Application" certificate
-#                                     (include private key when exporting).
-#   DEVELOPER_ID_CERTIFICATE_PASSWORD Password chosen when exporting the .p12.
-#   NOTARIZATION_APPLE_ID             Your Apple ID (e.g. you@example.com).
-#   NOTARIZATION_TEAM_ID              Your Apple Developer team ID (10 chars).
-#   NOTARIZATION_PASSWORD             App-specific password for notarytool.
-#                                     Create at appleid.apple.com →
-#                                     Sign-In and Security → App-Specific Passwords.
-#   SPARKLE_ED_PRIVATE_KEY            128-character hex EdDSA private key used
-#                                     by Sparkle. Export from your Keychain with:
-#                                       security find-generic-password \
-#                                         -a ed25519 -s ed25519 -w
+# A separate workflow (publish-release.yml) is triggered when the draft is published,
+# which updates the Sparkle appcast and pushes it to main.
 
 on:
   push:
@@ -33,7 +19,7 @@ jobs:
   release:
     runs-on: macos-26
     permissions:
-      contents: write   # needed to push the release commit and create the release
+      contents: write   # needed to create the release
 
     steps:
       # ── Checkout ──────────────────────────────────────────────────────────────
@@ -94,9 +80,7 @@ jobs:
       - name: Build universal binary
         run: |
           # Call xcodebuild directly so we can:
-          #   1. Suppress Xcode's automatic signing (DEVELOPMENT_TEAM and 
-          #      BUNDLE_ID_BASE are now in LocalSigning.xcconfig).
-          #      The explicit `codesign` step below does the real signing.
+          #   1. Use the values in LocalSigning.xcconfig for signing.
           #   2. Enable pipefail so a failed build isn't masked by xcpretty's
           #      zero exit code.
           set -o pipefail
@@ -169,40 +153,6 @@ jobs:
           rm "$ZIP"
           ditto -c -k --keepParent "$APP" "$ZIP"
 
-      # ── Sparkle appcast ───────────────────────────────────────────────────────
-      - name: Add ZIP to Releases/ and regenerate appcast
-        env:
-          SPARKLE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
-          REPO:        ${{ github.repository }}
-          ZIP:         ${{ steps.ver.outputs.zip }}
-          BUILD:       ${{ steps.ver.outputs.build }}
-        run: |
-          cp "$ZIP" "Releases/$ZIP"
-
-          # generate_appcast updates VolumeControlCast.xml in-place:
-          #   - adds only the new entry (--versions limits to current build)
-          #   - keeps all existing entries intact
-          #   - signs with the EdDSA key (-s)
-          bin/generate_appcast \
-            -s "$SPARKLE_KEY" \
-            --download-url-prefix \
-              "https://raw.githubusercontent.com/${REPO}/main/Releases/" \
-            --versions "$BUILD" \
-            Releases/
-
-      # ── Commit back to main ───────────────────────────────────────────────────
-      - name: Commit release artifacts to main
-        env:
-          TAG: ${{ steps.ver.outputs.tag }}
-          ZIP: ${{ steps.ver.outputs.zip }}
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "Releases/$ZIP" "Releases/VolumeControlCast.xml"
-          git commit -m "Release $TAG"
-          # Push from detached-HEAD state back to main
-          git push origin HEAD:refs/heads/main
-
       # ── Draft release ─────────────────────────────────────────────────────────
       - name: Resolve previous tag
         id: prev
@@ -236,4 +186,4 @@ jobs:
             --draft \
             --title "$TAG" \
             --notes-file /tmp/notes.md \
-            "Releases/$ZIP"
+            "$ZIP"

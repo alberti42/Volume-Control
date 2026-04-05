@@ -1,0 +1,74 @@
+name: Publish Release (Update Appcast)
+
+# Triggered when a GitHub release is changed from "Draft" to "Published".
+# This workflow:
+#   1. Downloads the signed ZIP from the release assets.
+#   2. Updates the Sparkle appcast (VolumeControlCast.xml).
+#   3. Commits the ZIP and the updated appcast back to the main branch.
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Extract version and build info
+        id: info
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          # Get build number from the project file in main
+          BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION' \
+            "Volume Control.xcodeproj/project.pbxproj" \
+            | sed 's/.*CURRENT_PROJECT_VERSION = \([0-9]*\);.*/\1/')
+          ZIP="VolumeControl-${TAG}.zip"
+          echo "tag=$TAG"     >> "$GITHUB_OUTPUT"
+          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
+          echo "zip=$ZIP"     >> "$GITHUB_OUTPUT"
+
+      - name: Download ZIP from release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG:      ${{ steps.info.outputs.tag }}
+          ZIP:      ${{ steps.info.outputs.zip }}
+        run: |
+          gh release download "$TAG" --pattern "$ZIP" --dir .
+
+      - name: Update Sparkle appcast
+        env:
+          SPARKLE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+          REPO:        ${{ github.repository }}
+          ZIP:         ${{ steps.info.outputs.zip }}
+          BUILD:       ${{ steps.info.outputs.build }}
+        run: |
+          # Move ZIP to the expected Releases/ folder
+          mv "$ZIP" "Releases/$ZIP"
+
+          # Update the appcast XML in-place
+          bin/generate_appcast \
+            -s "$SPARKLE_KEY" \
+            --download-url-prefix \
+              "https://raw.githubusercontent.com/${REPO}/main/Releases/" \
+            --versions "$BUILD" \
+            Releases/
+
+      - name: Commit and push changes to main
+        env:
+          TAG: ${{ steps.info.outputs.tag }}
+          ZIP: ${{ steps.info.outputs.zip }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "Releases/$ZIP" "Releases/VolumeControlCast.xml"
+          git commit -m "Release $TAG (automatic appcast update)"
+          git push origin main
