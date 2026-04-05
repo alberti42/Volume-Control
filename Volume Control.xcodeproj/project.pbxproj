@@ -88,6 +88,7 @@
 		65DBBEDA2E89DE1800752329 /* Volume Control Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volume Control Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65EF8F582E888C6B00AAE7B7 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
 		BC20FAA128902EF500CF5CAF /* Doppler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Doppler.h; sourceTree = "<group>"; };
+		BC20FAA228902EF500CF5CB0 /* Swinsian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Swinsian.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
@@ -229,6 +230,7 @@
 				65996E06267EB0FF0080A9A5 /* Music.h */,
 				65996E07267EB0FF0080A9A5 /* Spotify.h */,
 				BC20FAA128902EF500CF5CAF /* Doppler.h */,
+				BC20FAA228902EF500CF5CB0 /* Swinsian.h */,
 			);
 			path = "Supporting files";
 			sourceTree = "<group>";

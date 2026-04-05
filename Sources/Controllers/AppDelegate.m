@@ -149,6 +149,8 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 - (void)setVolumeUp:(bool)increase;
 - (void) setItunesVolume:(NSInteger)volume;
 - (void) setSpotifyVolume:(NSInteger)volume;
+- (void) setDopplerVolume:(NSInteger)volume;
+- (void) setSwinsianVolume:(NSInteger)volume;
 - (void) setSystemVolume:(NSInteger)volume;
 - (void)stopVolumeRampTimer;
 - (void)updatePercentages;
@@ -166,19 +168,33 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 - (void) setCurrentVolume:(double)currentVolume
 {
+  /* We use setValue:forKey: (KVC) rather than calling setSoundVolume:
+      directly because the generated headers declare soundVolume as
+      NSInteger for Music/ Spotify/Doppler but as NSNumber * for
+      Swinsian (whose sdef uses type="number").  The compiler would
+      see conflicting method signatures and pick arbitrarily.  KVC
+      bypasses that ambiguity by boxing the value as NSNumber
+      regardless. */
+    
 	[self setDoubleVolume:currentVolume];
 
-	[musicPlayer setSoundVolume:round(currentVolume)];
+	[musicPlayer setValue:@((NSInteger)round(currentVolume)) forKey:@"soundVolume"];
 }
 
 - (double) currentVolume
 {
-    double vol = [musicPlayer soundVolume];
+  /* We use valueForKey: rather than calling soundVolume directly
+  because ScriptingBridge returns a scalar for integer-typed
+  properties but an NSNumber * for Swinsian's number-typed
+  soundVolume.  Reading a pointer as a scalar produces garbage
+  (e.g. the memory address).  valueForKey: always returns id, so
+  doubleValue gives the correct numeric value uniformly. */
 
-    if (fabs(vol-[self doubleVolume])<1)
-	{
-		vol = [self doubleVolume];
-	}
+  double vol = [[musicPlayer valueForKey:@"soundVolume"] doubleValue];
+
+  if (fabs(vol-[self doubleVolume])<1) {
+    vol = [self doubleVolume];
+  }
 
 	return vol;
 }
@@ -205,11 +221,19 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 - (NSInteger) playerState
 {
-	return [musicPlayer playerState];
+    /* enum behaves like an integer and the default C enum size (4
+       bytes) doesn't match NSInteger's size on 64-bit (8 bytes). The
+       valueForKey: sidesteps this entirely by never calling
+       playerState as a typed method at the call site.  valueForKey
+       retrieves an id and then we can query the integer value
+       safely. */
+    return [[musicPlayer valueForKey:@"playerState"] integerValue];
 }
 
 -(id)initWithBundleIdentifier:(NSString*) bundleIdentifier andIcon:(NSImage*)icon {
 	if (self = [super init])  {
+        _bundleIdentifier = [bundleIdentifier copy];
+        _playerStateScript = nil;
 		[self setCurrentVolume: -100];
 		[self setOldVolume: -1];
 		musicPlayer = [SBApplication applicationWithBundleIdentifier:bundleIdentifier];
@@ -240,11 +264,13 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 @synthesize spotifyBtn = _spotifyBtn;
 @synthesize systemBtn = _systemBtn;
 @synthesize dopplerBtn = _dopplerBtn;
+@synthesize swinsianBtn = _swinsianBtn;
 
 @synthesize iTunesPerc = _iTunesPerc;
 @synthesize spotifyPerc = _spotifyPerc;
 @synthesize systemPerc = _systemPerc;
 @synthesize dopplerPerc = _dopplerPerc;
+@synthesize swinsianPerc = _swinsianPerc;
 
 @synthesize sparkle_updater = _sparkle_updater;
 
@@ -281,6 +307,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     iTunes = nil;
     spotify = nil;
     doppler = nil;
+    swinsian = nil;
     
     _statusBar = nil;
     
@@ -669,7 +696,9 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		else if (runningPlayerPtr == spotify)
 			[self setSpotifyVolume:[runningPlayerPtr currentVolume]];
 		else if (runningPlayerPtr == doppler)
-			[self setSpotifyVolume:[runningPlayerPtr currentVolume]];
+			[self setDopplerVolume:[runningPlayerPtr currentVolume]];
+		else if (runningPlayerPtr == swinsian)
+			[self setSwinsianVolume:[runningPlayerPtr currentVolume]];
 
 		// Update system UI if system volume is affected or when locked
 		if (_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio) {
@@ -750,6 +779,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
     doppler = [[PlayerApplication alloc] initWithBundleIdentifier:@"co.brushedtype.doppler-macos" andIcon:[NSImage imageNamed:@"doppler"]];
 
+    swinsian = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.swinsian.Swinsian" andIcon:[NSImage imageNamed:@"swinsian"]];
+
 	// Force MacOS to ask for authorization to AppleEvents if this was not already given
 	if([iTunes isRunning])
 		[iTunes currentVolume];
@@ -757,6 +788,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		[spotify currentVolume];
 	if([doppler isRunning])
 		[doppler currentVolume];
+	if([swinsian isRunning])
+		[swinsian currentVolume];
 
 	systemAudio = [[SystemApplication alloc] init];
 
@@ -888,6 +921,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 						  [NSNumber numberWithBool:true],  @"iTunesControl",
 						  [NSNumber numberWithBool:true],  @"spotifyControl",
 						  [NSNumber numberWithBool:true],  @"dopplerControl",
+						  [NSNumber numberWithBool:true],  @"swinsianControl",
 						  [NSNumber numberWithBool:true],  @"systemControl",
 						  [NSNumber numberWithBool:true],  @"PlaySoundFeedback",
 						  nil ]; // terminate the list
@@ -906,6 +940,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[[self iTunesBtn] setState:[preferences boolForKey:    @"iTunesControl"]];
 	[[self spotifyBtn] setState:[preferences boolForKey:   @"spotifyControl"]];
 	[[self dopplerBtn] setState:[preferences boolForKey:   @"dopplerControl"]];
+	[[self swinsianBtn] setState:[preferences boolForKey:  @"swinsianControl"]];
 	//[[self systemBtn] setState:[preferences boolForKey:    @"systemControl"]];
 	[[self systemBtn] setState:true];  // hard coded always to true
 	[[self systemBtn] setEnabled:false];
@@ -1133,6 +1168,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		{
 			currentPlayer = doppler;
 		}
+		else if([_swinsianBtn state] && [swinsian isRunning] && (SwinsianPlayerState)[swinsian playerState] == SwinsianPlayerStatePlaying)
+		{
+			currentPlayer = swinsian;
+		}
 		else if([_systemBtn state])
 		{
 			currentPlayer = systemAudio;
@@ -1210,6 +1249,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 			[self setSpotifyVolume:volume];
 		else if (runningPlayerPtr == doppler)
 			[self setDopplerVolume:volume];
+		else if (runningPlayerPtr == swinsian)
+			[self setSwinsianVolume:volume];
 
 		if(_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio)
 			[self setSystemVolume:volume];
@@ -1253,6 +1294,17 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	}
 }
 
+- (void) setSwinsianVolume:(NSInteger)volume
+{
+	if (volume == -1)
+		[[self swinsianPerc] setHidden:YES];
+	else
+	{
+		[[self swinsianPerc] setHidden:NO];
+		[[self swinsianPerc] setStringValue:[NSString stringWithFormat:@"(%d%%)",(int)volume]];
+	}
+}
+
 - (void) setSystemVolume:(NSInteger)volume
 {
 	if (volume == -1)
@@ -1281,6 +1333,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		[self setDopplerVolume:[doppler currentVolume]];
 	else
 		[self setDopplerVolume:-1];
+
+	if ([swinsian isRunning])
+		[self setSwinsianVolume:[swinsian currentVolume]];
+	else
+		[self setSwinsianVolume:-1];
 
 	[self setSystemVolume:[systemAudio currentVolume]];
 }
@@ -1475,6 +1532,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	{
 		[preferences setBool:[sender state] forKey:@"dopplerControl"];
 	}
+	else if (sender == _swinsianBtn)
+	{
+		[preferences setBool:[sender state] forKey:@"swinsianControl"];
+	}
 
 	[preferences synchronize];
 }
@@ -1555,6 +1616,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             [self setSpotifyVolume:volumePercent];
         } else if (runningPlayerPtr == doppler) {
             [self setDopplerVolume:volumePercent];
+        } else if (runningPlayerPtr == swinsian) {
+            [self setSwinsianVolume:volumePercent];
         }
 
         if (_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio) {
