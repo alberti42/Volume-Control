@@ -51,7 +51,7 @@ This app is the spiritual successor to _iTunes Volume Control_, offering a simpl
 
 ## Installation
 
-1. **Download** the [latest notarized release](https://raw.githubusercontent.com/alberti42/Volume-Control/main/VolumeControl.zip).
+1. **Download** the [latest notarized release](https://github.com/alberti42/Volume-Control/releases/latest/download/VolumeControl.zip).
 2. **Unzip** the archive.
 3. **Drag** the app into your `Applications` folder (or anywhere you like).
 4. **Launch** the app.

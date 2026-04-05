@@ -37,7 +37,7 @@ jobs:
           BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION' \
             "Volume Control.xcodeproj/project.pbxproj" \
             | sed 's/.*CURRENT_PROJECT_VERSION = \([0-9]*\);.*/\1/')
-          ZIP="VolumeControl-${TAG}.zip"
+          ZIP="VolumeControl.zip"
           echo "tag=$TAG"     >> "$GITHUB_OUTPUT"
           echo "short=$SHORT" >> "$GITHUB_OUTPUT"
           echo "build=$BUILD" >> "$GITHUB_OUTPUT"
