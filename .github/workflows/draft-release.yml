@@ -80,6 +80,13 @@ jobs:
           security set-key-partition-list \
             -S "apple-tool:,apple:,codesign:" -s -k "$KC_PASS" "$KC"
 
+      - name: Create LocalSigning.xcconfig from secrets
+        env:
+          TEAM_ID: ${{ secrets.NOTARIZATION_TEAM_ID }}
+        run: |
+          echo "DEVELOPMENT_TEAM = $TEAM_ID" > LocalSigning.xcconfig
+          echo "BUNDLE_ID_BASE = io.alberti42.VolumeControl" >> LocalSigning.xcconfig
+
       # ── Build ─────────────────────────────────────────────────────────────────
       - name: Install xcpretty
         run: gem install xcpretty --no-document
@@ -87,8 +94,8 @@ jobs:
       - name: Build universal binary
         run: |
           # Call xcodebuild directly so we can:
-          #   1. Suppress Xcode's automatic signing (DEVELOPMENT_TEAM is
-          #      anonymised to 0000000000 in the committed pbxproj).
+          #   1. Suppress Xcode's automatic signing (DEVELOPMENT_TEAM and 
+          #      BUNDLE_ID_BASE are now in LocalSigning.xcconfig).
           #      The explicit `codesign` step below does the real signing.
           #   2. Enable pipefail so a failed build isn't masked by xcpretty's
           #      zero exit code.

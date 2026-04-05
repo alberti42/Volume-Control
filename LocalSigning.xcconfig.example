@@ -1,0 +1,5 @@
+// Copy this file to LocalSigning.xcconfig and provide your own signing details.
+// Specify a unique Bundle ID base. If Xcode will check if the Bundle ID base is unique.
+// If it reports that the identifier is already taken, please choose a different one.
+DEVELOPMENT_TEAM = 0000000000
+BUNDLE_ID_BASE = com.example.VolumeControl
