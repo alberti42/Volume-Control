@@ -18,10 +18,10 @@ build.nosync/*
 *.pbxuser
 xcuserdata
 
-/OSDUIHelper.hop
-/readme.txt
+OSDUIHelper.hop
+readme.txt
 bin/*
-/Releases/appcast.xml
+Releases/appcast.xml
 
 # Sublime Text
 *.sublime-project
