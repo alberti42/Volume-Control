@@ -29,11 +29,11 @@ This app is the spiritual successor to _iTunes Volume Control_, offering a simpl
 
 ## Features
 
-- Control the volume of Apple Music, Spotify, and Doppler using the `volume up` and `volume down` keys.
+- Control the volume of Apple Music, Spotify, Doppler, and Swinsian 3.0+ using the `volume up` and `volume down` keys.
 - Especially useful when using AirPlay devices or external speakers.
 - Customize the volume step size.
 - Option to hide the volume bezel overlay (HUD).
-- When Music or Spotify is playing, volume keys affect their volume; otherwise, they adjust system volume.
+- When Music, Spotify, Doppler, or Swinsian is playing, volume keys affect their volume; otherwise, they adjust system volume.
 - Holding `⌘` (Command) key inverts this behavior.
 - Toggle behavior with the "Use ⌘ modifier" option.
 
@@ -45,7 +45,7 @@ This app is the spiritual successor to _iTunes Volume Control_, offering a simpl
 - AirPlay speakers depend on **app-specific** volume, not system volume.
 - This app restores fine-grained volume control directly from your keyboard.
 - Avoid the intrusive volume HUD overlay when watching movies.
-- Works seamlessly with Spotify and Doppler, too.
+- Works seamlessly with Spotify, Doppler, and Swinsian, too.
 
 ---
 
@@ -64,11 +64,11 @@ That’s it — no extra Terminal commands or security tweaks are required. 🎉
 
 The app requires Accessibility and Automation permissions to control other apps' volumes.
 
-1. When prompted, allow access to control **Music** and **Spotify**.
+1. When prompted, allow access to control **Music**, **Spotify**, **Doppler**, and **Swinsian**.
 2. If you missed it or need to reset:
    - Go to **System Settings → Privacy & Security → Accessibility**
    - Remove and re-add _Volume Control_.
-   - Also check **Automation** and ensure both Music and Spotify are enabled.
+   - Also check **Automation** and ensure all music players are enabled.
 
 <img src="Images/Accessability_dark_2x.png" alt="Screenshot of Accessibility" width="50%">
 
@@ -97,6 +97,7 @@ If you prefer or need to compile the app yourself using Xcode, see the instructi
 - Apple Remote integration adapted from `iremotepipe` by **Steven Wittens**
 - Native HUD overlay by **Benno Krauss** and reverse-engineered use of `OSDUIHelper`
 - Doppler support by **Ed Wellbrook**
+- Swinsian support by **Andrea Alberti**
 - Insightful discussions and support by [**waydabber**](https://github.com/waydabber) for the Liquid Glass effect for Tahoe HUD
 
 ---
@@ -122,6 +123,7 @@ GitHub: [@alberti42](https://github.com/alberti42)
 
 You can download older versions here:
 
+- [2.2.0](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.2.0.zip): Added support for Swinsian 3.0+; added support for LocalSigning.xcconfig for easier local development.
 - [2.1.0](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.1.0.zip): Brought back HUD for volume indication in Tahoe.
 - [2.0.1](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.1.zip): Fixed a bug preventing controlling volume of music players.
 - [2.0.0](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.0.zip): Notarized and compatible with Tahoe. Many improvements under the hood.
