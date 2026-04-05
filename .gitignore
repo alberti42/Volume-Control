@@ -27,3 +27,5 @@ Releases/appcast.xml
 *.sublime-project
 *.sublime-workspace
 LocalSigning.xcconfig
+
+compile_commands*.json
