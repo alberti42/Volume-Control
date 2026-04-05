@@ -24,4 +24,5 @@ bin/*
 /Releases/appcast.xml
 
 # Sublime Text
+*.sublime-project
 *.sublime-workspace
