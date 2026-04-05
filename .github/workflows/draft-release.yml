@@ -1,0 +1,232 @@
+name: Build, Notarize and Draft Release
+
+# Triggered when a vX.Y.Z tag is pushed (created by bin/bump_version.sh).
+# Pipeline:
+#   1. Build universal binary (arm64 + x86_64)
+#   2. Sign with Developer ID Application certificate
+#   3. Notarize with Apple + staple ticket
+#   4. Update appcast via generate_appcast (EdDSA-signed, new entry only)
+#   5. Commit appcast + ZIP back to main
+#   6. Create a draft GitHub release with the ZIP attached
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   DEVELOPER_ID_CERTIFICATE_P12      Base64-encoded .p12 export of the
+#                                     "Developer ID Application" certificate
+#                                     (include private key when exporting).
+#   DEVELOPER_ID_CERTIFICATE_PASSWORD Password chosen when exporting the .p12.
+#   NOTARIZATION_APPLE_ID             Your Apple ID (e.g. you@example.com).
+#   NOTARIZATION_TEAM_ID              Your Apple Developer team ID (10 chars).
+#   NOTARIZATION_PASSWORD             App-specific password for notarytool.
+#                                     Create at appleid.apple.com →
+#                                     Sign-In and Security → App-Specific Passwords.
+#   SPARKLE_ED_PRIVATE_KEY            128-character hex EdDSA private key used
+#                                     by Sparkle. Export from your Keychain with:
+#                                       security find-generic-password \
+#                                         -a ed25519 -s ed25519 -w
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  release:
+    runs-on: macos-26
+    permissions:
+      contents: write   # needed to push the release commit and create the release
+
+    steps:
+      # ── Checkout ──────────────────────────────────────────────────────────────
+      - name: Checkout (full history + tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── Version info ──────────────────────────────────────────────────────────
+      - name: Extract version info
+        id: ver
+        run: |
+          TAG="${GITHUB_REF_NAME}"                          # e.g. v2.2.0
+          SHORT="${TAG#v}"                                  # e.g. 2.2.0
+          BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION' \
+            "Volume Control.xcodeproj/project.pbxproj" \
+            | sed 's/.*CURRENT_PROJECT_VERSION = \([0-9]*\);.*/\1/')
+          ZIP="VolumeControl-${TAG}.zip"
+          echo "tag=$TAG"     >> "$GITHUB_OUTPUT"
+          echo "short=$SHORT" >> "$GITHUB_OUTPUT"
+          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
+          echo "zip=$ZIP"     >> "$GITHUB_OUTPUT"
+          echo "Version ${SHORT}, build ${BUILD}, archive ${ZIP}"
+
+      # ── Code-signing certificate ──────────────────────────────────────────────
+      - name: Import Developer ID certificate into temporary keychain
+        env:
+          P12_BASE64:   ${{ secrets.DEVELOPER_ID_CERTIFICATE_P12 }}
+          P12_PASSWORD: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+        run: |
+          KC="$RUNNER_TEMP/build.keychain-db"
+          KC_PASS="ci-keychain"   # ephemeral, only lives for this job
+          security create-keychain -p "$KC_PASS" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"    # 6-hour timeout
+          security unlock-keychain -p "$KC_PASS" "$KC"
+
+          echo "$P12_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KC" \
+            -P "$P12_PASSWORD" -T /usr/bin/codesign
+          rm "$RUNNER_TEMP/cert.p12"
+
+          security list-keychain -d user -s "$KC"
+          # Allow codesign to use the key without a passphrase prompt.
+          security set-key-partition-list \
+            -S "apple-tool:,apple:,codesign:" -s -k "$KC_PASS" "$KC"
+
+      # ── Build ─────────────────────────────────────────────────────────────────
+      - name: Install xcpretty
+        run: gem install xcpretty --no-document
+
+      - name: Build universal binary
+        run: |
+          # Call xcodebuild directly so we can:
+          #   1. Suppress Xcode's automatic signing (DEVELOPMENT_TEAM is
+          #      anonymised to 0000000000 in the committed pbxproj).
+          #      The explicit `codesign` step below does the real signing.
+          #   2. Enable pipefail so a failed build isn't masked by xcpretty's
+          #      zero exit code.
+          set -o pipefail
+          UID_VAL=$(id -u)
+          xcrun xcodebuild \
+            -project "Volume Control.xcodeproj" \
+            -scheme  "Volume Control" \
+            -configuration Release \
+            ARCHS="arm64 x86_64" \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=- \
+            BUILD_DIR="/tmp/VolumeControl-${UID_VAL}/build/release" \
+            CONFIGURATION_BUILD_DIR="/tmp/VolumeControl-${UID_VAL}/build/target/release" \
+            build \
+            2>&1 | xcpretty
+
+      - name: Locate built .app
+        id: app
+        run: |
+          APP=$(find /tmp/VolumeControl-$(id -u) \
+                  -name "Volume Control.app" \
+                  -path "*/release/*" | head -1)
+          if [[ -z "$APP" ]]; then
+            echo "ERROR: Volume Control.app not found after build"
+            exit 1
+          fi
+          echo "path=$APP" >> "$GITHUB_OUTPUT"
+          echo "Found: $APP"
+
+      # ── Sign ──────────────────────────────────────────────────────────────────
+      - name: Sign app bundle with Developer ID
+        env:
+          TEAM_ID: ${{ secrets.NOTARIZATION_TEAM_ID }}
+        run: |
+          APP="${{ steps.app.outputs.path }}"
+          # Strip stale signatures (avoids conflicts on nested code)
+          find "$APP" -name _CodeSignature -type d -exec rm -rf {} + 2>/dev/null || true
+          codesign --deep --force --options runtime \
+            --entitlements VolumeControl/VolumeControl.entitlements \
+            --sign "Developer ID Application: Andrea Alberti ($TEAM_ID)" \
+            "$APP"
+          codesign -vv --deep --strict "$APP"
+
+      # ── Notarize ──────────────────────────────────────────────────────────────
+      - name: Notarize with Apple and staple ticket
+        env:
+          APPLE_ID: ${{ secrets.NOTARIZATION_APPLE_ID }}
+          TEAM_ID:  ${{ secrets.NOTARIZATION_TEAM_ID }}
+          APP_PASS: ${{ secrets.NOTARIZATION_PASSWORD }}
+          ZIP:      ${{ steps.ver.outputs.zip }}
+        run: |
+          APP="${{ steps.app.outputs.path }}"
+
+          # Package for submission
+          ditto -c -k --keepParent "$APP" "$ZIP"
+
+          # Submit and wait (typically 2-10 minutes)
+          xcrun notarytool submit "$ZIP" \
+            --apple-id "$APPLE_ID" \
+            --team-id  "$TEAM_ID" \
+            --password "$APP_PASS" \
+            --wait
+
+          # Staple the notarization ticket into the .app
+          xcrun stapler staple "$APP"
+          spctl --assess --verbose "$APP"   # confirm Gatekeeper accepts it
+
+          # Re-zip with the stapled ticket in place
+          rm "$ZIP"
+          ditto -c -k --keepParent "$APP" "$ZIP"
+
+      # ── Sparkle appcast ───────────────────────────────────────────────────────
+      - name: Add ZIP to Releases/ and regenerate appcast
+        env:
+          SPARKLE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+          REPO:        ${{ github.repository }}
+          ZIP:         ${{ steps.ver.outputs.zip }}
+          BUILD:       ${{ steps.ver.outputs.build }}
+        run: |
+          cp "$ZIP" "Releases/$ZIP"
+
+          # generate_appcast updates VolumeControlCast.xml in-place:
+          #   - adds only the new entry (--versions limits to current build)
+          #   - keeps all existing entries intact
+          #   - signs with the EdDSA key (-s)
+          bin/generate_appcast \
+            -s "$SPARKLE_KEY" \
+            --download-url-prefix \
+              "https://raw.githubusercontent.com/${REPO}/main/Releases/" \
+            --versions "$BUILD" \
+            Releases/
+
+      # ── Commit back to main ───────────────────────────────────────────────────
+      - name: Commit release artifacts to main
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+          ZIP: ${{ steps.ver.outputs.zip }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "Releases/$ZIP" "Releases/VolumeControlCast.xml"
+          git commit -m "Release $TAG"
+          # Push from detached-HEAD state back to main
+          git push origin HEAD:refs/heads/main
+
+      # ── Draft release ─────────────────────────────────────────────────────────
+      - name: Resolve previous tag
+        id: prev
+        run: |
+          CURR="${GITHUB_REF_NAME}"
+          PREV=$(git tag --sort=-v:refname | grep -v "^${CURR}$" | head -1)
+          echo "tag=${PREV}" >> "$GITHUB_OUTPUT"
+
+      - name: Build changelog
+        env:
+          PREV_TAG: ${{ steps.prev.outputs.tag }}
+          CURR_TAG: ${{ steps.ver.outputs.tag }}
+          REPO:     ${{ github.repository }}
+        run: |
+          COMPARE="https://github.com/${REPO}/compare/${PREV_TAG}...${CURR_TAG}"
+          COMMITS=$(git log "${PREV_TAG}..HEAD" --oneline --no-merges \
+            | sed "s|^\([0-9a-f]*\) |- [\1](https://github.com/${REPO}/commit/\1) |")
+          {
+            printf '## Changes since %s\n\n' "${PREV_TAG}"
+            printf '%s\n\n' "${COMMITS:-_No commits listed._}"
+            printf '**Full diff:** %s\n' "${COMPARE}"
+          } > /tmp/notes.md
+
+      - name: Create draft GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG:      ${{ steps.ver.outputs.tag }}
+          ZIP:      ${{ steps.ver.outputs.zip }}
+        run: |
+          gh release create "$TAG" \
+            --draft \
+            --title "$TAG" \
+            --notes-file /tmp/notes.md \
+            "Releases/$ZIP"
