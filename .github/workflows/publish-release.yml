@@ -69,6 +69,58 @@ jobs:
           # Clean up the local ZIP so it's not committed to git.
           rm "Releases/$ZIP"
 
+      - name: Inject GitHub release notes into appcast
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG:      ${{ steps.info.outputs.tag }}
+          BUILD:    ${{ steps.info.outputs.build }}
+        run: |
+          # Fetch the release description (Markdown) written in the GitHub draft
+          gh release view "$TAG" --json body --jq '.body' > /tmp/notes.md
+
+          # Convert Markdown → HTML (pandoc is pre-installed on GitHub macOS runners)
+          pandoc -f gfm -t html /tmp/notes.md > /tmp/notes.html
+
+          # Inject the HTML as <description><![CDATA[…]]></description>
+          # into the <item> that matches the current build number
+          python3 - "$BUILD" 'Releases/VolumeControlCast.xml' /tmp/notes.html << 'PYEOF'
+import sys, re
+
+build, appcast_path, notes_path = sys.argv[1], sys.argv[2], sys.argv[3]
+
+with open(notes_path, encoding='utf-8') as f:
+    notes_html = f.read().strip()
+
+with open(appcast_path, encoding='utf-8') as f:
+    content = f.read()
+
+desc_tag = '<description><![CDATA[\n' + notes_html + '\n            ]]></description>'
+
+item_re = re.compile(
+    r'(<item>.*?<sparkle:version>' + re.escape(build) + r'</sparkle:version>.*?)(</item>)',
+    re.DOTALL
+)
+
+def inject(m):
+    inner = m.group(1)
+    if '<description>' in inner:
+        inner = re.sub(r'<description>.*?</description>', desc_tag, inner, flags=re.DOTALL)
+    else:
+        inner += '\n            ' + desc_tag + '\n        '
+    return inner + m.group(2)
+
+new_content = item_re.sub(inject, content)
+
+if new_content == content:
+    print(f'WARNING: no <item> found for build {build}', file=sys.stderr)
+    sys.exit(1)
+
+with open(appcast_path, 'w', encoding='utf-8') as f:
+    f.write(new_content)
+
+print(f'Release notes injected for build {build}.')
+PYEOF
+
       - name: Commit and push changes to main
         env:
           TAG: ${{ steps.info.outputs.tag }}
