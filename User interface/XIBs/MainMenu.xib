@@ -198,11 +198,11 @@
             <point key="canvasLocation" x="-249" y="361"/>
         </customView>
         <customView id="516" userLabel="Select music player">
-            <rect key="frame" x="0.0" y="0.0" width="200" height="237"/>
+            <rect key="frame" x="0.0" y="0.0" width="193" height="182"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="526">
-                    <rect key="frame" x="13" y="218" width="151" height="17"/>
+                    <rect key="frame" x="13" y="163" width="151" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Controlled music player:" id="527">
                         <font key="font" metaFont="system"/>
@@ -211,7 +211,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0bg-hh-XNT">
-                    <rect key="frame" x="13" y="191" width="72" height="19"/>
+                    <rect key="frame" x="13" y="136" width="72" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="System" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="gn3-1v-oHN">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -222,12 +222,12 @@
                     </connections>
                 </button>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6Dq-gA-3QC" userLabel="System icon">
-                    <rect key="frame" x="96" y="189" width="24" height="24"/>
+                    <rect key="frame" x="96" y="134" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="FinderTahoe" id="ZtE-IF-hUt"/>
                 </imageView>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tqe-nv-xjS" userLabel="System volume">
-                    <rect key="frame" x="127" y="192" width="48" height="17"/>
+                    <rect key="frame" x="127" y="137" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(100%)" id="dks-w9-Z2B">
                         <font key="font" metaFont="system"/>
@@ -236,7 +236,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="i0t-Ei-94H" userLabel="Apple Music checkbox">
-                    <rect key="frame" x="13" y="159" width="72" height="19"/>
+                    <rect key="frame" x="13" y="103" width="72" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="iTunes" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="4RS-28-iPU">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -247,12 +247,12 @@
                     </connections>
                 </button>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="N1r-k3-3vR" userLabel="Apple Music icon">
-                    <rect key="frame" x="96" y="157" width="24" height="24"/>
+                    <rect key="frame" x="96" y="101" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="AppleMusicTahoe" id="iGx-TR-YJX"/>
                 </imageView>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Gbm-9b-kdp" userLabel="Apple Music volume">
-                    <rect key="frame" x="128" y="160" width="48" height="17"/>
+                    <rect key="frame" x="128" y="104" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="Slf-tf-lOn">
                         <font key="font" metaFont="system"/>
@@ -261,7 +261,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hrb-gt-hEq" userLabel="Spotify checkbox">
-                    <rect key="frame" x="13" y="126" width="72" height="19"/>
+                    <rect key="frame" x="13" y="70" width="72" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Spotify" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="WHM-96-Dj4">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -272,12 +272,12 @@
                     </connections>
                 </button>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Q1i-LR-meS" userLabel="Spotify icon">
-                    <rect key="frame" x="96" y="123" width="24" height="24"/>
+                    <rect key="frame" x="96" y="68" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="spotify" id="5hJ-Vf-wie"/>
                 </imageView>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="q1C-RX-nra" userLabel="Spotify volume">
-                    <rect key="frame" x="128" y="127" width="48" height="17"/>
+                    <rect key="frame" x="128" y="71" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="9Qg-R9-iWN">
                         <font key="font" metaFont="system"/>
@@ -286,7 +286,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rCx-x9-wJV" userLabel="Doppler checkbox">
-                    <rect key="frame" x="13" y="93" width="72" height="19"/>
+                    <rect key="frame" x="13" y="38" width="72" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Doppler" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="FG1-ge-5gW">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -297,12 +297,12 @@
                     </connections>
                 </button>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="smK-tF-oAo" userLabel="Doppler icon">
-                    <rect key="frame" x="96" y="91" width="24" height="24"/>
+                    <rect key="frame" x="96" y="35" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="doppler" id="Nkd-GN-UZ9"/>
                 </imageView>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="f3g-HZ-QsT" userLabel="Doppler volume">
-                    <rect key="frame" x="128" y="94" width="48" height="17"/>
+                    <rect key="frame" x="128" y="39" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="moD-8s-vgH">
                         <font key="font" metaFont="system"/>
@@ -311,12 +311,12 @@
                     </textFieldCell>
                 </textField>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="INf-Ag-UuH" userLabel="Swinsian icon">
-                    <rect key="frame" x="96" y="58" width="24" height="24"/>
+                    <rect key="frame" x="96" y="3" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" image="swinsian" id="Y9R-4r-oa0"/>
                 </imageView>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SWy-tG-Uaq" userLabel="Swinsian volume">
-                    <rect key="frame" x="128" y="61" width="48" height="17"/>
+                    <rect key="frame" x="128" y="7" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="XbY-ie-kYg">
                         <font key="font" metaFont="system"/>
@@ -325,7 +325,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hv4-nY-et4" userLabel="Swinsian checkbox">
-                    <rect key="frame" x="13" y="61" width="76" height="19"/>
+                    <rect key="frame" x="13" y="6" width="76" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Swinsian" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="5FX-NT-3my">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -336,7 +336,7 @@
                     </connections>
                 </button>
             </subviews>
-            <point key="canvasLocation" x="-245" y="4"/>
+            <point key="canvasLocation" x="-248.5" y="-24"/>
         </customView>
     </objects>
     <resources>
