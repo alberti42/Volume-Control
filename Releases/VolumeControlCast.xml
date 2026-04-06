@@ -6,6 +6,24 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.2.0</title>
+            <pubDate>Mon, 06 Apr 2026 19:38:02 +0000</pubDate>
+            <sparkle:version>228</sparkle:version>
+            <sparkle:shortVersionString>2.2.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.5</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/alberti42/Volume-Control/releases/download/v2.2.0/VolumeControl.zip" length="5836538" type="application/octet-stream" sparkle:edSignature="oTOuE1BxlRHRjLsWMTkW9Qfhqw2/mV0kDtZbUldkIVZPQWbBTSuFXMBDxB2ikED/xDsBMJZ480JzBDdva8MdBg=="/>        
+            <description><![CDATA[
+<h2>New features</h2>
+<ul>
+<li>Added support for <a href="https://www.swinsian.com/">Swinsian</a> music player (fixes <a href="https://github.com/alberti42/Volume-Control/issues/25">#25</a>)</li>
+</ul>
+<h2>Detailed change log</h2>
+<ul>
+<li>Full diff: <a href="https://github.com/alberti42/Volume-Control/compare/v2.1.0...v2.2.0">https://github.com/alberti42/Volume-Control/compare/v2.1.0...v2.2.0</a></li>
+</ul>
+            ]]></description>
+        </item>
+        <item>
             <title>2.1.0</title>
             <pubDate>Sun, 26 Oct 2025 12:50:55 +0100</pubDate>
             <sparkle:version>213</sparkle:version>
