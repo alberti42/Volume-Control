@@ -161,6 +161,14 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 #pragma mark - Extention music applications
 
+@interface PlayerApplication () {
+    dispatch_queue_t _writeQueue;  // serial queue for ScriptingBridge writes
+    BOOL             _writeInFlight; // YES while a write is executing on _writeQueue
+    double           _pendingWrite;  // latest desired volume while write is in flight; -1 = none
+}
+- (void)scheduleVolumeWrite:(double)volume;
+@end
+
 @implementation PlayerApplication
 
 @synthesize currentVolume = _currentVolume;
@@ -175,10 +183,43 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
       see conflicting method signatures and pick arbitrarily.  KVC
       bypasses that ambiguity by boxing the value as NSNumber
       regardless. */
-    
-	[self setDoubleVolume:currentVolume];
 
-	[musicPlayer setValue:@((NSInteger)round(currentVolume)) forKey:@"soundVolume"];
+    [self setDoubleVolume:currentVolume];
+
+    // Negative sentinel values (e.g. -100 used during init) must not be
+    // forwarded to the player — they are internal "unset" markers only.
+    if (currentVolume >= 0) {
+        [self scheduleVolumeWrite:currentVolume];
+    }
+}
+
+// Sends `volume` to the ScriptingBridge player on a background serial queue.
+// If a write is already in flight the new value is remembered and dispatched
+// as soon as the in-flight write completes, so intermediate values are skipped
+// rather than queued — keeping the player in sync with the latest position.
+- (void) scheduleVolumeWrite:(double)volume
+{
+    if (_writeInFlight) {
+        // A write is already on its way; just record the latest target.
+        _pendingWrite = volume;
+        return;
+    }
+
+    _writeInFlight = YES;
+    _pendingWrite  = -1.0;
+
+    dispatch_async(_writeQueue, ^{
+        [self->musicPlayer setValue:@((NSInteger)round(volume)) forKey:@"soundVolume"];
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self->_writeInFlight = NO;
+            if (self->_pendingWrite >= 0) {
+                double v = self->_pendingWrite;
+                self->_pendingWrite = -1.0;
+                [self scheduleVolumeWrite:v];
+            }
+        });
+    });
 }
 
 - (double) currentVolume
@@ -234,6 +275,9 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 	if (self = [super init])  {
         _bundleIdentifier = [bundleIdentifier copy];
         _playerStateScript = nil;
+        _writeQueue    = dispatch_queue_create("io.alberti42.VolumeControl.sbWrite", DISPATCH_QUEUE_SERIAL);
+        _writeInFlight = NO;
+        _pendingWrite  = -1.0;
 		[self setCurrentVolume: -100];
 		[self setOldVolume: -1];
 		musicPlayer = [SBApplication applicationWithBundleIdentifier:bundleIdentifier];
@@ -1189,7 +1233,16 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 	if (runningPlayerPtr != nil)
 	{
-		double volume = [runningPlayerPtr currentVolume];
+        // During a ramp (key held) we use the locally-cached doubleVolume instead
+        // of querying the player via ScriptingBridge.  The cache is always current
+        // because setCurrentVolume: updates it synchronously on every write, and
+        // the ramp cannot start before at least one write has been issued (the
+        // initial key-down press fires setVolumeUp: once before the timer starts).
+        // Skipping the live SB read eliminates one of the two blocking round-trips
+        // per ramp tick that were causing the sluggish scrolling on Tahoe.
+        double volume = (self->volumeRampTimer != nil)
+                      ? [runningPlayerPtr doubleVolume]
+                      : [runningPlayerPtr currentVolume];
 		// NSLog(@"Current volume: %1.2f%%", volume);
 
 		if([runningPlayerPtr oldVolume]<0) // if it was not mute
