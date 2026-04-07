@@ -165,14 +165,18 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     dispatch_queue_t _writeQueue;  // serial queue for ScriptingBridge writes
     BOOL             _writeInFlight; // YES while a write is executing on _writeQueue
     double           _pendingWrite;  // latest desired volume while write is in flight; -1 = none
+    BOOL             _rampActive;    // YES while a key-hold ramp is in progress
 }
 - (void)scheduleVolumeWrite:(double)volume;
+- (void)scheduleVolumeVerification;
+@property (nonatomic, assign) BOOL rampActive;
 @end
 
 @implementation PlayerApplication
 
 @synthesize currentVolume = _currentVolume;
 @synthesize icon = _icon;
+@synthesize rampActive = _rampActive;
 
 - (void) setCurrentVolume:(double)currentVolume
 {
@@ -219,19 +223,44 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
                 [self scheduleVolumeWrite:v];
             } else {
 #ifdef DEBUG
-                // All writes have been flushed to the player.  Do a live SB read
-                // to verify the player ended up at the expected volume.  Blocking
-                // here is intentional and acceptable — this runs only once, after
-                // the ramp (or single press) is fully settled.
-                double sbVol      = [[self->musicPlayer valueForKey:@"soundVolume"] doubleValue];
-                double cachedVol  = [self doubleVolume];
-                NSLog(@"[VC] flush internal=%.2f  player SB=%.2f  delta=%.2f%@",
-                      cachedVol, sbVol, sbVol - cachedVol,
-                      (fabs(sbVol - cachedVol) > 1.0) ? @"  ⚠️ MISMATCH" : @"");
+                // All writes have been flushed to the player.
+                // Skip the verification read while a ramp is active: Apple Music on
+                // Tahoe acknowledges Apple Events before applying them, so an
+                // immediate SB read after write completion returns a stale value and
+                // produces spurious ⚠️ warnings.  The ramp-end path calls
+                // scheduleVolumeVerification with a delay instead.
+                if (!self->_rampActive) {
+                    double sbVol     = [[self->musicPlayer valueForKey:@"soundVolume"] doubleValue];
+                    double cachedVol = [self doubleVolume];
+                    NSLog(@"[VC] flush internal=%.2f  player SB=%.2f  delta=%.2f%@",
+                          cachedVol, sbVol, sbVol - cachedVol,
+                          (fabs(sbVol - cachedVol) > 1.0) ? @"  ⚠️ MISMATCH" : @"");
+                }
 #endif
             }
         });
     });
+}
+
+// Called by AppDelegate when the key-hold ramp ends.  Waits 500 ms to give
+// Apple Music time to apply the last write, then reads the actual volume and
+// compares it with the internal cache.  The delay is intentional: on Tahoe,
+// Apple Music acknowledges Apple Events before applying them, so an immediate
+// read after write completion returns a stale value.
+- (void)scheduleVolumeVerification
+{
+#ifdef DEBUG
+    double expected = [self doubleVolume];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+        // Skip if another ramp or write cycle started in the meantime.
+        if (self->_writeInFlight || self->_pendingWrite >= 0) return;
+        double sbVol = [[self->musicPlayer valueForKey:@"soundVolume"] doubleValue];
+        NSLog(@"[VC] verify  internal=%.2f  player SB=%.2f  delta=%.2f%@",
+              expected, sbVol, sbVol - expected,
+              (fabs(sbVol - expected) > 1.0) ? @"  ⚠️ MISMATCH" : @"");
+    });
+#endif
 }
 
 - (double) currentVolume
@@ -495,9 +524,17 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [volumeRampTimer invalidate];
     volumeRampTimer=nil;
     [self emitAcousticFeedback];
-    
+
     checkPlayerTimer = [NSTimer timerWithTimeInterval:checkPlayerTimeout target:self selector:@selector(resetCurrentPlayer:) userInfo:nil repeats:NO];
     [[NSRunLoop mainRunLoop] addTimer:checkPlayerTimer forMode:NSRunLoopCommonModes];
+
+#ifdef DEBUG
+    if ([currentPlayer isKindOfClass:[PlayerApplication class]]) {
+        PlayerApplication *p = (PlayerApplication *)currentPlayer;
+        p.rampActive = NO;
+        [p scheduleVolumeVerification];
+    }
+#endif
 }
 
 - (void)rampVolumeUp:(NSTimer*)theTimer
@@ -781,6 +818,12 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             [timerImgSpeaker invalidate];
             timerImgSpeaker = nil;
         }
+
+#ifdef DEBUG
+        if ([currentPlayer isKindOfClass:[PlayerApplication class]]) {
+            ((PlayerApplication *)currentPlayer).rampActive = YES;
+        }
+#endif
     } else {
         [self setVolumeUp:increase];
     }
