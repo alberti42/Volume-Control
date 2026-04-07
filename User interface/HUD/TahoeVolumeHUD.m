@@ -151,8 +151,8 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
 - (void)showHUDWithVolume:(double)volume usingMusicPlayer:(PlayerApplication*)player andLabel:(NSString*)label anchoredToStatusButton:(NSStatusBarButton *)button {
     self.controlledPlayer = player;
-    
-    if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
+
+    volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
     
     // Update header
@@ -192,7 +192,7 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
 
 - (void)setVolume:(double)volume {
-    if (volume > 1.0) volume = MAX(0.0, MIN(1.0, volume / 100.0));
+    volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
 }
 

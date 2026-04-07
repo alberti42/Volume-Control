@@ -29,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class, readonly, strong) TahoeVolumeHUD *sharedManager;
 @property (weak, nonatomic, nullable) id<TahoeVolumeHUDDelegate> delegate;
 
-/// Show/update the HUD under a status bar button. `volume` is 0.0–1.0 (or 0–100; both accepted).
+/// Show/update the HUD under a status bar button. `volume` is in the 0–100 range.
 - (void)showHUDWithVolume:(double)volume usingMusicPlayer:(PlayerApplication*)controlledPlayer andLabel:(NSString*)label anchoredToStatusButton:(NSStatusBarButton *)button;
 
 /// Programmatically hide it immediately.
