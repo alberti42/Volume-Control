@@ -225,7 +225,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
                 // the ramp (or single press) is fully settled.
                 double sbVol      = [[self->musicPlayer valueForKey:@"soundVolume"] doubleValue];
                 double cachedVol  = [self doubleVolume];
-                NSLog(@"[VC] flush internal=%.0f  player SB=%.0f  delta=%.0f%@",
+                NSLog(@"[VC] flush internal=%.2f  player SB=%.2f  delta=%.2f%@",
                       cachedVol, sbVol, sbVol - cachedVol,
                       (fabs(sbVol - cachedVol) > 1.0) ? @"  ⚠️ MISMATCH" : @"");
 #endif
@@ -1245,15 +1245,16 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 	if (runningPlayerPtr != nil)
 	{
-        // During a ramp (key held) we use the locally-cached doubleVolume instead
-        // of querying the player via ScriptingBridge.  The cache is always current
-        // because setCurrentVolume: updates it synchronously on every write, and
-        // the ramp cannot start before at least one write has been issued (the
-        // initial key-down press fires setVolumeUp: once before the timer starts).
-        // Skipping the live SB read eliminates one of the two blocking round-trips
-        // per ramp tick that were causing the sluggish scrolling on Tahoe.
-        double volume = (self->volumeRampTimer != nil)
-                      ? [runningPlayerPtr doubleVolume]
+        // During a ramp (key held) use the locally-cached doubleVolume for
+        // PlayerApplication instances to avoid a blocking ScriptingBridge round-trip
+        // on every tick.  The cache is always current because setCurrentVolume:
+        // updates it synchronously, and the ramp cannot start before at least one
+        // write has been issued (the initial key-down press calls setVolumeUp: once
+        // before the timer starts).
+        // SystemApplication reads CoreAudio in-process (no IPC), so it is fast
+        // enough to use currentVolume directly — and it has no doubleVolume cache.
+        double volume = (self->volumeRampTimer != nil && [runningPlayerPtr isKindOfClass:[PlayerApplication class]])
+                      ? [(PlayerApplication *)runningPlayerPtr doubleVolume]
                       : [runningPlayerPtr currentVolume];
 
 #ifdef DEBUG
@@ -1304,10 +1305,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         }
 
 #ifdef DEBUG
-        NSLog(@"[VC] step  internal=%.0f  →  target=%.0f  (HUD: %@)",
+        NSLog(@"[VC] step  internal=%.2f  →  target=%.2f  (HUD: %@)",
               dbgPrevVolume,
               volume,
-              _hideVolumeWindow ? @"hidden" : [NSString stringWithFormat:@"%.0f", volume]);
+              _hideVolumeWindow ? @"hidden" : [NSString stringWithFormat:@"%.2f", volume]);
 #endif
 
 		[runningPlayerPtr setCurrentVolume:volume];
