@@ -6,6 +6,30 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.2.1</title>
+            <pubDate>Tue, 07 Apr 2026 16:25:27 +0000</pubDate>
+            <sparkle:version>237</sparkle:version>
+            <sparkle:shortVersionString>2.2.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.5</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/alberti42/Volume-Control/releases/download/v2.2.1/VolumeControl.zip" length="5837604" type="application/octet-stream" sparkle:edSignature="Ahbhb/uLV9401Bj2/t47a5+yr0zy+C98C5uWe5FmCc+S17pFhVUhxfZPVwho40GjilKJtnrE9fjbi/rphaArDw=="/>
+        
+            <description><![CDATA[
+<h2>New features</h2>
+<ul>
+<li>Added support for <a href="https://www.swinsian.com/">Swinsian</a> music player (fixes #25)</li>
+</ul>
+<h2>Bug fixes</h2>
+<ul>
+<li>Smoother volume control when holding a key — Holding the volume up/down key now adjusts the volume continuously and smoothly. Previously, a slowdown introduced in macOS Tahoe caused the volume to change in sluggish, uneven steps when holding the key down.</li>
+<li>Fixed volume display jumping to wrong position — The volume bar in the on-screen HUD could snap to an incorrect position appearing around 25% when the volume was actually near zero). This has been fixed and the indicator now always reflects the true volume level.</li>
+</ul>
+<h2>Detailed change log</h2>
+<ul>
+<li>Full diff: <a href="https://github.com/alberti42/Volume-Control/compare/v2.2.0...v2.2.1">https://github.com/alberti42/Volume-Control/compare/v2.2.0...v2.2.1</a></li>
+</ul>
+            ]]></description>
+        </item>
+        <item>
             <title>2.2.0</title>
             <pubDate>Mon, 06 Apr 2026 19:38:02 +0000</pubDate>
             <sparkle:version>228</sparkle:version>
