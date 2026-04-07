@@ -217,6 +217,18 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
                 double v = self->_pendingWrite;
                 self->_pendingWrite = -1.0;
                 [self scheduleVolumeWrite:v];
+            } else {
+#ifdef DEBUG
+                // All writes have been flushed to the player.  Do a live SB read
+                // to verify the player ended up at the expected volume.  Blocking
+                // here is intentional and acceptable — this runs only once, after
+                // the ramp (or single press) is fully settled.
+                double sbVol      = [[self->musicPlayer valueForKey:@"soundVolume"] doubleValue];
+                double cachedVol  = [self doubleVolume];
+                NSLog(@"[VC] flush internal=%.0f  player SB=%.0f  delta=%.0f%@",
+                      cachedVol, sbVol, sbVol - cachedVol,
+                      (fabs(sbVol - cachedVol) > 1.0) ? @"  ⚠️ MISMATCH" : @"");
+#endif
             }
         });
     });
@@ -1243,7 +1255,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         double volume = (self->volumeRampTimer != nil)
                       ? [runningPlayerPtr doubleVolume]
                       : [runningPlayerPtr currentVolume];
-		// NSLog(@"Current volume: %1.2f%%", volume);
+
+#ifdef DEBUG
+        double dbgPrevVolume = volume; // internal belief before this step
+#endif
 
 		if([runningPlayerPtr oldVolume]<0) // if it was not mute
 		{
@@ -1288,6 +1303,13 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             }
         }
 
+#ifdef DEBUG
+        NSLog(@"[VC] step  internal=%.0f  →  target=%.0f  (HUD: %@)",
+              dbgPrevVolume,
+              volume,
+              _hideVolumeWindow ? @"hidden" : [NSString stringWithFormat:@"%.0f", volume]);
+#endif
+
 		[runningPlayerPtr setCurrentVolume:volume];
 		if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
 			[systemAudio setCurrentVolume:volume];
@@ -1309,8 +1331,6 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 			[self setSystemVolume:volume];
 
 		[self refreshVolumeBar:(int)volume];
-
-		// NSLog(@"New volume: %1.2f%%", [runningPlayerPtr currentVolume]);
 	}
 }
 
