@@ -749,7 +749,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             if(!_hideVolumeWindow){
                 if (@available(macOS 16.0, *)) {
                     // On Tahoe, show the new popover HUD.
-                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:0 usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName]  anchoredToStatusButton:self.statusBar.button];
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:0 usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName]  anchoredToStatusButton:([self hideFromStatusBar] ? nil : self.statusBar.button)];
                 } else {
                     // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
@@ -771,7 +771,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             {
                 if (@available(macOS 16.0, *)) {
                     // On Tahoe, show the new popover HUD.
-                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:[runningPlayerPtr oldVolume] usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName] anchoredToStatusButton:self.statusBar.button];
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:[runningPlayerPtr oldVolume] usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName] anchoredToStatusButton:([self hideFromStatusBar] ? nil : self.statusBar.button)];
                 } else {
                     // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
@@ -1336,7 +1336,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         {
             if (@available(macOS 16.0, *)) {
                 // On Tahoe, show the new popover HUD anchored to the status item.
-                [[TahoeVolumeHUD sharedManager] showHUDWithVolume:volume usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName] anchoredToStatusButton:self.statusBar.button];
+                [[TahoeVolumeHUD sharedManager] showHUDWithVolume:volume usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName] anchoredToStatusButton:([self hideFromStatusBar] ? nil : self.statusBar.button)];
             } else {
                 if(image) {
                     id osdMgr = [self->OSDManager sharedManager];
@@ -1585,6 +1585,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 -(void)hideStatusBarItem {
 	if (self.statusBar) {
 		self.statusBar.visible = NO;
+		// Force the underlying NSStatusBarWindow out of visibility too. Setting
+		// visible=NO alone removes the item from the menu bar composite but leaves
+		// button.window.isVisible == YES, which would otherwise mislead anchoring
+		// code (e.g. the Tahoe HUD) into using a stale cached frame.
+		[self.statusBar.button.window orderOut:nil];
 		// self.statusBar.length = 0; // collapses to zero width, however, some space remains allocated by macOS
 	}
 }
@@ -1592,6 +1597,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 - (void)showStatusBarItem {
 	if (self.statusBar) {
 		self.statusBar.visible = YES;
+		[self.statusBar.button.window orderFront:nil];
 		// self.statusBar.length = NSSquareStatusItemLength;
 	}
 }

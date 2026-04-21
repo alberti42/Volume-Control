@@ -41,6 +41,7 @@ static const CGFloat kCornerRadius   = 24.0;
 static const CGFloat kBelowGap       = 14.0;
 static const NSTimeInterval kAutoHide = 1.5;
 static const CGFloat kSideInset  = 12.0;  // left/right margin
+static const CGFloat kTopMarginWhenUnanchored = 14.0;  // pt below top of visibleFrame when no usable anchor (matches Tahoe system HUD)
 
 static const NSTimeInterval kFadeInDuration  = 0.25; // seconds
 static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
@@ -217,27 +218,55 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 #pragma mark - Layout / Anchoring
 
 - (void)positionPanelBelowStatusButton:(NSStatusBarButton *)button {
-    if (!button || !button.window) {
-        NSScreen *screen = NSScreen.mainScreen ?: NSScreen.screens.firstObject;
-        if (screen) {
-            NSRect vis = screen.visibleFrame;
-            CGFloat x = NSMidX(vis) - self.panel.frame.size.width/2.0;
-            CGFloat y = NSMidY(vis) - self.panel.frame.size.height/2.0;
-            [self.panel setFrameOrigin:NSMakePoint(round(x), round(y))];
+    NSSize size = NSMakeSize(kHUDWidth, kHUDHeight);
+
+    // Decide whether the button is a usable anchor. The HUD caller passes nil when
+    // the status item is intentionally hidden (e.g. "Hide from Status Bar"). We also
+    // treat the button as unusable if its window was ordered out, or if its on-screen
+    // rect does not currently intersect the screen's frame. That single geometric
+    // test covers:
+    //   - Ice/Bartender, which move the status window off-screen horizontally.
+    //   - macOS auto-hide menu bar when the bar is not currently revealed — the
+    //     status item's window sits above the screen top in that state.
+    // Critically, it does NOT fire when the user hovers to reveal the auto-hidden
+    // menu bar: the status item is back on-screen in that moment, so we anchor
+    // normally under the icon, matching Tahoe's behavior.
+    BOOL useAnchor = (button != nil) && (button.window != nil) && button.window.isVisible;
+    NSRect buttonInScreen = NSZeroRect;
+    NSScreen *target = nil;
+
+    if (useAnchor) {
+        NSRect buttonRectInWindow = [button convertRect:button.bounds toView:nil];
+        buttonInScreen = [button.window convertRectToScreen:buttonRectInWindow];
+        target = button.window.screen ?: NSScreen.mainScreen;
+        if (!NSIntersectsRect(target.frame, buttonInScreen)) {
+            useAnchor = NO;
         }
+    }
+
+    if (!useAnchor) {
+        NSScreen *screen = target ?: NSScreen.mainScreen ?: NSScreen.screens.firstObject;
+        if (!screen) return;
+        NSRect vis  = screen.visibleFrame;
+        NSRect full = screen.frame;
+        // When the menu bar is hidden system-wide, visibleFrame expands to the top of
+        // frame, which would pull the HUD upward by the menu bar's height. Compensate
+        // by computing the top-of-usable-area as if the menu bar were still reserving
+        // space, so the HUD lands at the same screen position in both states.
+        BOOL menuBarHidden = (NSMaxY(full) - NSMaxY(vis)) < 1.0;
+        CGFloat topEdge = menuBarHidden
+            ? (NSMaxY(full) - [NSStatusBar systemStatusBar].thickness)
+            : NSMaxY(vis);
+        CGFloat x = NSMidX(full) - size.width / 2.0;
+        CGFloat y = topEdge - size.height - kTopMarginWhenUnanchored;
+        [self.panel setFrame:NSMakeRect(round(x), round(y), size.width, size.height) display:NO];
         return;
     }
 
-    NSRect buttonRectInWindow = [button convertRect:button.bounds toView:nil];
-    NSRect buttonInScreen = [button.window convertRectToScreen:buttonRectInWindow];
-
-    NSSize size = NSMakeSize(kHUDWidth, kHUDHeight);
     CGFloat x = NSMidX(buttonInScreen) - size.width / 2.0;
     CGFloat y = NSMinY(buttonInScreen) - size.height - kBelowGap;
 
-    NSScreen *target = button.window.screen ?: NSScreen.mainScreen;
     NSRect vis = target.visibleFrame;
-
     if (y < NSMinY(vis)) y = NSMinY(vis) + 2.0;
 
     CGFloat margin = 8.0;
