@@ -1,6 +1,7 @@
 name: Publish Release (Update Appcast)
 
-# Triggered when a GitHub release is changed from "Draft" to "Published".
+# Triggered when a GitHub release is changed from "Draft" to "Published",
+# unless it is marked as a pre-release (see the job-level `if` below).
 # This workflow:
 #   1. Downloads the fixed-name VolumeControl.zip from the release assets.
 #   2. Updates the Sparkle appcast (VolumeControlCast.xml) pointing to the GitHub Release asset.
@@ -18,6 +19,14 @@ on:
 
 jobs:
   publish:
+    # Skip pre-releases. GitHub fires "published" for pre-releases as well as
+    # full releases (only the "released" event type excludes them), so without
+    # this guard marking a release as a pre-release would still regenerate the
+    # appcast and push the build to every user through Sparkle. Pre-releases are
+    # meant to be handed out by link only — e.g. asking a bug reporter to try a
+    # build — so they must never touch VolumeControlCast.xml.
+    # workflow_dispatch carries no release payload, so it is always allowed.
+    if: github.event_name == 'workflow_dispatch' || github.event.release.prerelease == false
     runs-on: macos-latest
     permissions:
       contents: write
