@@ -128,5 +128,6 @@
 @property (assign, nonatomic) double oldVolume;
 @property (assign, nonatomic) double doubleVolume;
 @property (assign, nonatomic) NSImage* icon;
+@property (copy, nonatomic, readonly) NSString* bundleIdentifier;
 
 @end

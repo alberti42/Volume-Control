@@ -1345,24 +1345,131 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
 }
 
 // Automation (Apple Events) permission for a target app, without prompting.
-- (NSString *)automationStatusForBundleID:(NSString *)bundleID
+// Returns the raw OSStatus so callers can both display it and branch on it —
+// -playerDiagnosticsLine:enabled: queries a player only on noErr, so building
+// the report never sends an Apple Event that would stall or prompt. Returns
+// errAEEventFailed if the address descriptor itself could not be built.
+- (OSStatus)automationPermissionForBundleID:(NSString *)bundleID
 {
     const char *cstr = [bundleID UTF8String];
+    if (cstr == NULL) {
+        return errAEEventFailed;
+    }
+
     AEAddressDesc target;
     if (AECreateDesc(typeApplicationBundleID, cstr, strlen(cstr), &target) != noErr) {
-        return @"(check failed)";
+        return errAEEventFailed;
     }
 
     OSStatus status = AEDeterminePermissionToAutomateTarget(&target, typeWildCard, typeWildCard, false);
     AEDisposeDesc(&target);
 
+    return status;
+}
+
+- (NSString *)automationStatusForBundleID:(NSString *)bundleID
+{
+    OSStatus status = [self automationPermissionForBundleID:bundleID];
+
     switch (status) {
+        case errAEEventFailed:                  return @"(check failed)";
         case noErr:                             return @"granted";
         case errAEEventNotPermitted:            return @"denied";
         case errAEEventWouldRequireUserConsent: return @"not yet requested";
         case procNotFound:                      return @"app not running";
         default:                                return [NSString stringWithFormat:@"unknown (%d)", (int)status];
     }
+}
+
+// State of the CGEventTap that intercepts the keyboard volume keys. Everything
+// downstream (players, devices, HUD) is irrelevant if the tap never receives an
+// event, so this distinguishes "the keys never reach us" from "we act on them
+// but nothing changes".
+- (NSString *)eventTapDiagnostics
+{
+    BOOL created = (eventTap != NULL);
+    BOOL valid   = created && CFMachPortIsValid(eventTap);
+    BOOL live    = valid && CGEventTapIsEnabled(eventTap);
+
+    NSMutableString *r = [NSMutableString string];
+    [r appendFormat:@"Volume keys enabled (menu) : %@\n", [self Tapping] ? @"yes" : @"no"];
+    [r appendFormat:@"Event tap created          : %@\n", created ? @"yes" : @"no"];
+    [r appendFormat:@"Event tap port valid       : %@\n", valid   ? @"yes" : @"no"];
+    [r appendFormat:@"Event tap receiving keys   : %@\n", live    ? @"yes" : @"no"];
+
+    // The telling combination: macOS says we are trusted, yet the tap is not
+    // running. That is what a stale Accessibility record looks like after an
+    // app update or a change of signing identity, and re-ticking the existing
+    // entry does not fix it — it has to be removed and added again.
+    if (!live && AXIsProcessTrusted() && [self Tapping]) {
+        [r appendString:@"\n# The tap is not receiving keys even though Accessibility is granted.\n"
+                        @"# The permission record is probably stale: quit Volume Control, remove it\n"
+                        @"# from System Settings > Privacy & Security > Accessibility with the \"-\"\n"
+                        @"# button, then add it again and relaunch.\n"];
+    }
+
+    return r;
+}
+
+// Human-readable player state, shared by all four players: Music, Spotify,
+// Doppler and Swinsian all use the same four-char codes in their sdef.
+- (NSString *)descriptionForPlayerState:(NSInteger)state
+{
+    switch (state) {
+        case 'kPSP': return @"playing";
+        case 'kPSp': return @"paused";
+        case 'kPSS': return @"stopped";
+        default:     return [NSString stringWithFormat:@"state %ld", (long)state];
+    }
+}
+
+// One line per player: whether the volume keys are allowed to target it (the
+// tick in the menu), whether it is running, and whether it is playing. The keys
+// act on the first ticked player that is playing, falling back to System, so an
+// unticked or non-playing player explains "the keys do nothing" just as well as
+// a dead event tap.
+- (NSString *)playerDiagnosticsLine:(PlayerApplication *)player
+                            enabled:(BOOL)enabled
+{
+    NSMutableString *s = [NSMutableString stringWithString:enabled ? @"targeted" : @"NOT targeted"];
+
+    if (![player isRunning]) {
+        [s appendString:@", not running"];
+        return s;
+    }
+    [s appendString:@", running"];
+
+    // -playerState sends an Apple Event. Only ask when we know it is permitted,
+    // so building the report can never stall on, or trigger, a consent prompt.
+    if ([self automationPermissionForBundleID:[player bundleIdentifier]] == noErr) {
+        [s appendFormat:@", %@", [self descriptionForPlayerState:[player playerState]]];
+    } else {
+        [s appendString:@", state unknown (automation not granted)"];
+    }
+
+    return s;
+}
+
+- (NSString *)playerTargetingDiagnostics
+{
+    NSMutableString *r = [NSMutableString string];
+    [r appendFormat:@"Apple Music : %@\n", [self playerDiagnosticsLine:iTunes   enabled:[_iTunesBtn state]   != NSControlStateValueOff]];
+    [r appendFormat:@"Spotify     : %@\n", [self playerDiagnosticsLine:spotify  enabled:[_spotifyBtn state]  != NSControlStateValueOff]];
+    [r appendFormat:@"Doppler     : %@\n", [self playerDiagnosticsLine:doppler  enabled:[_dopplerBtn state]  != NSControlStateValueOff]];
+    [r appendFormat:@"Swinsian    : %@\n", [self playerDiagnosticsLine:swinsian enabled:[_swinsianBtn state] != NSControlStateValueOff]];
+    [r appendFormat:@"System      : %@\n", ([_systemBtn state] != NSControlStateValueOff) ? @"targeted" : @"NOT targeted"];
+    return r;
+}
+
+- (NSString *)settingsDiagnostics
+{
+    NSMutableString *r = [NSMutableString string];
+    [r appendFormat:@"Command key inverts app/system : %@\n", [self UseAppleCMDModifier]       ? @"yes" : @"no"];
+    [r appendFormat:@"Lock system and player volume  : %@\n", [self LockSystemAndPlayerVolume] ? @"yes" : @"no"];
+    [r appendFormat:@"Volume HUD                     : %@\n", [self hideVolumeWindow]          ? @"hidden" : @"shown"];
+    [r appendFormat:@"Hidden from status bar         : %@\n", [self hideFromStatusBar]         ? @"yes" : @"no"];
+    [r appendFormat:@"Sound feedback                 : %@\n", [self PlaySoundFeedback]         ? @"on" : @"off"];
+    return r;
 }
 
 // Builds the self-documenting plain-text diagnostics report placed on the
@@ -1391,6 +1498,22 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
     [r appendFormat:@"  Spotify     : %@\n", [self automationStatusForBundleID:@"com.spotify.client"]];
     [r appendFormat:@"  Doppler     : %@\n", [self automationStatusForBundleID:@"co.brushedtype.doppler-macos"]];
     [r appendFormat:@"  Swinsian    : %@\n\n", [self automationStatusForBundleID:@"com.swinsian.Swinsian"]];
+
+    [r appendString:@"## Event tap (keyboard volume keys)\n"];
+    [r appendString:@"# The event tap is how Volume Control sees the volume keys at all. If it is\n"];
+    [r appendString:@"# not receiving keys, nothing below matters: the keys go straight to macOS.\n\n"];
+    [r appendString:[self eventTapDiagnostics]];
+    [r appendString:@"\n"];
+
+    [r appendString:@"## Players targeted by the volume keys\n"];
+    [r appendString:@"# \"targeted\" = ticked in the Volume Control menu. The keys act on the first\n"];
+    [r appendString:@"# targeted player that is playing; if none is, they act on System.\n\n"];
+    [r appendString:[self playerTargetingDiagnostics]];
+    [r appendString:@"\n"];
+
+    [r appendString:@"## Settings\n\n"];
+    [r appendString:[self settingsDiagnostics]];
+    [r appendString:@"\n"];
 
     [r appendString:@"## Audio output devices\n"];
     [r appendString:@"# If a device shows \"no\" everywhere it exposes no software volume control;\n"];
