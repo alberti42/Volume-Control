@@ -358,6 +358,11 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 		[self setCurrentVolume: -100];
 		[self setOldVolume: -1];
 		musicPlayer = [SBApplication applicationWithBundleIdentifier:bundleIdentifier];
+        // Most Apple Events to the player are sent synchronously on the main
+        // thread. With the default timeout (about 2 minutes), a player that
+        // stops answering freezes the whole app, including the status item.
+        // The timeout is in ticks (1/60 s): 120 ticks = 2 s.
+        [(SBApplication *)musicPlayer setTimeout:120];
         [self setIcon:icon];
 	}
 	return self;
