@@ -197,13 +197,34 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 #pragma mark - Extention music applications
 
+// Records whether an Apple Event sent through an SBApplication failed. The
+// probe gives its own SBApplication one of these, so its result cannot mix
+// with events that the main thread and the write queue send meanwhile.
+@interface SBFailureRecorder : NSObject <SBApplicationDelegate>
+@property (atomic, assign) BOOL failed;
+@end
+
+@implementation SBFailureRecorder
+- (id)eventDidFail:(const AppleEvent *)event withError:(NSError *)error
+{
+    self.failed = YES;
+    return nil;
+}
+@end
+
 @interface PlayerApplication () <SBApplicationDelegate> {
     dispatch_queue_t _writeQueue;  // serial queue for ScriptingBridge writes
     BOOL             _writeInFlight; // YES while a write is executing on _writeQueue
     double           _pendingWrite;  // latest desired volume while write is in flight; -1 = none
     BOOL             _rampActive;    // YES while a key-hold ramp is in progress
     BOOL             _volumeReadTimedOut; // YES if the last -currentVolume read timed out
+    _Atomic(BOOL)    _unresponsive;  // YES from an Apple Event timeout until the player answers again
+    _Atomic(BOOL)    _probing;       // YES while the background probe is scheduled
+    dispatch_queue_t _probeQueue;    // serial queue for probe Apple Events
+    SBApplication   *_probePlayer;   // separate SBApplication, used only on _probeQueue
+    id<SBApplicationDelegate> _probeFailureRecorder;
 }
+- (void)startProbing;
 - (void)scheduleVolumeWrite:(double)volume;
 - (void)scheduleVolumeVerification;
 @property (nonatomic, assign) BOOL rampActive;
@@ -309,6 +330,13 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
   (e.g. the memory address).  valueForKey: always returns id, so
   doubleValue gives the correct numeric value uniformly. */
 
+  // An unresponsive player gets no Apple Event from here; it reads as a
+  // timed-out read without the 2 s wait.
+  if (atomic_load(&_unresponsive)) {
+    _volumeReadTimedOut = YES;
+    return 0;
+  }
+
   _volumeReadTimedOut = NO;
   double vol = [[musicPlayer valueForKey:@"soundVolume"] doubleValue];
 
@@ -330,8 +358,40 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 {
 	if ([error code] == errAETimeout) {
 		_volumeReadTimedOut = YES;
+		atomic_store(&_unresponsive, YES);
+		[self startProbing];
 	}
 	return nil;
+}
+
+- (BOOL) isUnresponsive
+{
+	return atomic_load(&_unresponsive);
+}
+
+// While the player is unresponsive, ask it for its player state every 3 s
+// on _probeQueue. When it answers, or quits, clear _unresponsive so the
+// main thread talks to it again.
+- (void) startProbing
+{
+	BOOL expected = NO;
+	if (!atomic_compare_exchange_strong(&_probing, &expected, YES))
+		return;
+
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), _probeQueue, ^{
+		SBFailureRecorder *recorder = (SBFailureRecorder *)self->_probeFailureRecorder;
+		recorder.failed = NO;
+		BOOL running = [self->_probePlayer isRunning];
+		if (running) {
+			[self->_probePlayer valueForKey:@"playerState"];
+		}
+		atomic_store(&self->_probing, NO);
+		if (!running || !recorder.failed) {
+			atomic_store(&self->_unresponsive, NO);
+		} else {
+			[self startProbing];
+		}
+	});
 }
 
 - (void) nextTrack
@@ -362,6 +422,10 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
        playerState as a typed method at the call site.  valueForKey
        retrieves an id and then we can query the integer value
        safely. */
+    // An unresponsive player reads as not playing (0 is no player state),
+    // so -runningPlayer falls back to the next player without waiting.
+    if (atomic_load(&_unresponsive))
+        return 0;
     return [[musicPlayer valueForKey:@"playerState"] integerValue];
 }
 
@@ -381,6 +445,13 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
         // The timeout is in ticks (1/60 s): 120 ticks = 2 s.
         [(SBApplication *)musicPlayer setTimeout:120];
         [(SBApplication *)musicPlayer setDelegate:self];
+        atomic_store(&_unresponsive, NO);
+        atomic_store(&_probing, NO);
+        _probeQueue = dispatch_queue_create("io.alberti42.VolumeControl.sbProbe", DISPATCH_QUEUE_SERIAL);
+        _probePlayer = [SBApplication applicationWithBundleIdentifier:bundleIdentifier];
+        [_probePlayer setTimeout:120];
+        _probeFailureRecorder = [[SBFailureRecorder alloc] init];
+        [_probePlayer setDelegate:_probeFailureRecorder];
         [self setIcon:icon];
 	}
 	return self;
@@ -1472,7 +1543,9 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
 
     // -playerState sends an Apple Event. Only ask when we know it is permitted,
     // so building the report can never stall on, or trigger, a consent prompt.
-    if ([self automationPermissionForBundleID:[player bundleIdentifier]] == noErr) {
+    if ([player isUnresponsive]) {
+        [s appendString:@", not responding to Apple Events"];
+    } else if ([self automationPermissionForBundleID:[player bundleIdentifier]] == noErr) {
         [s appendFormat:@", %@", [self descriptionForPlayerState:[player playerState]]];
     } else {
         [s appendString:@", state unknown (automation not granted)"];
@@ -1839,14 +1912,14 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
 		[[self systemPerc] setStringValue:@"(n/a)"];
 }
 
-// Shows "(timed out)" in the player's menu field when its last volume read
+// Shows "(n/a)" in the player's menu field when its last volume read
 // timed out. Returns YES if it did.
-- (BOOL) showTimeoutOfPlayer:(PlayerApplication*)player inField:(NSTextField*)field
+- (BOOL) showNotAvailableForPlayer:(PlayerApplication*)player inField:(NSTextField*)field
 {
 	if (![player volumeReadTimedOut])
 		return NO;
 	[field setHidden:NO];
-	[field setStringValue:@"(timed out)"];
+	[field setStringValue:@"(n/a)"];
 	return YES;
 }
 
@@ -1854,28 +1927,28 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
 {
 	if([iTunes isRunning]) {
 		double volume = [iTunes currentVolume];
-		if (![self showTimeoutOfPlayer:iTunes inField:[self iTunesPerc]])
+		if (![self showNotAvailableForPlayer:iTunes inField:[self iTunesPerc]])
 			[self setItunesVolume:volume];
 	} else
 		[self setItunesVolume:-1];
 
 	if([spotify isRunning]) {
 		double volume = [spotify currentVolume];
-		if (![self showTimeoutOfPlayer:spotify inField:[self spotifyPerc]])
+		if (![self showNotAvailableForPlayer:spotify inField:[self spotifyPerc]])
 			[self setSpotifyVolume:volume];
 	} else
 		[self setSpotifyVolume:-1];
 
 	if ([doppler isRunning]) {
 		double volume = [doppler currentVolume];
-		if (![self showTimeoutOfPlayer:doppler inField:[self dopplerPerc]])
+		if (![self showNotAvailableForPlayer:doppler inField:[self dopplerPerc]])
 			[self setDopplerVolume:volume];
 	} else
 		[self setDopplerVolume:-1];
 
 	if ([swinsian isRunning]) {
 		double volume = [swinsian currentVolume];
-		if (![self showTimeoutOfPlayer:swinsian inField:[self swinsianPerc]])
+		if (![self showNotAvailableForPlayer:swinsian inField:[self swinsianPerc]])
 			[self setSwinsianVolume:volume];
 	} else
 		[self setSwinsianVolume:-1];
