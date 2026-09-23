@@ -111,7 +111,8 @@
 - (void)handleAsynchronouslyTappedEventWithKeyCode:(int)keyCode
                                           keyState:(BOOL)keyState
                                        keyIsRepeat:(BOOL)keyIsRepeat
-                                       keyModifier:(CGEventFlags)keyModifier;
+                                       keyModifier:(CGEventFlags)keyModifier
+                                  keyboardModifier:(CGEventFlags)keyboardModifier;
 
 @end
 

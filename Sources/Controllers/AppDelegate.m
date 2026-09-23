@@ -118,6 +118,9 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     int keyState   = (((keyFlags & 0xFF00) >> 8)) == 0xA;
     bool keyIsRepeat = (keyFlags & 0x1);
     CGEventFlags keyModifier = [sysEvent modifierFlags] | 0xFFFF;
+    // The modifiers held on the keyboard at this moment, independent of the
+    // flags the system stored on the event. Recorded for the diagnostics report.
+    CGEventFlags keyboardModifier = CGEventSourceFlagsState(kCGEventSourceStateHIDSystemState);
 
     // If this key is currently handed off to macOS (because the output device
     // has no controllable volume), let its auto-repeat events and its release
@@ -141,7 +144,8 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
             [app handleAsynchronouslyTappedEventWithKeyCode:keyCode
                                                    keyState:keyState
                                                 keyIsRepeat:keyIsRepeat
-                                                keyModifier:keyModifier];
+                                                keyModifier:keyModifier
+                                           keyboardModifier:keyboardModifier];
         });
         
         return NULL;
@@ -156,6 +160,12 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 @interface AppDelegate () <NSMenuDelegate>
 {
+	// Last initial volume key press, for the diagnostics report.
+	NSDate*   _lastKeyPressDate;
+	int       _lastKeyPressCode;
+	BOOL      _lastKeyPressEventCmd;     // ⌘ bit on the event's flags
+	BOOL      _lastKeyPressKeyboardCmd;  // ⌘ held on the keyboard (HID state)
+	NSString* _lastKeyPressTarget;
 	//StatusItemView* _statusBarItemView;
 	NSTimer* _statusBarHideTimer;
 	NSPopover* _hideFromStatusBarHintPopover;
@@ -788,8 +798,19 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
                                           keyState:(BOOL)keyState
                                        keyIsRepeat:(BOOL)keyIsRepeat
                                        keyModifier:(CGEventFlags)keyModifier
+                                  keyboardModifier:(CGEventFlags)keyboardModifier
 {
     [self setAppleCMDModifierPressed:(keyModifier & NX_COMMANDMASK) == NX_COMMANDMASK];
+
+    // Record the initial press for the diagnostics report. -runningPlayer
+    // caches its result, so the calls below use the same target.
+    if (keyState == 1 && !keyIsRepeat) {
+        _lastKeyPressDate        = [NSDate date];
+        _lastKeyPressCode        = keyCode;
+        _lastKeyPressEventCmd    = (keyModifier & NX_COMMANDMASK) == NX_COMMANDMASK;
+        _lastKeyPressKeyboardCmd = (keyboardModifier & kCGEventFlagMaskCommand) == kCGEventFlagMaskCommand;
+        _lastKeyPressTarget      = [self nameOfPlayer:[self runningPlayer]];
+    }
 
     // If the resolved target is the system output and that device exposes no
     // controllable volume (e.g. many HDMI/DisplayPort displays), don't handle
@@ -1565,6 +1586,42 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
     return r;
 }
 
+- (NSString *)nameOfPlayer:(id)player
+{
+    if (player == nil)         return @"none";
+    if (player == iTunes)      return @"Apple Music";
+    if (player == spotify)     return @"Spotify";
+    if (player == doppler)     return @"Doppler";
+    if (player == swinsian)    return @"Swinsian";
+    if (player == systemAudio) return @"System";
+    return @"?";
+}
+
+// The last initial volume key press. The volume keys arrive as system-defined
+// events, and the app reads ⌘ from the flags stored on the event. If macOS
+// stops setting the ⌘ bit there, "on the event" reads "no" while "on the
+// keyboard" reads "yes".
+- (NSString *)lastKeyPressDiagnostics
+{
+    if (_lastKeyPressDate == nil)
+        return @"No volume key pressed since Volume Control started.\n";
+
+    NSString *key;
+    switch (_lastKeyPressCode) {
+        case NX_KEYTYPE_SOUND_UP:   key = @"volume up";   break;
+        case NX_KEYTYPE_SOUND_DOWN: key = @"volume down"; break;
+        case NX_KEYTYPE_MUTE:       key = @"mute";        break;
+        default:                    key = [NSString stringWithFormat:@"key %d", _lastKeyPressCode]; break;
+    }
+
+    NSMutableString *r = [NSMutableString string];
+    [r appendFormat:@"Key                    : %@, %.0f s ago\n", key, -[_lastKeyPressDate timeIntervalSinceNow]];
+    [r appendFormat:@"Command on the event   : %@\n", _lastKeyPressEventCmd    ? @"yes" : @"no"];
+    [r appendFormat:@"Command on the keyboard: %@\n", _lastKeyPressKeyboardCmd ? @"yes" : @"no"];
+    [r appendFormat:@"Acted on               : %@\n", _lastKeyPressTarget];
+    return r;
+}
+
 - (NSString *)settingsDiagnostics
 {
     NSMutableString *r = [NSMutableString string];
@@ -1617,6 +1674,11 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
 
     [r appendString:@"## Settings\n\n"];
     [r appendString:[self settingsDiagnostics]];
+    [r appendString:@"\n"];
+
+    [r appendString:@"## Last volume key press\n"];
+    [r appendString:@"# To check the Command key: press Command + volume up, then create this report.\n\n"];
+    [r appendString:[self lastKeyPressDiagnostics]];
     [r appendString:@"\n"];
 
     [r appendString:@"## Audio output devices\n"];
