@@ -123,6 +123,7 @@
 
 - (BOOL) isRunning;
 - (NSInteger) playerState;
+- (BOOL) volumeReadTimedOut;
 
 @property (assign, nonatomic) double currentVolume;
 @property (assign, nonatomic) double oldVolume;

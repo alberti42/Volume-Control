@@ -197,11 +197,12 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 #pragma mark - Extention music applications
 
-@interface PlayerApplication () {
+@interface PlayerApplication () <SBApplicationDelegate> {
     dispatch_queue_t _writeQueue;  // serial queue for ScriptingBridge writes
     BOOL             _writeInFlight; // YES while a write is executing on _writeQueue
     double           _pendingWrite;  // latest desired volume while write is in flight; -1 = none
     BOOL             _rampActive;    // YES while a key-hold ramp is in progress
+    BOOL             _volumeReadTimedOut; // YES if the last -currentVolume read timed out
 }
 - (void)scheduleVolumeWrite:(double)volume;
 - (void)scheduleVolumeVerification;
@@ -308,6 +309,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
   (e.g. the memory address).  valueForKey: always returns id, so
   doubleValue gives the correct numeric value uniformly. */
 
+  _volumeReadTimedOut = NO;
   double vol = [[musicPlayer valueForKey:@"soundVolume"] doubleValue];
 
   if (fabs(vol-[self doubleVolume])<1) {
@@ -315,6 +317,21 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
   }
 
 	return vol;
+}
+
+- (BOOL) volumeReadTimedOut
+{
+	return _volumeReadTimedOut;
+}
+
+// SBApplicationDelegate: ScriptingBridge calls this for every Apple Event
+// that fails, and the event then returns nil (or 0 for a scalar).
+- (id) eventDidFail:(const AppleEvent *)event withError:(NSError *)error
+{
+	if ([error code] == errAETimeout) {
+		_volumeReadTimedOut = YES;
+	}
+	return nil;
 }
 
 - (void) nextTrack
@@ -363,6 +380,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
         // stops answering freezes the whole app, including the status item.
         // The timeout is in ticks (1/60 s): 120 ticks = 2 s.
         [(SBApplication *)musicPlayer setTimeout:120];
+        [(SBApplication *)musicPlayer setDelegate:self];
         [self setIcon:icon];
 	}
 	return self;
@@ -1805,26 +1823,45 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
 		[[self systemPerc] setStringValue:@"(n/a)"];
 }
 
+// Shows "(timed out)" in the player's menu field when its last volume read
+// timed out. Returns YES if it did.
+- (BOOL) showTimeoutOfPlayer:(PlayerApplication*)player inField:(NSTextField*)field
+{
+	if (![player volumeReadTimedOut])
+		return NO;
+	[field setHidden:NO];
+	[field setStringValue:@"(timed out)"];
+	return YES;
+}
+
 - (void) updatePercentages
 {
-	if([iTunes isRunning])
-		[self setItunesVolume:[iTunes currentVolume]];
-	else
+	if([iTunes isRunning]) {
+		double volume = [iTunes currentVolume];
+		if (![self showTimeoutOfPlayer:iTunes inField:[self iTunesPerc]])
+			[self setItunesVolume:volume];
+	} else
 		[self setItunesVolume:-1];
 
-	if([spotify isRunning])
-		[self setSpotifyVolume:[spotify currentVolume]];
-	else
+	if([spotify isRunning]) {
+		double volume = [spotify currentVolume];
+		if (![self showTimeoutOfPlayer:spotify inField:[self spotifyPerc]])
+			[self setSpotifyVolume:volume];
+	} else
 		[self setSpotifyVolume:-1];
 
-	if ([doppler isRunning])
-		[self setDopplerVolume:[doppler currentVolume]];
-	else
+	if ([doppler isRunning]) {
+		double volume = [doppler currentVolume];
+		if (![self showTimeoutOfPlayer:doppler inField:[self dopplerPerc]])
+			[self setDopplerVolume:volume];
+	} else
 		[self setDopplerVolume:-1];
 
-	if ([swinsian isRunning])
-		[self setSwinsianVolume:[swinsian currentVolume]];
-	else
+	if ([swinsian isRunning]) {
+		double volume = [swinsian currentVolume];
+		if (![self showTimeoutOfPlayer:swinsian inField:[self swinsianPerc]])
+			[self setSwinsianVolume:volume];
+	} else
 		[self setSwinsianVolume:-1];
 
 	[self setSystemVolume:[systemAudio currentVolume]];
