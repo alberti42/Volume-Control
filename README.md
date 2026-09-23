@@ -1,6 +1,7 @@
 # Volume Control for macOS
 
 [![notarized download](https://img.shields.io/github/actions/workflow/status/alberti42/Volume-Control/verify-release.yml?branch=main&label=notarized%20download&logo=apple)](https://github.com/alberti42/Volume-Control/actions/workflows/verify-release.yml)
+[![Homebrew cask](https://img.shields.io/homebrew/cask/v/volume-control)](https://formulae.brew.sh/cask/volume-control)
 
 ♫ **Control the volume of Apple Music, Spotify, and Doppler using your keyboard — seamlessly.**
 
@@ -59,6 +60,14 @@ This app is the spiritual successor to _iTunes Volume Control_, offering a simpl
 4. **Launch** the app.
 
 That’s it — no extra Terminal commands or security tweaks are required. 🎉
+
+### With Homebrew
+
+```sh
+brew install --cask volume-control
+```
+
+Homebrew installs the app into `Applications`. After that, the app updates itself through its built-in updater, so `brew upgrade` leaves it alone unless you run `brew upgrade --greedy`.
 
 ---
 
