@@ -1,7 +1,7 @@
 # Volume Control for macOS
 
 [![notarized download](https://img.shields.io/github/actions/workflow/status/alberti42/Volume-Control/verify-release.yml?branch=main&label=notarized%20download&logo=apple)](https://github.com/alberti42/Volume-Control/actions/workflows/verify-release.yml)
-[![Homebrew cask](https://img.shields.io/homebrew/cask/v/volume-control)](https://formulae.brew.sh/cask/volume-control)
+[![Homebrew cask](https://img.shields.io/homebrew/cask/v/volume-control?logo=homebrew)](https://formulae.brew.sh/cask/volume-control)
 
 ♫ **Control the volume of Apple Music, Spotify, and Doppler using your keyboard — seamlessly.**
 
