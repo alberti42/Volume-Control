@@ -21,6 +21,7 @@ xcuserdata
 OSDUIHelper.hop
 readme.txt
 bin/*
+!bin/bump_version.sh
 Releases/appcast.xml
 
 # Sublime Text
