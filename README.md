@@ -1,7 +1,5 @@
 # Volume Control for macOS
 
-[![Build, Notarize and Draft Release](https://github.com/alberti42/Volume-Control/actions/workflows/draft-release.yml/badge.svg)](https://github.com/alberti42/Volume-Control/actions/workflows/draft-release.yml)
-
 ♫ **Control the volume of Apple Music, Spotify, and Doppler using your keyboard — seamlessly.**
 
 > 🚀 Now compatible with macOS 27 Golden Gate (supports Ventura and newer).<br>
