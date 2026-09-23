@@ -848,7 +848,15 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	{
 		if([runningPlayerPtr oldVolume]<0)
 		{
-			[runningPlayerPtr setOldVolume:[runningPlayerPtr currentVolume]];
+			double volume = [runningPlayerPtr currentVolume];
+
+			// A timed-out read returns 0; storing it as the volume to restore
+			// would unmute the player to 0, so ignore the key press.
+			if ([runningPlayerPtr isKindOfClass:[PlayerApplication class]] &&
+				[(PlayerApplication *)runningPlayerPtr volumeReadTimedOut])
+				return;
+
+			[runningPlayerPtr setOldVolume:volume];
 			[runningPlayerPtr setCurrentVolume:0];
 
 			if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
@@ -1678,6 +1686,14 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
         double volume = (self->volumeRampTimer != nil && [runningPlayerPtr isKindOfClass:[PlayerApplication class]])
                       ? [(PlayerApplication *)runningPlayerPtr doubleVolume]
                       : [runningPlayerPtr currentVolume];
+
+        // A timed-out read returns 0, not the player's volume. Stepping from
+        // it would send the player 0 + increment once it answers again, so
+        // ignore the key press. During a ramp no read happens, and the flag
+        // still holds the result of the read made by the initial key press.
+        if ([runningPlayerPtr isKindOfClass:[PlayerApplication class]] &&
+            [(PlayerApplication *)runningPlayerPtr volumeReadTimedOut])
+            return;
 
 #ifdef DEBUG
         double dbgPrevVolume = volume; // internal belief before this step
