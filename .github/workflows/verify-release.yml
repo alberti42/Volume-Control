@@ -1,0 +1,76 @@
+name: Verify Published Release
+
+# Checks the VolumeControl.zip attached to the latest published release — the
+# file users download — the way a user's Mac would:
+#   1. Build provenance: the ZIP was built by draft-release.yml from a tag.
+#   2. Code signature: valid, and made with the Developer ID of team 9V3X7C8VCK.
+#   3. Notarization ticket stapled to the app.
+#   4. Gatekeeper accepts the app as "Notarized Developer ID".
+#
+# Runs weekly, after publish-release.yml, and on demand. A check can fail with
+# no new release, for example if Apple revokes the certificate or the ticket.
+# All three triggers run on main, so the README badge follows branch=main.
+# Needs no secrets.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'   # Mondays, 06:00 UTC
+  workflow_run:
+    workflows: ["Publish Release (Update Appcast)"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read       # download the release asset
+  attestations: read   # read the build provenance attestation
+
+jobs:
+  verify:
+    runs-on: macos-26
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO:     ${{ github.repository }}
+      TEAM_ID:  9V3X7C8VCK
+
+    steps:
+      - name: Download the latest release
+        id: rel
+        run: |
+          # Without a tag, gh picks the latest release: not a draft, not a pre-release.
+          TAG=$(gh release view --repo "$REPO" --json tagName -q .tagName)
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          gh release download "$TAG" --repo "$REPO" --pattern VolumeControl.zip
+          shasum -a 256 VolumeControl.zip
+          echo "Latest release: $TAG"
+
+      - name: Verify build provenance
+        env:
+          TAG: ${{ steps.rel.outputs.tag }}
+        run: |
+          gh attestation verify VolumeControl.zip \
+            --repo "$REPO" \
+            --signer-workflow "$REPO/.github/workflows/draft-release.yml" \
+            --source-ref "refs/tags/$TAG"
+
+      - name: Extract the app
+        run: |
+          # ditto keeps the extended attributes that hold the stapled ticket.
+          ditto -x -k VolumeControl.zip extracted
+          test -d "extracted/Volume Control.app"
+
+      - name: Verify code signature and team
+        run: |
+          APP="extracted/Volume Control.app"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          TEAM=$(codesign -dv "$APP" 2>&1 | sed -n 's/^TeamIdentifier=//p')
+          echo "TeamIdentifier: $TEAM"
+          test "$TEAM" = "$TEAM_ID"
+
+      - name: Verify stapled notarization ticket
+        run: xcrun stapler validate "extracted/Volume Control.app"
+
+      - name: Verify Gatekeeper accepts the app
+        run: |
+          OUT=$(spctl --assess --type execute --verbose=4 "extracted/Volume Control.app" 2>&1)
+          echo "$OUT"
+          echo "$OUT" | grep -q "source=Notarized Developer ID"
