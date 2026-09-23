@@ -134,7 +134,11 @@ GitHub: [@alberti42](https://github.com/alberti42)
 
 You can download older versions here:
 
-- [2.2.0](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.2.0.zip): Added support for Swinsian 3.0+; added support for LocalSigning.xcconfig for easier local development.
+- [2.3.2](https://github.com/alberti42/Volume-Control/releases/download/v2.3.2/VolumeControl.zip): Compatible with macOS 27 Golden Gate; a player that stops responding no longer freezes Volume Control; more detail in Copy Diagnostics.
+- [2.3.0](https://github.com/alberti42/Volume-Control/releases/download/v2.3.0/VolumeControl.zip): Better support for displays and devices without a standard volume control; added the Copy Diagnostics menu item.
+- [2.2.2](https://github.com/alberti42/Volume-Control/releases/download/v2.2.2/VolumeControl.zip): Fixed the position of the volume HUD when the menu bar icon is hidden or the menu bar hides automatically.
+- [2.2.1](https://github.com/alberti42/Volume-Control/releases/download/v2.2.1/VolumeControl.zip): Smoother volume changes when holding a key; fixed the volume HUD jumping to a wrong position.
+- [2.2.0](https://github.com/alberti42/Volume-Control/releases/download/v2.2.0/VolumeControl.zip): Added support for Swinsian 3.0+; added support for LocalSigning.xcconfig for easier local development.
 - [2.1.0](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.1.0.zip): Brought back HUD for volume indication in Tahoe.
 - [2.0.1](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.1.zip): Fixed a bug preventing controlling volume of music players.
 - [2.0.0](https://raw.githubusercontent.com/alberti42/Volume-Control/main/Releases/VolumeControl-v2.0.0.zip): Notarized and compatible with Tahoe. Many improvements under the hood.
