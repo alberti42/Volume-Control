@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="24765" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="25098" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24765"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="25098"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -201,7 +201,7 @@
                     </sliderCell>
                 </slider>
             </subviews>
-            <point key="canvasLocation" x="-249" y="361"/>
+            <point key="canvasLocation" x="-3" y="119"/>
         </customView>
         <customView id="516" userLabel="Select music player">
             <rect key="frame" x="0.0" y="0.0" width="193" height="182"/>
@@ -342,7 +342,7 @@
                     </connections>
                 </button>
             </subviews>
-            <point key="canvasLocation" x="-248.5" y="-24"/>
+            <point key="canvasLocation" x="-2" y="-138"/>
         </customView>
     </objects>
     <resources>
