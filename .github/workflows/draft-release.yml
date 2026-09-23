@@ -5,7 +5,8 @@ name: Build, Notarize and Draft Release
 #   1. Build universal binary (arm64 + x86_64)
 #   2. Sign with Developer ID Application certificate
 #   3. Notarize with Apple + staple ticket (Temporarily disabled)
-#   4. Create a draft GitHub release with the ZIP attached
+#   4. Attest build provenance for the ZIP (Sigstore, verifiable with gh attestation verify)
+#   5. Create a draft GitHub release with the ZIP attached
 #
 # A separate workflow (publish-release.yml) is triggered when the draft is published,
 # which updates the Sparkle appcast and pushes it to main.
@@ -19,7 +20,10 @@ jobs:
   release:
     runs-on: macos-26
     permissions:
-      contents: write   # needed to create the release
+      contents: write           # needed to create the release
+      id-token: write           # needed by actions/attest to request a Sigstore certificate
+      attestations: write       # needed by actions/attest to store the attestation
+      artifact-metadata: write  # needed by actions/attest to create the artifact storage record
 
     steps:
       # ── Checkout ──────────────────────────────────────────────────────────────
@@ -152,6 +156,17 @@ jobs:
           # Re-zip with the stapled ticket in place
           rm "$ZIP"
           ditto -c -k --keepParent "$APP" "$ZIP"
+
+      # ── Build provenance ──────────────────────────────────────────────────────
+      # Records a signed SLSA provenance statement: this ZIP (by its SHA-256) was
+      # built by this workflow, from this commit and tag. publish-release.yml
+      # signs the ZIP for Sparkle without changing the file, so the attestation
+      # stays valid for the file users download. To verify a downloaded ZIP:
+      #   gh attestation verify VolumeControl.zip --repo alberti42/Volume-Control
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ steps.ver.outputs.zip }}
 
       # ── Draft release ─────────────────────────────────────────────────────────
       - name: Resolve previous tag
