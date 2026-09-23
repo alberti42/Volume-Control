@@ -6,6 +6,43 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.3.2</title>
+            <pubDate>Wed, 23 Sep 2026 17:35:00 +0000</pubDate>
+            <sparkle:version>261</sparkle:version>
+            <sparkle:shortVersionString>2.3.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.5</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/alberti42/Volume-Control/releases/download/v2.3.2/VolumeControl.zip" length="5852242" type="application/octet-stream" sparkle:edSignature="sVGydT+V5+xBOOKytJKg4HaKwoZPMUFsdJYtvS0+PTsrql+iYDLSrX23eAmT1dBg/EadtRhwzGd3M+9YJQ9ACg=="/>
+        
+            <description><![CDATA[
+<h2>Compatible with macOS 27 Golden Gate</h2>
+<p>Volume Control 2.3.2 runs on macOS 27 Golden Gate. Version 2.3.1 was published only as a pre-release; its changes are included here.</p>
+<h2>A player that stops responding no longer freezes Volume Control</h2>
+<p>Volume Control controls Apple Music, Spotify, Doppler and Swinsian through Apple Events. When a player stopped answering them, Volume Control waited about 2 minutes for each answer. On macOS 27, an Apple Music that did not respond at launch kept the menu bar icon from appearing.</p>
+<ul>
+<li>Volume Control now waits at most 2 s for a player to answer.</li>
+<li>After a player fails to answer once, Volume Control stops sending it requests. The volume keys act on the next ticked player that is playing, or on System, and the menu shows <strong>(n/a)</strong> next to the player. Volume Control checks the player every 3 s and uses it again as soon as it answers, or once it quits.</li>
+</ul>
+<h2>More detail in Copy Diagnostics</h2>
+<p>The report from <strong>Copy Diagnostics</strong> now also includes:</p>
+<ul>
+<li><strong>Event tap</strong>: whether Volume Control receives the volume keys at all. If Accessibility is granted but the keys do not arrive, the report says how to fix the permission record.</li>
+<li><strong>Players targeted by the volume keys</strong>: for each player, whether it is ticked in the menu, running, and playing, or not responding.</li>
+<li><strong>Settings</strong>: the options that change which volume the keys act on.</li>
+<li><strong>Last volume key press</strong>: the key, whether the Command key was held, and which player the key acted on. To check the Command key, press Command + volume up, then choose Copy Diagnostics.</li>
+</ul>
+<h2>Changes since v2.3.0</h2>
+<ul>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/6a14ed6">6a14ed6</a> Report the last volume key press in diagnostics</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/865c986">865c986</a> Skip players that stop answering Apple Events</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/804af20">804af20</a> Ignore volume keys when the player's volume read timed out</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/aa7a2c5">aa7a2c5</a> Show "(timed out)" in the menu when a player does not answer</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/a229548">a229548</a> Time out Apple Events to a player after 2 s</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/1d65e92">1d65e92</a> Report event tap, player targeting and settings in diagnostics</li>
+</ul>
+<p><strong>Full diff:</strong> https://github.com/alberti42/Volume-Control/compare/v2.3.0...v2.3.2</p>
+            ]]></description>
+        </item>
+        <item>
             <title>2.3.0</title>
             <pubDate>Sat, 11 Jul 2026 15:18:25 +0000</pubDate>
             <sparkle:version>248</sparkle:version>
