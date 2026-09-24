@@ -800,15 +800,20 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
                                        keyModifier:(CGEventFlags)keyModifier
                                   keyboardModifier:(CGEventFlags)keyboardModifier
 {
-    [self setAppleCMDModifierPressed:(keyModifier & NX_COMMANDMASK) == NX_COMMANDMASK];
+    // On some setups the volume key event arrives without the Command bit
+    // although Command is held (seen on macOS 27 with a MacBookPro18,1), so
+    // Command counts as pressed if either the event or the keyboard says so.
+    BOOL eventCmd    = (keyModifier & NX_COMMANDMASK) == NX_COMMANDMASK;
+    BOOL keyboardCmd = (keyboardModifier & kCGEventFlagMaskCommand) == kCGEventFlagMaskCommand;
+    [self setAppleCMDModifierPressed:eventCmd || keyboardCmd];
 
     // Record the initial press for the diagnostics report. -runningPlayer
     // caches its result, so the calls below use the same target.
     if (keyState == 1 && !keyIsRepeat) {
         _lastKeyPressDate        = [NSDate date];
         _lastKeyPressCode        = keyCode;
-        _lastKeyPressEventCmd    = (keyModifier & NX_COMMANDMASK) == NX_COMMANDMASK;
-        _lastKeyPressKeyboardCmd = (keyboardModifier & kCGEventFlagMaskCommand) == kCGEventFlagMaskCommand;
+        _lastKeyPressEventCmd    = eventCmd;
+        _lastKeyPressKeyboardCmd = keyboardCmd;
         _lastKeyPressTarget      = [self nameOfPlayer:[self runningPlayer]];
     }
 
@@ -1598,9 +1603,9 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
 }
 
 // The last initial volume key press. The volume keys arrive as system-defined
-// events, and the app reads ⌘ from the flags stored on the event. If macOS
-// stops setting the ⌘ bit there, "on the event" reads "no" while "on the
-// keyboard" reads "yes".
+// events; the app counts ⌘ as pressed if the flags stored on the event or the
+// keyboard state say so. When the event arrives without the ⌘ bit, "on the
+// event" reads "no" while "on the keyboard" reads "yes".
 - (NSString *)lastKeyPressDiagnostics
 {
     if (_lastKeyPressDate == nil)
