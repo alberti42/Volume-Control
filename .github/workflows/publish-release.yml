@@ -1,7 +1,9 @@
 name: Publish Release (Update Appcast)
 
-# Triggered when a GitHub release is changed from "Draft" to "Published",
-# unless it is marked as a pre-release (see the job-level `if` below).
+# Triggered by the "released" event: "A release was published, or a
+# pre-release was changed to a release" (GitHub webhook docs). It does not fire
+# for pre-releases, so publishing a pre-release leaves the appcast alone, and
+# promoting it to a full release later updates the appcast.
 # This workflow:
 #   1. Downloads the fixed-name VolumeControl.zip from the release assets.
 #   2. Updates the Sparkle appcast (VolumeControlCast.xml) pointing to the GitHub Release asset.
@@ -10,7 +12,7 @@ name: Publish Release (Update Appcast)
 
 on:
   release:
-    types: [published]
+    types: [released]
   workflow_dispatch:
     inputs:
       tag:
@@ -19,12 +21,12 @@ on:
 
 jobs:
   publish:
-    # Skip pre-releases. GitHub fires "published" for pre-releases as well as
-    # full releases (only the "released" event type excludes them), so without
-    # this guard marking a release as a pre-release would still regenerate the
-    # appcast and push the build to every user through Sparkle. Pre-releases are
-    # meant to be handed out by link only — e.g. asking a bug reporter to try a
-    # build — so they must never touch VolumeControlCast.xml.
+    # Skip pre-releases. The "released" trigger already excludes them; this
+    # guard is a second check. Pre-releases are meant to be handed out by link
+    # only — e.g. asking a bug reporter to try a build — so they must never
+    # touch VolumeControlCast.xml. The trigger used to be "published", which
+    # also fires for pre-releases but not when a pre-release is changed to a
+    # release, so a promoted pre-release never reached the appcast.
     # workflow_dispatch carries no release payload, so it is always allowed.
     if: github.event_name == 'workflow_dispatch' || github.event.release.prerelease == false
     runs-on: macos-latest
