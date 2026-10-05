@@ -53,6 +53,11 @@ static const NSInteger kPassThroughEventTag = 0x0056434B; // 'VCK'
 // accessed atomically across the tap and main threads.
 static _Atomic(int) gPassThroughKeyCode = -1;
 
+// When the tap last received a media key (volume, brightness, play, ...), as
+// CFAbsoluteTime, or 0 if never. For the diagnostics report: unlike
+// CGEventTapIsEnabled, it shows whether keys actually reach the tap.
+static _Atomic(CFAbsoluteTime) gLastTapKeyTime = 0;
+
 CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
     // Keep track of how many consecutive timeouts we’ve seen.
@@ -61,6 +66,18 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     // We auto-resume a few times, then give up and alert the user if it persists.
     static int timeout_count = 0;
     
+    // macOS can also disable the tap "by user input". That says nothing about
+    // our responsiveness, so re-enable without counting it as a timeout.
+    if (type == kCGEventTapDisabledByUserInput) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            AppDelegate *app = (__bridge AppDelegate *)refcon;
+            if ([app Tapping]) {
+                [app setTapping:YES];
+            }
+        });
+        return event;
+    }
+
     if (type == kCGEventTapDisabledByTimeout) {
         if (timeout_count < 5) {
             // This handles “false positives” that occur when macOS temporarily
@@ -104,6 +121,9 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     // Pass through events we don't care about
     if (type != NX_SYSDEFINED) return event;
 
+    // An event arrived, so the timeouts counted above are no longer consecutive.
+    timeout_count = 0;
+
     NSEvent *sysEvent = [NSEvent eventWithCGEvent:event];
     if ([sysEvent subtype] != NX_SUBTYPE_AUX_CONTROL_BUTTONS) return event;
 
@@ -111,6 +131,8 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     // perform its native handling. Without this guard we would re-catch and
     // re-process them, defeating the passthrough (and looping).
     if ([sysEvent data2] == kPassThroughEventTag) return event;
+
+    atomic_store(&gLastTapKeyTime, CFAbsoluteTimeGetCurrent());
 
     // Extract key info
     int keyFlags   = ([sysEvent data1] & 0x0000FFFF);
@@ -166,6 +188,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 	BOOL      _lastKeyPressEventCmd;     // ⌘ bit on the event's flags
 	BOOL      _lastKeyPressKeyboardCmd;  // ⌘ held on the keyboard (HID state)
 	NSString* _lastKeyPressTarget;
+	NSDate*   _eventTapCreatedDate;      // nil while there is no tap
 	//StatusItemView* _statusBarItemView;
 	NSTimer* _statusBarHideTimer;
 	NSPopover* _hideFromStatusBarHintPopover;
@@ -513,18 +536,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (IBAction)terminate:(id)sender
 {
-    if (eventTap && CFMachPortIsValid(eventTap)) {
-        if (CFMachPortIsValid(eventTap)) {
-            CFMachPortInvalidate(eventTap);
-        }
-        if (runLoopSource) {
-            CFRunLoopSourceInvalidate(runLoopSource);
-            CFRelease(runLoopSource);
-            runLoopSource = nil;
-        }
-        CFRelease(eventTap);
-        eventTap = nil;
-    }
+    [self destroyEventTap];
     
     [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
     
@@ -726,16 +738,32 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     return NO;
 }
 
-- (bool)createEventTap
+// Remove the tap, its run loop source and the trust timer. Also removes a tap
+// whose port is no longer valid, which would otherwise stay registered.
+- (void)destroyEventTap
 {
-    if (eventTap != nil && CFMachPortIsValid(eventTap)) {
-        CFMachPortInvalidate(eventTap);
-        CFRunLoopSourceInvalidate(runLoopSource);
+    if (eventTap) {
+        if (CFMachPortIsValid(eventTap)) {
+            CFMachPortInvalidate(eventTap);
+        }
         CFRelease(eventTap);
-        CFRelease(runLoopSource);
         eventTap = nil;
+    }
+    if (runLoopSource) {
+        CFRunLoopSourceInvalidate(runLoopSource);
+        CFRelease(runLoopSource);
         runLoopSource = nil;
     }
+    if (accessibilityCheckTimer) {
+        [accessibilityCheckTimer invalidate];
+        accessibilityCheckTimer = nil;
+    }
+    _eventTapCreatedDate = nil;
+}
+
+- (bool)createEventTap
+{
+    [self destroyEventTap];
     
     CGEventMask eventMask = CGEventMaskBit(NX_SYSDEFINED);
     eventTap = CGEventTapCreate(kCGSessionEventTap,
@@ -746,6 +774,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
                                 (__bridge void *)self);
     
     if (eventTap != nil) {
+        _eventTapCreatedDate = [NSDate date];
         runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0);
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
         
@@ -763,23 +792,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 }
 
 - (void)handleEventTapDisabledByUser {
-    if (eventTap && CFMachPortIsValid(eventTap)) {
-        if (CFMachPortIsValid(eventTap)) {
-            CFMachPortInvalidate(eventTap);
-        }
-        if (runLoopSource) {
-            CFRunLoopSourceInvalidate(runLoopSource);
-            CFRelease(runLoopSource);
-            runLoopSource = nil;
-        }
-        CFRelease(eventTap);
-        eventTap = nil;
-    }
-    
-    if (accessibilityCheckTimer) {
-        [accessibilityCheckTimer invalidate];
-        accessibilityCheckTimer = nil;
-    }
+    [self destroyEventTap];
     
     // Update toggle state to reflect reality
     [self setTapping:NO];
@@ -1374,19 +1387,21 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 }
 
 - (void)setTapping:(bool)enabled {
-    if (eventTap) {
-        CGEventTapEnable(eventTap, enabled);
-        // Reset key state tracking to avoid stale state after re-creation
-        _previousKeyCode = 0;
-        _muteDown = NO;
-    } else if (enabled) {
-        // Try to recreate the tap if it was torn down
+    // Enabling always creates a new tap. A tap can stop receiving keys while
+    // macOS still reports it valid and enabled (seen after sleep, issue #43);
+    // re-enabling such a tap does not help, and only a new tap does. This is
+    // also what the wake handler and the "Enable" menu item rely on.
+    if (enabled) {
         if (![self createEventTap]) {
-            NSLog(@"[Volume Control] Failed to recreate event tap.");
-            // You could also show an alert here if desired
-            enabled = NO; // fallback
+            NSLog(@"[Volume Control] Failed to create event tap.");
+            enabled = NO;
         }
+    } else {
+        [self destroyEventTap];
     }
+    // Reset key state tracking to avoid stale state after re-creation
+    _previousKeyCode = 0;
+    _muteDown = NO;
     
     NSMenuItem *menuItem = [_statusMenu itemWithTag:TAPPING_ID];
     [menuItem setState:enabled];
@@ -1519,18 +1534,28 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
     BOOL valid   = created && CFMachPortIsValid(eventTap);
     BOOL live    = valid && CGEventTapIsEnabled(eventTap);
 
+    NSString *createdText = (created && _eventTapCreatedDate)
+        ? [NSString stringWithFormat:@"yes, %.0f s ago", -[_eventTapCreatedDate timeIntervalSinceNow]]
+        : (created ? @"yes" : @"no");
+
+    CFAbsoluteTime lastKey = atomic_load(&gLastTapKeyTime);
+    NSString *lastKeyText = (lastKey == 0)
+        ? @"none since Volume Control started"
+        : [NSString stringWithFormat:@"%.0f s ago", CFAbsoluteTimeGetCurrent() - lastKey];
+
     NSMutableString *r = [NSMutableString string];
     [r appendFormat:@"Volume keys enabled (menu) : %@\n", [self Tapping] ? @"yes" : @"no"];
-    [r appendFormat:@"Event tap created          : %@\n", created ? @"yes" : @"no"];
+    [r appendFormat:@"Event tap created          : %@\n", createdText];
     [r appendFormat:@"Event tap port valid       : %@\n", valid   ? @"yes" : @"no"];
-    [r appendFormat:@"Event tap receiving keys   : %@\n", live    ? @"yes" : @"no"];
+    [r appendFormat:@"Event tap enabled          : %@\n", live    ? @"yes" : @"no"];
+    [r appendFormat:@"Last media key seen by tap : %@\n", lastKeyText];
 
     // The telling combination: macOS says we are trusted, yet the tap is not
     // running. That is what a stale Accessibility record looks like after an
     // app update or a change of signing identity, and re-ticking the existing
     // entry does not fix it — it has to be removed and added again.
     if (!live && AXIsProcessTrusted() && [self Tapping]) {
-        [r appendString:@"\n# The tap is not receiving keys even though Accessibility is granted.\n"
+        [r appendString:@"\n# The tap is not enabled even though Accessibility is granted.\n"
                         @"# The permission record is probably stale: quit Volume Control, remove it\n"
                         @"# from System Settings > Privacy & Security > Accessibility with the \"-\"\n"
                         @"# button, then add it again and relaunch.\n"];
@@ -1667,7 +1692,9 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
 
     [r appendString:@"## Event tap (keyboard volume keys)\n"];
     [r appendString:@"# The event tap is how Volume Control sees the volume keys at all. If it is\n"];
-    [r appendString:@"# not receiving keys, nothing below matters: the keys go straight to macOS.\n\n"];
+    [r appendString:@"# not receiving keys, nothing below matters: the keys go straight to macOS.\n"];
+    [r appendString:@"# \"Last media key seen by tap\" updates on every volume key press. If it\n"];
+    [r appendString:@"# does not, the keys do not reach Volume Control.\n\n"];
     [r appendString:[self eventTapDiagnostics]];
     [r appendString:@"\n"];
 
