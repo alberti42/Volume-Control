@@ -10,7 +10,11 @@
 
 This app is the spiritual successor to _iTunes Volume Control_, offering a simple yet powerful way to adjust volume for your favorite music apps directly from your keyboard — especially when listening via AirPlay or external speakers.
 
-<img src="Images/screenshot.jpg" alt="Screenshot of the application" width="25%">
+<img src="Images/app_menu_screenshot.png" alt="Volume Control's menu, open from its menu bar icon" width="296">
+
+On macOS 26 and later, the volume HUD looks like the system volume HUD, with the icon of the player it controls:
+
+<img src="Images/HUD_screenshot.png" alt="Volume Control's HUD under the menu bar, showing Apple Music's icon, the output device AirPods Pro 3 and the volume slider" width="480">
 
 ---
 
@@ -35,6 +39,7 @@ This app is the spiritual successor to _iTunes Volume Control_, offering a simpl
 - Control the volume of Apple Music, Spotify, Doppler, and Swinsian 3.0+ using the `volume up` and `volume down` keys.
 - Especially useful when using AirPlay devices or external speakers.
 - Customize the volume step size.
+- On macOS 26 and later, the volume HUD matches the system volume HUD: the same Liquid Glass, slider with tick marks, size and position.
 - Option to hide the volume bezel overlay (HUD).
 - When Music, Spotify, Doppler, or Swinsian is playing, volume keys affect their volume; otherwise, they adjust system volume.
 - Holding `⌘` (Command) key inverts this behavior.
