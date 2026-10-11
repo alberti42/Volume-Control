@@ -47,9 +47,9 @@ public final class HUDVolumeSlider: NSView {
     }
 }
 
-@Observable
-final class HUDVolumeSliderModel {
-    var value: Double = 0.6
+// ObservableObject rather than @Observable, which needs macOS 14; the app targets 13.5.
+final class HUDVolumeSliderModel: ObservableObject {
+    @Published var value: Double = 0.6
 }
 
 /// Takes the first click, so the slider can be dragged while the HUD panel is not key.
@@ -65,7 +65,7 @@ private final class FirstMouseHostingView<Content: View>: NSHostingView<Content>
 /// the SDK, so it is left out.
 @available(macOS 26.0, *)
 private struct HUDVolumeSliderContent: View {
-    let model: HUDVolumeSliderModel
+    @ObservedObject var model: HUDVolumeSliderModel
     let onValueChanged: (Double) -> Void
     let onEditingChanged: (Bool) -> Void
 
