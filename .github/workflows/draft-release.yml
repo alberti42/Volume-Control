@@ -1,6 +1,7 @@
 name: Build, Notarize and Draft Release
 
-# Triggered when a vX.Y.Z tag is pushed (created by bin/bump_version.sh).
+# Triggered when a vX.Y.Z or vX.Y.Z-beta.N tag is pushed (created by bin/bump_version.sh).
+# A -beta.N tag creates a draft pre-release, which publish-release.yml skips.
 # Pipeline:
 #   1. Build universal binary (arm64 + x86_64)
 #   2. Sign with Developer ID Application certificate
@@ -15,6 +16,7 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-beta.[0-9]+'
 
 jobs:
   release:
@@ -36,8 +38,9 @@ jobs:
       - name: Extract version info
         id: ver
         run: |
-          TAG="${GITHUB_REF_NAME}"                          # e.g. v2.2.0
-          SHORT="${TAG#v}"                                  # e.g. 2.2.0
+          TAG="${GITHUB_REF_NAME}"                          # e.g. v2.5.0 or v2.5.0-beta.1
+          SHORT="${TAG#v}"                                  # e.g. 2.5.0 or 2.5.0-beta.1
+          if [[ "$SHORT" == *-* ]]; then PRERELEASE=true; else PRERELEASE=false; fi
           BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION' \
             "Volume Control.xcodeproj/project.pbxproj" \
             | sed 's/.*CURRENT_PROJECT_VERSION = \([0-9]*\);.*/\1/')
@@ -46,6 +49,7 @@ jobs:
           echo "short=$SHORT" >> "$GITHUB_OUTPUT"
           echo "build=$BUILD" >> "$GITHUB_OUTPUT"
           echo "zip=$ZIP"     >> "$GITHUB_OUTPUT"
+          echo "prerelease=$PRERELEASE" >> "$GITHUB_OUTPUT"
           echo "Version ${SHORT}, build ${BUILD}, archive ${ZIP}"
 
       # ── Code-signing certificate ──────────────────────────────────────────────
@@ -173,7 +177,13 @@ jobs:
         id: prev
         run: |
           CURR="${GITHUB_REF_NAME}"
-          PREV=$(git tag --sort=-v:refname | grep -v "^${CURR}$" | head -1)
+          # versionsort.suffix sorts v2.5.0-beta.1 before v2.5.0. A release compares
+          # against the previous release, so its notes cover its pre-releases too;
+          # a pre-release compares against the previous tag of either kind.
+          TAGS=$(git -c versionsort.suffix=-beta tag --list 'v*' --sort=-v:refname)
+          if [[ "$CURR" != *-* ]]; then TAGS=$(echo "$TAGS" | grep -v -e '-'); fi
+          # The tag listed right after the current one, in descending version order.
+          PREV=$(echo "$TAGS" | awk -v c="$CURR" 'found {print; exit} $0 == c {found=1}')
           echo "tag=${PREV}" >> "$GITHUB_OUTPUT"
 
       - name: Build changelog
@@ -185,7 +195,13 @@ jobs:
           COMPARE="https://github.com/${REPO}/compare/${PREV_TAG}...${CURR_TAG}"
           COMMITS=$(git log "${PREV_TAG}..HEAD" --oneline --no-merges \
             | sed "s|^\([0-9a-f]*\) |- [\1](https://github.com/${REPO}/commit/\1) |")
+          # The draft starts with this version's CHANGELOG.md section; a pre-release
+          # uses [Unreleased], where its changes stay until the release.
+          SHORT="${CURR_TAG#v}"
+          if [[ "$SHORT" == *-* ]]; then SECTION=Unreleased; else SECTION="$SHORT"; fi
+          ENTRY=$(python3 bin/changelog.py section "$SECTION" || true)
           {
+            if [[ -n "$ENTRY" ]]; then printf '%s\n\n' "$ENTRY"; fi
             printf '## Changes since %s\n\n' "${PREV_TAG}"
             printf '%s\n\n' "${COMMITS:-_No commits listed._}"
             printf '**Full diff:** %s\n' "${COMPARE}"
@@ -196,9 +212,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG:      ${{ steps.ver.outputs.tag }}
           ZIP:      ${{ steps.ver.outputs.zip }}
+          PRERELEASE: ${{ steps.ver.outputs.prerelease }}
         run: |
+          PRERELEASE_FLAG=()
+          [[ "$PRERELEASE" == true ]] && PRERELEASE_FLAG=(--prerelease)
           gh release create "$TAG" \
-            --draft \
+            --draft "${PRERELEASE_FLAG[@]}" \
             --title "$TAG" \
             --notes-file /tmp/notes.md \
             "$ZIP"

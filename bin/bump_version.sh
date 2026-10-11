@@ -3,18 +3,24 @@
 # bump_version.sh — Bump version and build number, commit, and tag locally.
 #
 # Usage:
-#   ./bin/bump_version.sh v2.2.0
+#   ./bin/bump_version.sh v2.5.0           # release
+#   ./bin/bump_version.sh v2.5.0-beta.1    # pre-release
+#
+# Versions follow Semantic Versioning 2.0.0; pre-releases carry a -beta.N suffix.
 #
 # What it does:
-#   1. Validates the version format (vX.Y.Z).
+#   1. Validates the version format (vX.Y.Z or vX.Y.Z-beta.N).
 #   2. Checks the working tree is clean.
 #   3. Ensures the tag does not already exist.
 #   4. Derives the next build number: the larger of the appcast's last
 #      sparkle:version and the project's CURRENT_PROJECT_VERSION, plus 1.
-#   5. Updates MARKETING_VERSION (main app target only) and CURRENT_PROJECT_VERSION
-#      (all targets) in project.pbxproj.
-#   6. Commits with "Version bump to vX.Y.Z (build N)".
-#   7. Creates a local git tag vX.Y.Z.
+#   5. Updates MARKETING_VERSION (main app target only, X.Y.Z without the -beta.N
+#      suffix) and CURRENT_PROJECT_VERSION (all targets) in project.pbxproj.
+#   6. For a release, moves the [Unreleased] entries of CHANGELOG.md under
+#      "## [X.Y.Z] - date" (bin/changelog.py). A pre-release leaves them under
+#      [Unreleased].
+#   7. Commits with "Version bump to vX.Y.Z (build N)".
+#   8. Creates a local git tag vX.Y.Z, unsigned like the earlier release tags.
 #
 # Push manually when ready:
 #   git push origin main --tags
@@ -28,12 +34,13 @@ APPCAST="Releases/VolumeControlCast.xml"
 
 VERSION="${1:-}"
 
-if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "Usage: $0 vX.Y.Z"
+if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?$ ]]; then
+    echo "Usage: $0 vX.Y.Z | vX.Y.Z-beta.N"
     exit 1
 fi
 
-SHORT="${VERSION#v}"   # strip leading 'v', e.g. "2.2.0"
+SHORT="${VERSION#v}"   # strip leading 'v', e.g. "2.5.0" or "2.5.0-beta.1"
+BASE="${SHORT%%-*}"    # without the pre-release suffix, e.g. "2.5.0"
 
 # ── Pre-flight checks ──────────────────────────────────────────────────────────
 
@@ -90,13 +97,13 @@ echo "Bumping to ${VERSION} (build ${NEW_BUILD})..."
 #   Updated for all targets (main app + helper share the same build number).
 
 sed -i '' \
-    -e "s/MARKETING_VERSION = [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*;/MARKETING_VERSION = ${SHORT};/g" \
+    -e "s/MARKETING_VERSION = [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*;/MARKETING_VERSION = ${BASE};/g" \
     -e "s/CURRENT_PROJECT_VERSION = [0-9][0-9]*;/CURRENT_PROJECT_VERSION = ${NEW_BUILD};/g" \
     "$PBXPROJ"
 
 # ── Verify the substitutions landed ───────────────────────────────────────────
 
-FOUND_VER=$(grep -c "MARKETING_VERSION = ${SHORT};" "$PBXPROJ" || true)
+FOUND_VER=$(grep -c "MARKETING_VERSION = ${BASE};" "$PBXPROJ" || true)
 FOUND_BUILD=$(grep -c "CURRENT_PROJECT_VERSION = ${NEW_BUILD};" "$PBXPROJ" || true)
 
 if [[ "$FOUND_VER" -lt 2 ]]; then
@@ -106,15 +113,26 @@ if [[ "$FOUND_BUILD" -lt 4 ]]; then
     echo "Warning: expected at least 4 CURRENT_PROJECT_VERSION replacements, found ${FOUND_BUILD}."
 fi
 
+# ── Update CHANGELOG.md (releases only) ───────────────────────────────────────
+
+if [[ "$SHORT" == "$BASE" ]]; then
+    if ! python3 bin/changelog.py release "$BASE"; then
+        git checkout -- "$PBXPROJ"
+        exit 1
+    fi
+    git add CHANGELOG.md
+fi
+
 # ── Commit and tag ─────────────────────────────────────────────────────────────
 
 git add "$PBXPROJ"
 git commit -m "Version bump to ${VERSION} (build ${NEW_BUILD})"
-git tag "$VERSION"
+# --no-sign: with tag.gpgsign set, a plain "git tag" asks for a message and fails.
+git tag --no-sign "$VERSION"
 
 echo ""
 echo "Done:"
-echo "  Version : ${VERSION}  (marketing: ${SHORT})"
+echo "  Version : ${VERSION}  (marketing: ${BASE})"
 echo "  Build   : ${NEW_BUILD}"
 echo ""
 echo "Push when ready:"

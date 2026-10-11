@@ -22,6 +22,7 @@ OSDUIHelper.hop
 readme.txt
 bin/*
 !bin/bump_version.sh
+!bin/changelog.py
 Releases/appcast.xml
 
 # Sublime Text
