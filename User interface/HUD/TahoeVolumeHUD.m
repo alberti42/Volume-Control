@@ -46,6 +46,29 @@ static const CGFloat kTopMarginWhenUnanchored = 14.0;  // pt below top of visibl
 static const NSTimeInterval kFadeInDuration  = 0.25; // seconds
 static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
+// Returns YES while the window server draws a menu bar on `screen`. Its menu bar
+// window (owner "Window Server", layer kCGMainMenuWindowLevel) is in the on-screen
+// window list only while the bar is drawn; with "Automatically hide and show the
+// menu bar" on, it disappears when the bar hides. Owner name and layer are readable
+// without Screen Recording permission; the window name is not.
+static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
+    CFArrayRef list = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, kCGNullWindowID);
+    if (!list) return NO;
+    // Window-list bounds have their origin at the top-left of the primary screen.
+    CGFloat primaryHeight = NSMaxY(NSScreen.screens.firstObject.frame);
+    BOOL found = NO;
+    for (NSDictionary *info in (__bridge NSArray *)list) {
+        if ([info[(id)kCGWindowLayer] integerValue] != kCGMainMenuWindowLevel) continue;
+        if (![info[(id)kCGWindowOwnerName] isEqualToString:@"Window Server"]) continue;
+        CGRect bounds;
+        if (!CGRectMakeWithDictionaryRepresentation((__bridge CFDictionaryRef)info[(id)kCGWindowBounds], &bounds)) continue;
+        NSRect inScreen = NSMakeRect(bounds.origin.x, primaryHeight - CGRectGetMaxY(bounds), bounds.size.width, bounds.size.height);
+        if (NSIntersectsRect(inScreen, screen.frame)) { found = YES; break; }
+    }
+    CFRelease(list);
+    return found;
+}
+
 @implementation TahoeVolumeHUD
 
 + (TahoeVolumeHUD *)sharedManager {
@@ -222,15 +245,18 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
     // Decide whether the button is a usable anchor. The HUD caller passes nil when
     // the status item is intentionally hidden (e.g. "Hide from Status Bar"). We also
-    // treat the button as unusable if its window was ordered out, or if its on-screen
-    // rect does not currently intersect the screen's frame. That single geometric
-    // test covers:
-    //   - Ice/Bartender, which move the status window off-screen horizontally.
-    //   - macOS auto-hide menu bar when the bar is not currently revealed — the
-    //     status item's window sits above the screen top in that state.
-    // Critically, it does NOT fire when the user hovers to reveal the auto-hidden
-    // menu bar: the status item is back on-screen in that moment, so we anchor
-    // normally under the icon, matching Tahoe's behavior.
+    // treat the button as unusable if:
+    //   - its window was ordered out;
+    //   - its on-screen rect does not intersect the screen's frame. This covers
+    //     Ice/Bartender, which move the status window off-screen horizontally, and
+    //     the auto-hidden menu bar on macOS 26, where the status item's window sits
+    //     above the screen top while the bar is hidden;
+    //   - the menu bar is set to hide automatically and is not drawn right now. On
+    //     macOS 27 the status item's window stays at its revealed position while the
+    //     bar is hidden, so only the window server's menu bar window tells the two
+    //     states apart.
+    // When the user hovers to reveal the auto-hidden menu bar, none of these fire
+    // and the HUD anchors under the icon, matching the system HUD.
     BOOL useAnchor = (button != nil) && (button.window != nil) && button.window.isVisible;
     NSRect buttonInScreen = NSZeroRect;
     NSScreen *target = nil;
@@ -239,7 +265,10 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
         NSRect buttonRectInWindow = [button convertRect:button.bounds toView:nil];
         buttonInScreen = [button.window convertRectToScreen:buttonRectInWindow];
         target = button.window.screen ?: NSScreen.mainScreen;
+        BOOL menuBarAutoHides = (NSMaxY(target.frame) - NSMaxY(target.visibleFrame)) < 1.0;
         if (!NSIntersectsRect(target.frame, buttonInScreen)) {
+            useAnchor = NO;
+        } else if (menuBarAutoHides && !menuBarIsDrawnOnScreen(target)) {
             useAnchor = NO;
         }
     }
