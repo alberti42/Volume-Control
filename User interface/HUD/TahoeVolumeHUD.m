@@ -428,7 +428,9 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     [row addSubview:self.titleLabel];
 
     // New constraints for better padding and alignment.
-    CGFloat topPadding = 12.0; // Increased to provide more space at the top.
+    // Puts the title's centre 18.5 pt below the top of the glass, where the system
+    // volume HUD draws its title (measured on macOS 27.0.1).
+    CGFloat topPadding = 9.5;
     CGFloat bottomPadding = 4.0; // Defines space between header and slider strip.
 
     [NSLayoutConstraint activateConstraints:@[
