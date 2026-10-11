@@ -421,7 +421,10 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     // Title label
     self.titleLabel = [NSTextField labelWithString:@"Place holder"];
     self.titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    self.titleLabel.font = [NSFont systemFontOfSize:12 weight:NSFontWeightSemibold];
+    // The system volume HUD's title uses Font.system(.callout, weight: .medium)
+    // (checked on macOS 27.0.1); .callout is 12 pt on macOS.
+    CGFloat calloutSize = [NSFont preferredFontForTextStyle:NSFontTextStyleCallout options:@{}].pointSize;
+    self.titleLabel.font = [NSFont systemFontOfSize:calloutSize weight:NSFontWeightMedium];
     self.titleLabel.textColor = [NSColor labelColor];
 
     [row addSubview:self.appIconView];
