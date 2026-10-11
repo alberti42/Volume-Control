@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- With Spotify, volume up changed the volume by less than volume down: at the default increment, 2 per press instead of 3.4 ([#43](https://github.com/alberti42/Volume-Control/issues/43)). Both now change it by the same amount.
+
 ## [2.4.0] - 2026-10-11
 
 ### Changed

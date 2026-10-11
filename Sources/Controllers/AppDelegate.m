@@ -251,6 +251,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     double           _pendingWrite;  // latest desired volume while write is in flight; -1 = none
     BOOL             _rampActive;    // YES while a key-hold ramp is in progress
     BOOL             _volumeReadTimedOut; // YES if the last -currentVolume read timed out
+    double           _volumeReadTolerance; // a read closer than this to the cache keeps the cache
     _Atomic(BOOL)    _unresponsive;  // YES from an Apple Event timeout until the player answers again
     _Atomic(BOOL)    _probing;       // YES while the background probe is scheduled
     dispatch_queue_t _probeQueue;    // serial queue for probe Apple Events
@@ -325,7 +326,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
                     double cachedVol = [self doubleVolume];
                     NSLog(@"[VC] flush internal=%.2f  player SB=%.2f  delta=%.2f%@",
                           cachedVol, sbVol, sbVol - cachedVol,
-                          (fabs(sbVol - cachedVol) > 1.0) ? @"  ⚠️ MISMATCH" : @"");
+                          (fabs(sbVol - cachedVol) >= self->_volumeReadTolerance) ? @"  ⚠️ MISMATCH" : @"");
                 }
 #endif
             }
@@ -349,7 +350,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
         double sbVol = [[self->musicPlayer valueForKey:@"soundVolume"] doubleValue];
         NSLog(@"[VC] verify  internal=%.2f  player SB=%.2f  delta=%.2f%@",
               expected, sbVol, sbVol - expected,
-              (fabs(sbVol - expected) > 1.0) ? @"  ⚠️ MISMATCH" : @"");
+              (fabs(sbVol - expected) >= self->_volumeReadTolerance) ? @"  ⚠️ MISMATCH" : @"");
     });
 #endif
 }
@@ -373,7 +374,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
   _volumeReadTimedOut = NO;
   double vol = [[musicPlayer valueForKey:@"soundVolume"] doubleValue];
 
-  if (fabs(vol-[self doubleVolume])<1) {
+  if (fabs(vol-[self doubleVolume])<_volumeReadTolerance) {
     vol = [self doubleVolume];
   }
 
@@ -469,6 +470,13 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
         _writeQueue    = dispatch_queue_create("io.alberti42.VolumeControl.sbWrite", DISPATCH_QUEUE_SERIAL);
         _writeInFlight = NO;
         _pendingWrite  = -1.0;
+        // Spotify stores the volume as int(v * 655.35) and reports it divided
+        // by 655.35 and truncated, so it mostly reads back one less than the
+        // integer written: 50 -> 49, but 20 -> 20 (issue #43). With rounding
+        // of the write, a read can differ from the cache by up to 1.5 while
+        // both agree. A tolerance of 1 made volume up step 2 and volume down
+        // step 3.38 at an increment of 3.125.
+        _volumeReadTolerance = [bundleIdentifier isEqualToString:@"com.spotify.client"] ? 1.5 : 1.0;
 		[self setCurrentVolume: -100];
 		[self setOldVolume: -1];
 		musicPlayer = [SBApplication applicationWithBundleIdentifier:bundleIdentifier];
