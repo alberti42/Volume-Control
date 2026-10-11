@@ -6,6 +6,45 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.4.0</title>
+            <pubDate>Sun, 11 Oct 2026 15:15:45 +0000</pubDate>
+            <sparkle:version>284</sparkle:version>
+            <sparkle:shortVersionString>2.4.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/alberti42/Volume-Control/releases/download/v2.4.0/VolumeControl.zip" length="6219429" type="application/octet-stream" sparkle:edSignature="yGMrfApXU6/8V/wiDOgZlyRnpdUFYd8TFANe72jbjfrRXYJEkwbZZZ50J/cPsh9CS+iQRQz7I7tOx+crQmKlCg=="/>
+        
+            <description><![CDATA[
+<h2>The volume HUD now looks like the system volume HUD</h2>
+<p>On macOS 26 and later, Volume Control's HUD now looks like the one macOS shows: the same Liquid Glass with its bright rim, the same slider with tick marks and speaker icons, and the same size, font and position on screen. This was a long-awaited feature 🎉 and it finally works: on macOS 27, the two HUDs match down to the pixel.</p>
+<p><img src="https://raw.githubusercontent.com/alberti42/Volume-Control/main/Images/HUD_screenshot.png" alt="Volume Control's HUD under the menu bar, showing Apple Music's icon, the output device AirPods Pro 3 and the volume slider" width="480"></p>
+<p>Volume Control still shows the icon of the player it controls next to the title.</p>
+<h2>The HUD is centred again when the menu bar hides automatically (macOS 27)</h2>
+<p>When the menu bar hides automatically, the HUD should appear centred at the top of the screen while the menu bar is hidden, and under Volume Control's icon while the menu bar is shown. On macOS 27 it appeared under the icon's position even while the menu bar was hidden. It is centred again.</p>
+<h2>Also new since v2.3.2</h2>
+<p>These fixes were first in the v2.3.3 and v2.3.4 pre-releases:</p>
+<ul>
+<li><strong>Volume keys stop working</strong>: on some Macs the volume keys stopped working after a while, and only relaunching Volume Control brought them back; see <a href="https://github.com/alberti42/Volume-Control/issues/43">#43</a>. Waking the Mac from sleep, or unticking and re-ticking <strong>Enable</strong>, now brings them back.</li>
+<li><strong>Command key</strong>: on some Macs, holding Command did not switch the volume keys between the music player and the system volume; see <a href="https://github.com/alberti42/Volume-Control/issues/56">#56</a>. It works now.</li>
+<li><strong>Copy Diagnostics</strong> reports more: whether Command was held according to the volume key event and according to the keyboard, whether Volume Control is receiving the volume keys and since when, and the last volume key it received.</li>
+</ul>
+<h2>Changes since v2.3.2</h2>
+<ul>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/4260830">4260830</a> Detect Command from the keyboard state when the key event lacks it</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/887f9f4">887f9f4</a> Create a new event tap when tapping is enabled, and on wake</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/d87eacd">d87eacd</a> Use the system volume banner's glass for the Tahoe HUD</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/aa77d77">aa77d77</a> Center the HUD when the auto-hidden menu bar is hidden on macOS 27</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/0c63683">0c63683</a> Draw the Tahoe HUD with an active window appearance</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/13516f0">13516f0</a> Use a SwiftUI slider with the system volume HUD's icons and ticks</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/44db2ce">44db2ce</a> Place the centered HUD at the system HUD's height</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/255d47f">255d47f</a> Leave room around the HUD glass and match the system HUD's width</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/fe51aae">fe51aae</a> Move the HUD title up 2.5 pt to the system HUD's position</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/4db95ab">4db95ab</a> Use the system HUD's title font</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/1fb4c9b">1fb4c9b</a> Build HUDVolumeSlider for macOS 13.5</li>
+</ul>
+<p><strong>Full diff:</strong> https://github.com/alberti42/Volume-Control/compare/v2.3.2...v2.4.0</p>
+            ]]></description>
+        </item>
+        <item>
             <title>2.3.2</title>
             <pubDate>Wed, 23 Sep 2026 17:35:00 +0000</pubDate>
             <sparkle:version>261</sparkle:version>
