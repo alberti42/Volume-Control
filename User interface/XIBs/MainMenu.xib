@@ -108,6 +108,12 @@
                         <action selector="toggleAutomaticUpdates:" target="3" id="39"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Keep volume keys alive..." tag="10" id="kva-01-menu" userLabel="Keep volume keys alive">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="toggleKeepVolumeKeysAlive:" target="3" id="kva-02-actn"/>
+                    </connections>
+                </menuItem>
                 <menuItem title="Copy Diagnostics..." id="dgn-01-menu" userLabel="Copy Diagnostics">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>

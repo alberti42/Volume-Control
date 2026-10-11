@@ -33,6 +33,7 @@ void handleSIGTERM(int sig) {
 #define TAPPING_ID 1
 #define HIDE_FROM_STATUS_BAR_ID 5
 #define HIDE_VOLUME_WINDOW_ID 6
+#define KEEP_VOLUME_KEYS_ALIVE_ID 10
 
 #pragma mark - Tapping key stroke events
 
@@ -57,6 +58,28 @@ static _Atomic(int) gPassThroughKeyCode = -1;
 // CFAbsoluteTime, or 0 if never. For the diagnostics report: unlike
 // CGEventTapIsEnabled, it shows whether keys actually reach the tap.
 static _Atomic(CFAbsoluteTime) gLastTapKeyTime = 0;
+
+// The test event that "Keep volume keys alive" sends through the tap
+// (see -probeEventTap:). It is a system-defined event with a subtype that no
+// key uses, so no app acts on it, and the tap consumes it. The tag in data2
+// tells it apart from any other event with the same subtype.
+static const short kTapProbeSubtype = 0x56;
+static const NSInteger kTapProbeEventTag = 0x56435042; // 'VCPB'
+
+// Allowed period of the test event, in seconds. Each test event has its own
+// 2 s check, which compares the arrival time with its own send time, so checks
+// may overlap when the period is 2 s.
+static const NSInteger kKeepAliveIntervalMin = 2;
+static const NSInteger kKeepAliveIntervalMax = 60;
+
+// When the tap last received the test event, as CFAbsoluteTime, or 0 if never.
+static _Atomic(CFAbsoluteTime) gLastTapProbeTime = 0;
+
+#ifdef DEBUG
+// Set by "Simulate dead event tap (debug)": the callback lets every event
+// pass untouched, as if it never received it. Creating a new tap clears it.
+static _Atomic(BOOL) gSimulateDeadTap = NO;
+#endif
 
 CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
@@ -118,6 +141,10 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
         return event; // always return quickly so system input isn’t blocked
     }
 
+#ifdef DEBUG
+    if (atomic_load(&gSimulateDeadTap)) return event;
+#endif
+
     // Pass through events we don't care about
     if (type != NX_SYSDEFINED) return event;
 
@@ -125,6 +152,13 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
     timeout_count = 0;
 
     NSEvent *sysEvent = [NSEvent eventWithCGEvent:event];
+
+    // Our own test event: record that it arrived and remove it.
+    if ([sysEvent subtype] == kTapProbeSubtype && [sysEvent data2] == kTapProbeEventTag) {
+        atomic_store(&gLastTapProbeTime, CFAbsoluteTimeGetCurrent());
+        return NULL;
+    }
+
     if ([sysEvent subtype] != NX_SUBTYPE_AUX_CONTROL_BUTTONS) return event;
 
     // Let our own re-posted volume keys flow straight through to macOS, so it can
@@ -189,6 +223,10 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 	BOOL      _lastKeyPressKeyboardCmd;  // ⌘ held on the keyboard (HID state)
 	NSString* _lastKeyPressTarget;
 	NSDate*   _eventTapCreatedDate;      // nil while there is no tap
+	NSTimer*  _keepAliveTimer;           // sends the test event while "Keep volume keys alive" is on
+	NSUInteger _keepAliveRecreations;    // taps re-created because the test event did not arrive
+	NSDate*   _keepAliveLastRecreation;  // when that last happened; nil if never
+	NSTextField* _keepAliveIntervalLabel; // shows the slider's value in the "Keep volume keys alive" dialog
 	//StatusItemView* _statusBarItemView;
 	NSTimer* _statusBarHideTimer;
 	NSPopover* _hideFromStatusBarHintPopover;
@@ -507,6 +545,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 // @synthesize AppleRemoteConnected=_AppleRemoteConnected;
 @synthesize StartAtLogin=_StartAtLogin;
 @synthesize Tapping=_Tapping;
+@synthesize KeepVolumeKeysAlive=_KeepVolumeKeysAlive;
 @synthesize UseAppleCMDModifier=_UseAppleCMDModifier;
 @synthesize LockSystemAndPlayerVolume=_LockSystemAndPlayerVolume;
 @synthesize AppleCMDModifierPressed=_AppleCMDModifierPressed;
@@ -783,6 +822,9 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     
     if (eventTap != nil) {
         _eventTapCreatedDate = [NSDate date];
+#ifdef DEBUG
+        atomic_store(&gSimulateDeadTap, NO);
+#endif
         runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0);
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
         
@@ -1266,6 +1308,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 						  [NSNumber numberWithBool:true],  @"swinsianControl",
 						  [NSNumber numberWithBool:true],  @"systemControl",
 						  [NSNumber numberWithBool:true],  @"PlaySoundFeedback",
+						  [NSNumber numberWithBool:false], @"KeepVolumeKeysAlive",
+						  [NSNumber numberWithInt:5],      @"KeepVolumeKeysAliveInterval",
 						  nil ]; // terminate the list
 	[preferences registerDefaults:dict];
     
@@ -1287,6 +1331,15 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[[self systemBtn] setState:true];  // hard coded always to true
 	[[self systemBtn] setEnabled:false];
 	[self setPlaySoundFeedback:[preferences boolForKey:     @"PlaySoundFeedback"]];
+	[self setKeepVolumeKeysAlive:[preferences boolForKey:   @"KeepVolumeKeysAlive"]];
+#ifdef DEBUG
+	NSMenuItem *keepAliveItem = [_statusMenu itemWithTag:KEEP_VOLUME_KEYS_ALIVE_ID];
+	NSMenuItem *simulateItem = [[NSMenuItem alloc] initWithTitle:@"Simulate dead event tap (debug)"
+	                                                      action:@selector(simulateDeadEventTap:)
+	                                               keyEquivalent:@""];
+	simulateItem.target = self;
+	[_statusMenu insertItem:simulateItem atIndex:[_statusMenu indexOfItem:keepAliveItem] + 1];
+#endif
 
 	NSInteger volumeIncSetting = [preferences integerForKey:@"volumeIncrement"];
 	[self setVolumeInc:volumeIncSetting];
@@ -1421,6 +1474,157 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
     _Tapping = enabled;
 }
+
+- (IBAction)toggleKeepVolumeKeysAlive:(id)sender
+{
+    if (![self KeepVolumeKeysAlive]) {
+        NSAlert *alert = [[NSAlert alloc] init];
+        alert.messageText = @"Keep Volume Keys Alive";
+        alert.informativeText =
+            @"On some Macs the volume keys stop reaching Volume Control after a while, "
+            @"although macOS still reports its connection to the keyboard (the event tap) as working. "
+            @"Unticking and re-ticking Enable brings the keys back. "
+            @"Most users never see this and do not need this option.\n\n"
+            @"When this option is on, Volume Control sends itself a test event through the event tap "
+            @"at the interval below. The test event is a system-defined event that no app acts on, and "
+            @"Volume Control removes it when it arrives. If it does not arrive within 2 seconds, "
+            @"Volume Control creates a new event tap, as unticking and re-ticking Enable does.\n\n"
+            @"A shorter interval brings the keys back sooner. We recommend 5 seconds: "
+            @"each test event keeps one CPU core busy for about 200 µs.\n\n"
+            @"Copy Diagnostics shows how many times Volume Control has created a new event tap this way.";
+
+        NSInteger stored = MIN(MAX([preferences integerForKey:@"KeepVolumeKeysAliveInterval"],
+                                   kKeepAliveIntervalMin), kKeepAliveIntervalMax);
+        NSSlider *slider = [NSSlider sliderWithValue:(double)stored
+                                            minValue:(double)kKeepAliveIntervalMin
+                                            maxValue:(double)kKeepAliveIntervalMax
+                                              target:self
+                                              action:@selector(keepAliveIntervalSliderChanged:)];
+        slider.continuous = YES;
+        [slider.widthAnchor constraintEqualToConstant:200].active = YES;
+        _keepAliveIntervalLabel = [NSTextField labelWithString:@""];
+        [_keepAliveIntervalLabel.widthAnchor constraintEqualToConstant:40].active = YES;
+        [self keepAliveIntervalSliderChanged:slider];
+        NSStackView *row = [NSStackView stackViewWithViews:@[
+            [NSTextField labelWithString:@"Send a test event every"], slider, _keepAliveIntervalLabel]];
+        row.orientation = NSUserInterfaceLayoutOrientationHorizontal;
+        row.spacing = 6;
+        [row setFrameSize:row.fittingSize];
+        alert.accessoryView = row;
+
+        [alert addButtonWithTitle:@"Turn On"];
+        [alert addButtonWithTitle:@"Cancel"];
+        [NSApp activateIgnoringOtherApps:YES];
+        NSModalResponse response = [alert runModal];
+        _keepAliveIntervalLabel = nil;
+        if (response != NSAlertFirstButtonReturn)
+            return;
+
+        [preferences setInteger:lround(slider.doubleValue) forKey:@"KeepVolumeKeysAliveInterval"];
+    }
+    [self setKeepVolumeKeysAlive:![self KeepVolumeKeysAlive]];
+}
+
+// Snaps the slider to whole seconds and shows the value next to it.
+- (void)keepAliveIntervalSliderChanged:(NSSlider *)slider
+{
+    slider.doubleValue = round(slider.doubleValue);
+    [_keepAliveIntervalLabel setStringValue:[NSString stringWithFormat:@"%ld s", lround(slider.doubleValue)]];
+}
+
+- (void)setKeepVolumeKeysAlive:(bool)enabled
+{
+    NSMenuItem *menuItem = [_statusMenu itemWithTag:KEEP_VOLUME_KEYS_ALIVE_ID];
+    [menuItem setState:enabled];
+
+    [preferences setBool:enabled forKey:@"KeepVolumeKeysAlive"];
+    [preferences synchronize];
+
+    _KeepVolumeKeysAlive = enabled;
+
+    [_keepAliveTimer invalidate];
+    _keepAliveTimer = nil;
+    if (enabled) {
+        NSInteger interval = MIN(MAX([preferences integerForKey:@"KeepVolumeKeysAliveInterval"],
+                                     kKeepAliveIntervalMin), kKeepAliveIntervalMax);
+        _keepAliveTimer = [NSTimer timerWithTimeInterval:(NSTimeInterval)interval
+                                                  target:self
+                                                selector:@selector(probeEventTap:)
+                                                userInfo:nil
+                                                 repeats:YES];
+        [[NSRunLoop mainRunLoop] addTimer:_keepAliveTimer forMode:NSRunLoopCommonModes];
+    }
+}
+
+// Sends the test event through the tap and, if the tap has not received it
+// 2 s later, creates a new tap. A tap can stop receiving keys while macOS
+// still reports it valid and enabled (issue #43), so the only way to find out
+// is to send it an event. The tap's callback runs on the main run loop, like
+// the check below; the 2 s leave room for a main thread busy with a player's
+// Apple Event, which times out after 2 s.
+- (void)probeEventTap:(NSTimer *)timer
+{
+    if (![self Tapping] || eventTap == NULL)
+        return;
+
+    CFAbsoluteTime sentTime = CFAbsoluteTimeGetCurrent();
+    NSDate *probedTapDate = _eventTapCreatedDate;
+
+    NSEvent *ev = [NSEvent otherEventWithType:NSEventTypeSystemDefined
+                                     location:NSZeroPoint
+                                modifierFlags:0
+                                    timestamp:0
+                                 windowNumber:0
+                                      context:nil
+                                      subtype:kTapProbeSubtype
+                                        data1:0
+                                        data2:kTapProbeEventTag];
+#ifdef DEBUG
+    // Wall time includes waiting for the window server; CPU time is what
+    // this thread computes.
+    uint64_t postStart    = clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
+    uint64_t postCPUStart = clock_gettime_nsec_np(CLOCK_THREAD_CPUTIME_ID);
+#endif
+    CGEventPost(kCGHIDEventTap, ev.CGEvent);
+#ifdef DEBUG
+    double postMicroseconds    = (clock_gettime_nsec_np(CLOCK_UPTIME_RAW) - postStart) / 1000.0;
+    double postCPUMicroseconds = (clock_gettime_nsec_np(CLOCK_THREAD_CPUTIME_ID) - postCPUStart) / 1000.0;
+#endif
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+        // Skip if the option or tapping was switched off, or the tap was
+        // replaced meanwhile.
+        if (![self KeepVolumeKeysAlive] || ![self Tapping] || self->_eventTapCreatedDate != probedTapDate)
+            return;
+        CFAbsoluteTime arrivedTime = atomic_load(&gLastTapProbeTime);
+        if (arrivedTime >= sentTime) {
+#ifdef DEBUG
+            NSLog(@"[VC] tap test event arrived after %.1f ms (CGEventPost took %.1f µs, %.1f µs CPU)",
+                  (arrivedTime - sentTime) * 1000.0, postMicroseconds, postCPUMicroseconds);
+#endif
+            return;
+        }
+
+        NSLog(@"[Volume Control] The event tap did not receive the test event; creating a new tap.");
+        self->_keepAliveRecreations++;
+        self->_keepAliveLastRecreation = [NSDate date];
+        [self setTapping:YES];
+    });
+}
+
+#ifdef DEBUG
+// Debug builds only: imitates a tap that stops receiving events while macOS
+// still reports it valid and enabled (issue #43). The callback lets every
+// event pass untouched, test events included. With "Keep volume keys alive"
+// on, the next test event does not arrive and a new tap replaces this one.
+// (Removing the tap's run loop source did not stop the callback.)
+- (void)simulateDeadEventTap:(id)sender
+{
+    atomic_store(&gSimulateDeadTap, YES);
+    NSLog(@"[VC] simulating a dead event tap: the tap ignores all events until a new tap is created");
+}
+#endif
 
 - (IBAction)toggleTapping:(id)sender
 {
@@ -1557,6 +1761,16 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
     [r appendFormat:@"Event tap port valid       : %@\n", valid   ? @"yes" : @"no"];
     [r appendFormat:@"Event tap enabled          : %@\n", live    ? @"yes" : @"no"];
     [r appendFormat:@"Last media key seen by tap : %@\n", lastKeyText];
+
+    NSString *keepAliveText = @"off";
+    if ([self KeepVolumeKeysAlive]) {
+        NSTimeInterval interval = _keepAliveTimer.timeInterval;
+        keepAliveText = (_keepAliveRecreations == 0)
+            ? [NSString stringWithFormat:@"on, every %.0f s, new tap created 0 times", interval]
+            : [NSString stringWithFormat:@"on, every %.0f s, new tap created %lu times, last %.0f s ago",
+               interval, (unsigned long)_keepAliveRecreations, -[_keepAliveLastRecreation timeIntervalSinceNow]];
+    }
+    [r appendFormat:@"Keep volume keys alive     : %@\n", keepAliveText];
 
     // The telling combination: macOS says we are trusted, yet the tap is not
     // running. That is what a stale Accessibility record looks like after an

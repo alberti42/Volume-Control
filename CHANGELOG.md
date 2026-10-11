@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Keep volume keys alive** in the menu, off by default. On some Macs the volume keys stop reaching Volume Control after a while, and unticking and re-ticking **Enable** brings them back ([#43](https://github.com/alberti42/Volume-Control/issues/43)). With this option on, Volume Control sends itself a test event every 5 s, or at an interval you set between 2 and 60 s, and creates a new event tap when the test event does not arrive. Copy Diagnostics shows how many times this has happened.
+
 ### Fixed
 
 - With Spotify, volume up changed the volume by less than volume down: at the default increment, 2 per press instead of 3.4 ([#43](https://github.com/alberti42/Volume-Control/issues/43)). Both now change it by the same amount.
