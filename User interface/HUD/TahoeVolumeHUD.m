@@ -5,6 +5,7 @@
 #import "HUDPanel.h"
 #import "AppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
+#import <objc/message.h>
 
 // Product Module Name: Volume_Control
 #import "Volume_Control-Swift.h"  // exposes LiquidGlassView to ObjC
@@ -37,10 +38,28 @@ static const CGFloat kCornerRadius   = 24.0;
 static const CGFloat kBelowGap       = 14.0;
 static const NSTimeInterval kAutoHide = 1.5;
 static const CGFloat kSideInset  = 12.0;  // left/right margin
-static const CGFloat kTopMarginWhenUnanchored = 14.0;  // pt below top of visibleFrame when no usable anchor (matches Tahoe system HUD)
+// pt below the menu bar when no usable anchor. ControlCenter passes menu bar height + 10
+// as the system volume HUD's top margin; with a 30 pt menu bar both HUDs measure 40 pt
+// below the screen top (macOS 27.0.1).
+static const CGFloat kTopMarginWhenUnanchored = 10.0;
 
 static const NSTimeInterval kFadeInDuration  = 0.25; // seconds
 static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
+
+// Returns the height of `screen`'s menu bar when it is shown, also while it is hidden.
+// ControlCenter places the system volume HUD with -[NSScreen _revealedMenuBarHeight]
+// (30 pt where NSStatusBar.thickness is 22 pt, on macOS 27.0.1). Without that private
+// method, use the space the menu bar reserves in visibleFrame, or the status bar
+// thickness while the menu bar is hidden.
+static CGFloat menuBarHeightOfScreen(NSScreen *screen) {
+    SEL sel = NSSelectorFromString(@"_revealedMenuBarHeight");
+    if ([screen respondsToSelector:sel]) {
+        CGFloat height = ((CGFloat (*)(id, SEL))objc_msgSend)(screen, sel);
+        if (height > 0) return height;
+    }
+    CGFloat reserved = NSMaxY(screen.frame) - NSMaxY(screen.visibleFrame);
+    return reserved >= 1.0 ? reserved : [NSStatusBar systemStatusBar].thickness;
+}
 
 // Returns YES while the window server draws a menu bar on `screen`. Its menu bar
 // window (owner "Window Server", layer kCGMainMenuWindowLevel) is in the on-screen
@@ -272,16 +291,10 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     if (!useAnchor) {
         NSScreen *screen = target ?: NSScreen.mainScreen ?: NSScreen.screens.firstObject;
         if (!screen) return;
-        NSRect vis  = screen.visibleFrame;
         NSRect full = screen.frame;
-        // When the menu bar is hidden system-wide, visibleFrame expands to the top of
-        // frame, which would pull the HUD upward by the menu bar's height. Compensate
-        // by computing the top-of-usable-area as if the menu bar were still reserving
-        // space, so the HUD lands at the same screen position in both states.
-        BOOL menuBarHidden = (NSMaxY(full) - NSMaxY(vis)) < 1.0;
-        CGFloat topEdge = menuBarHidden
-            ? (NSMaxY(full) - [NSStatusBar systemStatusBar].thickness)
-            : NSMaxY(vis);
+        // The HUD's top sits kTopMarginWhenUnanchored below the menu bar, at the same
+        // screen position whether the menu bar is shown or hidden, as the system HUD does.
+        CGFloat topEdge = NSMaxY(full) - menuBarHeightOfScreen(screen);
         CGFloat x = NSMidX(full) - size.width / 2.0;
         CGFloat y = topEdge - size.height - kTopMarginWhenUnanchored;
         [self.panel setFrame:NSMakeRect(round(x), round(y), size.width, size.height) display:NO];
