@@ -279,9 +279,9 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
 - (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius {
     if (@available(macOS 26.0, *)) {
-        LiquidGlassView *glass = [LiquidGlassView glassWithStyle:NSGlassEffectViewStyleClear  // Clear
+        LiquidGlassView *glass = [LiquidGlassView glassWithStyle:NSGlassEffectViewStyleRegular
                                                     cornerRadius:radius
-                                                       tintColor:[NSColor colorWithCalibratedWhite:0 alpha:1]];
+                                                       tintColor:nil];
         self.glass = glass;
         
         // Enable the new vibrant rim here.
@@ -296,8 +296,10 @@ static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
             [glass.bottomAnchor constraintEqualToAnchor:host.bottomAnchor],
         ]];
         
-        // Optional Tahoe tuning:
-        [glass setVariantIfAvailable:5];
+        // Variant 9 with the Regular style gives the same glassBackground filter
+        // parameters as SwiftUI's _Glass.controlCenter, which ControlCenter uses
+        // for the system volume banner (checked on macOS 27.0.1).
+        [glass setVariantIfAvailable:9];
         [glass setScrimStateIfAvailable:0];
         [glass setSubduedStateIfAvailable:0];
         
