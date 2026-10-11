@@ -1,18 +1,15 @@
 // FILE: TahoeVolumeHUD.m
 
 #import "TahoeVolumeHUD.h"
-#import "VolumeSliderCell.h"
 #import <AppKit/NSGlassEffectView.h>
 #import "HUDPanel.h"
-#import "VolumeSlider.h"
 #import "AppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
 
 // Product Module Name: Volume_Control
 #import "Volume_Control-Swift.h"  // exposes LiquidGlassView to ObjC
 
-// **IMPROVEMENT 1: Add VolumeSliderDelegate protocol conformance**
-@interface TahoeVolumeHUD () <VolumeSliderDelegate>
+@interface TahoeVolumeHUD ()
 
 // Window + layout
 @property (strong) HUDPanel *panel;
@@ -20,8 +17,7 @@
 @property (strong) LiquidGlassView *glass;
 
 // UI
-// **IMPROVEMENT 2: Change property type to be more specific**
-@property (strong) VolumeSlider *slider;
+@property (strong) HUDVolumeSlider *slider;
 @property (strong) NSImageView *appIconView;
 @property (strong) NSTimer *hideTimer;
 @property (strong) NSTextField *titleLabel;
@@ -36,7 +32,7 @@
 
 // Tunables
 static const CGFloat kHUDHeight      = 64.0;
-static const CGFloat kHUDWidth       = 290.0;
+static const CGFloat kHUDWidth       = 293.0;  // measured from the system volume HUD on macOS 27.0.1
 static const CGFloat kCornerRadius   = 24.0;
 static const CGFloat kBelowGap       = 14.0;
 static const NSTimeInterval kAutoHide = 1.5;
@@ -353,64 +349,28 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     NSView *strip = [NSView new];
     strip.translatesAutoresizingMaskIntoConstraints = NO;
 
-    // Left and Right speaker glyphs are correct
-    NSImageView *iconLeft = [NSImageView new];
-    iconLeft.translatesAutoresizingMaskIntoConstraints = NO;
-    iconLeft.symbolConfiguration = [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
-    iconLeft.image = [NSImage imageWithSystemSymbolName:@"speaker.fill" accessibilityDescription:nil];
-    iconLeft.contentTintColor = NSColor.labelColor;
-    [iconLeft setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
-    [iconLeft setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
-
-    NSImageView *iconRight = [NSImageView new];
-    iconRight.translatesAutoresizingMaskIntoConstraints = NO;
-    iconRight.symbolConfiguration = [NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightSemibold];
-    iconRight.image = [NSImage imageWithSystemSymbolName:@"speaker.wave.2.fill" accessibilityDescription:nil];
-    iconRight.contentTintColor = NSColor.labelColor;
-    [iconRight setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
-    [iconRight setContentCompressionResistancePriority:751 forOrientation:NSLayoutConstraintOrientationHorizontal];
-
-    // Create the slider
-    VolumeSlider *slider = [VolumeSlider new]; // Changed from HoverSlider
-    slider.minValue = 0.0;
-    slider.maxValue = 1.0;
-    slider.doubleValue = 0.6;
-    slider.trackingDelegate = self;
+    // SwiftUI slider with the speaker icons and tick marks of the system volume HUD.
+    HUDVolumeSlider *slider = [[HUDVolumeSlider alloc] initWithFrame:NSZeroRect];
     slider.translatesAutoresizingMaskIntoConstraints = NO;
-    slider.controlSize = NSControlSizeSmall;
-
-    // Assign our custom cell that handles all the drawing
-    VolumeSliderCell *cell = [VolumeSliderCell new]; // Changed from CustomVolumeSlider
-    cell.minValue = 0.0;
-    cell.maxValue = 1.0;
-    cell.controlSize = NSControlSizeSmall;
-    slider.cell = cell;
-
-    [slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
-    [slider setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+    slider.doubleValue = 0.6;
+    __weak typeof(self) weakSelf = self;
+    slider.onValueChanged = ^(double value) { [weakSelf sliderDidChangeValue:value]; };
+    slider.onEditingEnded = ^{ [weakSelf sliderDidEndDragging]; };
     self.slider = slider;
 
-    // Add views to the strip - NO MORE trackBackgroundView
-    [strip addSubview:iconLeft];
     [strip addSubview:slider];
-    [strip addSubview:iconRight];
 
-    // Set up constraints
+    // Insets and the 4 pt upward offset put the icons and the track where the system
+    // volume HUD draws them (measured on macOS 27.0.1).
     [NSLayoutConstraint activateConstraints:@[
         [strip.heightAnchor constraintEqualToConstant:36],
 
-        [iconLeft.leadingAnchor constraintEqualToAnchor:strip.leadingAnchor constant:12],
-        [iconLeft.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
-
-        [iconRight.trailingAnchor constraintEqualToAnchor:strip.trailingAnchor constant:-12],
-        [iconRight.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
-
-        // Slider is now constrained directly between the icons
-        [slider.leadingAnchor constraintEqualToAnchor:iconLeft.trailingAnchor constant:8],
-        [slider.trailingAnchor constraintEqualToAnchor:iconRight.leadingAnchor constant:-8],
-        [slider.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor],
+        [slider.leadingAnchor constraintEqualToAnchor:strip.leadingAnchor constant:15],
+        [slider.trailingAnchor constraintEqualToAnchor:strip.trailingAnchor constant:-15],
+        [slider.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor constant:-4],
+        [slider.heightAnchor constraintEqualToAnchor:strip.heightAnchor],
     ]];
-    
+
     return strip;
 }
 
@@ -462,13 +422,10 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     return row;
 }
 
-#pragma mark - VolumeSliderDelegate
+#pragma mark - Slider callbacks
 
-// 5. IMPLEMENT the new delegate methods.
-- (void)volumeSlider:(VolumeSlider *)slider didChangeValue:(double)value {
-    // This is now the method that gets called during a drag.
-    
-    // Selector to match the protocol definition.
+// Called on every change the user makes while dragging.
+- (void)sliderDidChangeValue:(double)value {
     if ([self.delegate respondsToSelector:@selector(hud:didChangeVolume:forPlayer:)]) {
         [self.delegate hud:self didChangeVolume:value forPlayer:self.controlledPlayer];
     }
@@ -482,7 +439,7 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
                                                      repeats:NO];
 }
 
-- (void)volumeSliderDidEndDragging:(VolumeSlider *)slider {
+- (void)sliderDidEndDragging {
     if ([self.delegate respondsToSelector:@selector(didChangeVolumeFinal:)]) {
         [self.delegate didChangeVolumeFinal:self];
     }
