@@ -1482,16 +1482,16 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         alert.messageText = @"Keep Volume Keys Alive";
         alert.informativeText =
             @"On some Macs the volume keys stop reaching Volume Control after a while, "
-            @"although macOS still reports its connection to the keyboard (the event tap) as working. "
+            @"although macOS still reports its connection to the keyboard as working. "
             @"Unticking and re-ticking Enable brings the keys back. "
             @"Most users never see this and do not need this option.\n\n"
-            @"When this option is on, Volume Control sends itself a test event through the event tap "
-            @"at the interval below. The test event is a system-defined event that no app acts on, and "
+            @"When this option is on, Volume Control sends itself a test event through its connection "
+            @"to the keyboard at the interval below. The test event is a system-defined event that no app acts on, and "
             @"Volume Control removes it when it arrives. If it does not arrive within 2 seconds, "
-            @"Volume Control creates a new event tap, as unticking and re-ticking Enable does.\n\n"
+            @"Volume Control reconnects to the keyboard, as unticking and re-ticking Enable does.\n\n"
             @"A shorter interval brings the keys back sooner. We recommend 5 seconds: "
             @"each test event keeps one CPU core busy for about 200 µs.\n\n"
-            @"Copy Diagnostics shows how many times Volume Control has created a new event tap this way.";
+            @"Copy Diagnostics shows how many times Volume Control has reconnected this way.";
 
         NSInteger stored = MIN(MAX([preferences integerForKey:@"KeepVolumeKeysAliveInterval"],
                                    kKeepAliveIntervalMin), kKeepAliveIntervalMax);
