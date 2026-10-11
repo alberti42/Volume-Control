@@ -33,7 +33,12 @@
 
 // Tunables
 static const CGFloat kHUDHeight      = 64.0;
-static const CGFloat kHUDWidth       = 293.0;  // measured from the system volume HUD on macOS 27.0.1
+static const CGFloat kHUDWidth       = 292.0;  // measured from the system volume HUD on macOS 27.0.1
+// Transparent margin between the glass and the panel's edges. The glass draws its
+// outermost pixels half outside its shape; a panel exactly the size of the glass clips
+// them, which removes the dark edge line on the sides and tightens the corners by 1 px.
+// The system HUD's window (352 pt wide) leaves room on every side as well.
+static const CGFloat kPanelPadding   = 20.0;
 static const CGFloat kCornerRadius   = 24.0;
 static const CGFloat kBelowGap       = 14.0;
 static const NSTimeInterval kAutoHide = 1.5;
@@ -101,7 +106,8 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
 
     // ... (this part is correct) ...
     // Panel
-    NSRect frame = NSMakeRect(0, 0, kHUDWidth, kHUDHeight);
+    NSSize panelSize = NSMakeSize(kHUDWidth + 2 * kPanelPadding, kHUDHeight + 2 * kPanelPadding);
+    NSRect frame = NSMakeRect(0, 0, panelSize.width, panelSize.height);
     _panel = [[HUDPanel alloc] initWithContentRect:frame
                                          styleMask:(NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel)
                                            backing:NSBackingStoreBuffered
@@ -127,9 +133,9 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     _panel.becomesKeyOnlyIfNeeded = YES;
 
     // Size fences
-    _panel.contentMinSize = NSMakeSize(kHUDWidth, kHUDHeight);
-    _panel.contentMaxSize = NSMakeSize(FLT_MAX, kHUDHeight);
-    [_panel setContentSize:NSMakeSize(kHUDWidth, kHUDHeight)];
+    _panel.contentMinSize = panelSize;
+    _panel.contentMaxSize = NSMakeSize(FLT_MAX, panelSize.height);
+    [_panel setContentSize:panelSize];
 
     // Root host
     _root = [[NSView alloc] initWithFrame:_panel.contentView.bounds];
@@ -138,8 +144,8 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     _root.layer.backgroundColor = NSColor.clearColor.CGColor;
     _panel.contentView = _root;
 
-    // Hard height on the window contentView — guarantees kHUDHeight regardless of fitting sizes
-    self.contentFixedHeight = [_panel.contentView.heightAnchor constraintEqualToConstant:kHUDHeight];
+    // Hard height on the window contentView — guarantees the panel height regardless of fitting sizes
+    self.contentFixedHeight = [_panel.contentView.heightAnchor constraintEqualToConstant:panelSize.height];
     self.contentFixedHeight.priority = 1000;
     self.contentFixedHeight.active = YES;
 
@@ -150,8 +156,20 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
         [_root.bottomAnchor constraintEqualToAnchor:_panel.contentView.bottomAnchor],
     ]];
 
+    // The glass fills glassHost, which is inset by kPanelPadding. (LiquidGlassView pins
+    // itself to its superview's edges, so the inset goes on the host.)
+    NSView *glassHost = [NSView new];
+    glassHost.translatesAutoresizingMaskIntoConstraints = NO;
+    [_root addSubview:glassHost];
+    [NSLayoutConstraint activateConstraints:@[
+        [glassHost.leadingAnchor constraintEqualToAnchor:_root.leadingAnchor constant:kPanelPadding],
+        [glassHost.trailingAnchor constraintEqualToAnchor:_root.trailingAnchor constant:-kPanelPadding],
+        [glassHost.topAnchor constraintEqualToAnchor:_root.topAnchor constant:kPanelPadding],
+        [glassHost.bottomAnchor constraintEqualToAnchor:_root.bottomAnchor constant:-kPanelPadding],
+    ]];
+
     // Glass (Swift class)
-    [self installGlassInto:_root cornerRadius:kCornerRadius];
+    [self installGlassInto:glassHost cornerRadius:kCornerRadius];
     
     // Content wrapper (fills the glass)
     NSView *wrapper = [NSView new];
@@ -199,7 +217,7 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     self.titleLabel.stringValue = label;
     
     // Size fence each time
-    [_panel setContentSize:NSMakeSize(kHUDWidth, kHUDHeight)];
+    [_panel setContentSize:NSMakeSize(kHUDWidth + 2 * kPanelPadding, kHUDHeight + 2 * kPanelPadding)];
     
     [self positionPanelBelowStatusButton:button];
     
@@ -297,7 +315,7 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
         CGFloat topEdge = NSMaxY(full) - menuBarHeightOfScreen(screen);
         CGFloat x = NSMidX(full) - size.width / 2.0;
         CGFloat y = topEdge - size.height - kTopMarginWhenUnanchored;
-        [self.panel setFrame:NSMakeRect(round(x), round(y), size.width, size.height) display:NO];
+        [self.panel setFrame:NSInsetRect(NSMakeRect(round(x), round(y), size.width, size.height), -kPanelPadding, -kPanelPadding) display:NO];
         return;
     }
 
@@ -310,7 +328,7 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     CGFloat margin = 8.0;
     x = MAX(NSMinX(vis) + margin, MIN(x, NSMaxX(vis) - margin - size.width));
 
-    [self.panel setFrame:NSMakeRect(round(x), round(y), size.width, size.height) display:NO];
+    [self.panel setFrame:NSInsetRect(NSMakeRect(round(x), round(y), size.width, size.height), -kPanelPadding, -kPanelPadding) display:NO];
 }
 
 #pragma mark - Glass
@@ -378,8 +396,8 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     [NSLayoutConstraint activateConstraints:@[
         [strip.heightAnchor constraintEqualToConstant:36],
 
-        [slider.leadingAnchor constraintEqualToAnchor:strip.leadingAnchor constant:15],
-        [slider.trailingAnchor constraintEqualToAnchor:strip.trailingAnchor constant:-15],
+        [slider.leadingAnchor constraintEqualToAnchor:strip.leadingAnchor constant:14],
+        [slider.trailingAnchor constraintEqualToAnchor:strip.trailingAnchor constant:-14],
         [slider.centerYAnchor constraintEqualToAnchor:strip.centerYAnchor constant:-4],
         [slider.heightAnchor constraintEqualToAnchor:strip.heightAnchor],
     ]];
