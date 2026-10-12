@@ -17,6 +17,7 @@
 #import <stdatomic.h>
 #import <CoreServices/CoreServices.h>
 #import <sys/sysctl.h>
+#import <libproc.h>
 
 #import "OSD.h"
 
@@ -1822,6 +1823,54 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     return r;
 }
 
+// Every enabled event tap that receives NX_SYSDEFINED events (the volume
+// keys), in the order CGGetEventTapList returns them, with the owning
+// process. A tap that can block and sits before ours can take the volume keys
+// away from Volume Control while ours still receives other events (issue #43).
+- (NSString *)volumeKeyTapsDiagnostics
+{
+    uint32_t count = 0;
+    if (CGGetEventTapList(0, NULL, &count) != kCGErrorSuccess || count == 0)
+        return @"(the list of event taps is not available)\n";
+
+    CGEventTapInformation *taps = calloc(count, sizeof(CGEventTapInformation));
+    if (!taps)
+        return @"(the list of event taps is not available)\n";
+    if (CGGetEventTapList(count, taps, &count) != kCGErrorSuccess) {
+        free(taps);
+        return @"(the list of event taps is not available)\n";
+    }
+
+    NSMutableString *r = [NSMutableString string];
+    pid_t ownPid = getpid();
+    int shown = 0;
+    for (uint32_t i = 0; i < count; i++) {
+        CGEventTapInformation t = taps[i];
+        if (!t.enabled || !(t.eventsOfInterest & CGEventMaskBit(NX_SYSDEFINED)))
+            continue;
+
+        NSString *name = [[NSRunningApplication runningApplicationWithProcessIdentifier:t.tappingProcess] localizedName];
+        if (!name) {
+            char buf[2 * MAXCOMLEN] = {0};
+            name = (proc_name(t.tappingProcess, buf, sizeof(buf)) > 0)
+                ? [NSString stringWithUTF8String:buf] : @"unknown process";
+        }
+        if (t.tappingProcess == ownPid)
+            name = [name stringByAppendingString:@" (this app)"];
+
+        const char *point = (t.tapPoint == kCGHIDEventTap) ? "HID"
+                          : (t.tapPoint == kCGSessionEventTap) ? "session"
+                          : "app";
+        [r appendFormat:@"%d. %@ (pid %d): %s, %s level\n", ++shown, name, t.tappingProcess,
+            (t.options == kCGEventTapOptionListenOnly) ? "listens" : "can block", point];
+    }
+    free(taps);
+
+    if (shown == 0)
+        [r appendString:@"(none)\n"];
+    return r;
+}
+
 // Human-readable player state, shared by all four players: Music, Spotify,
 // Doppler and Swinsian all use the same four-char codes in their sdef.
 - (NSString *)descriptionForPlayerState:(NSInteger)state
@@ -1959,6 +2008,14 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [r appendString:@"# \"Last media key seen by tap\" updates on every volume key press. If it\n"];
     [r appendString:@"# does not, the keys do not reach Volume Control.\n\n"];
     [r appendString:[self eventTapDiagnostics]];
+    [r appendString:@"\n"];
+
+    [r appendString:@"## All event taps on the volume keys\n"];
+    [r appendString:@"# Every event tap on the Mac that receives the volume keys, in the order\n"];
+    [r appendString:@"# macOS lists them. \"can block\" = the tap can stop a key from reaching\n"];
+    [r appendString:@"# the taps after it; \"listens\" = it only watches. An app with a tap that\n"];
+    [r appendString:@"# can block, listed before Volume Control, may take the volume keys away.\n\n"];
+    [r appendString:[self volumeKeyTapsDiagnostics]];
     [r appendString:@"\n"];
 
     [r appendString:@"## Players targeted by the volume keys\n"];
