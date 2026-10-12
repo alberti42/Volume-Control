@@ -2010,11 +2010,12 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [r appendString:[self eventTapDiagnostics]];
     [r appendString:@"\n"];
 
-    [r appendString:@"## All event taps on the volume keys\n"];
-    [r appendString:@"# Every event tap on the Mac that receives the volume keys, in the order\n"];
-    [r appendString:@"# macOS lists them. \"can block\" = the tap can stop a key from reaching\n"];
-    [r appendString:@"# the taps after it; \"listens\" = it only watches. An app with a tap that\n"];
-    [r appendString:@"# can block, listed before Volume Control, may take the volume keys away.\n\n"];
+    [r appendString:@"## Apps that intercept system keys\n"];
+    [r appendString:@"# System keys are the volume, brightness and media keys. Each app below\n"];
+    [r appendString:@"# sees every system key press, in the order macOS lists them; which keys it\n"];
+    [r appendString:@"# acts on depends on the app's settings. \"can block\" = it can stop a key\n"];
+    [r appendString:@"# from reaching the apps after it; \"listens\" = it only watches. An app\n"];
+    [r appendString:@"# that can block, listed before Volume Control, may take the volume keys away.\n\n"];
     [r appendString:[self volumeKeyTapsDiagnostics]];
     [r appendString:@"\n"];
 
