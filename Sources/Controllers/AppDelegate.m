@@ -1699,11 +1699,22 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
     return model;
 }
 
+// Returned by -automationPermissionForBundleID: when macOS did not answer in
+// time. Positive, so it cannot collide with an Apple Event error code.
+static const OSStatus kAutomationCheckTimedOut = 1;
+
 // Automation (Apple Events) permission for a target app, without prompting.
 // Returns the raw OSStatus so callers can both display it and branch on it —
 // -playerDiagnosticsLine:enabled: queries a player only on noErr, so building
 // the report never sends an Apple Event that would stall or prompt. Returns
 // errAEEventFailed if the address descriptor itself could not be built.
+//
+// AEDeterminePermissionToAutomateTarget can block for a long time: on
+// macOS 27 it had not returned for Spotify, running or not, after 1 min 43 s,
+// while it answered for Apple Music in 0.04 s. Called on the main thread, that froze Volume Control.
+// The check therefore runs on a background queue, and the caller waits at most
+// 1 s. A check that is still waiting from an earlier call is not started again;
+// the caller gets kAutomationCheckTimedOut at once.
 - (OSStatus)automationPermissionForBundleID:(NSString *)bundleID
 {
     const char *cstr = [bundleID UTF8String];
@@ -1711,15 +1722,39 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
         return errAEEventFailed;
     }
 
-    AEAddressDesc target;
-    if (AECreateDesc(typeApplicationBundleID, cstr, strlen(cstr), &target) != noErr) {
-        return errAEEventFailed;
+    static NSMutableSet<NSString *> *pending;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{ pending = [NSMutableSet set]; });
+
+    @synchronized (pending) {
+        if ([pending containsObject:bundleID])
+            return kAutomationCheckTimedOut;
+        [pending addObject:bundleID];
     }
 
-    OSStatus status = AEDeterminePermissionToAutomateTarget(&target, typeWildCard, typeWildCard, false);
-    AEDisposeDesc(&target);
+    NSString *key = [bundleID copy];
+    __block _Atomic(OSStatus) result = errAEEventFailed;
+    dispatch_semaphore_t done = dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        const char *id = [key UTF8String];
+        AEAddressDesc target;
+        OSStatus status = AECreateDesc(typeApplicationBundleID, id, strlen(id), &target);
+        if (status == noErr) {
+            status = AEDeterminePermissionToAutomateTarget(&target, typeWildCard, typeWildCard, false);
+            AEDisposeDesc(&target);
+        } else {
+            status = errAEEventFailed;
+        }
+        atomic_store(&result, status);
+        @synchronized (pending) {
+            [pending removeObject:key];
+        }
+        dispatch_semaphore_signal(done);
+    });
 
-    return status;
+    if (dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC))) != 0)
+        return kAutomationCheckTimedOut;
+    return atomic_load(&result);
 }
 
 - (NSString *)automationStatusForBundleID:(NSString *)bundleID
@@ -1732,6 +1767,7 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
         case errAEEventNotPermitted:            return @"denied";
         case errAEEventWouldRequireUserConsent: return @"not yet requested";
         case procNotFound:                      return @"app not running";
+        case kAutomationCheckTimedOut:          return @"macOS did not answer within 1 s";
         default:                                return [NSString stringWithFormat:@"unknown (%d)", (int)status];
     }
 }
@@ -1818,10 +1854,15 @@ static NSString * const kGitHubIssuesURL = @"https://github.com/alberti42/Volume
     // so building the report can never stall on, or trigger, a consent prompt.
     if ([player isUnresponsive]) {
         [s appendString:@", not responding to Apple Events"];
-    } else if ([self automationPermissionForBundleID:[player bundleIdentifier]] == noErr) {
-        [s appendFormat:@", %@", [self descriptionForPlayerState:[player playerState]]];
     } else {
-        [s appendString:@", state unknown (automation not granted)"];
+        OSStatus permission = [self automationPermissionForBundleID:[player bundleIdentifier]];
+        if (permission == noErr) {
+            [s appendFormat:@", %@", [self descriptionForPlayerState:[player playerState]]];
+        } else if (permission == kAutomationCheckTimedOut) {
+            [s appendString:@", state unknown (automation permission check did not answer)"];
+        } else {
+            [s appendString:@", state unknown (automation not granted)"];
+        }
     }
 
     return s;
