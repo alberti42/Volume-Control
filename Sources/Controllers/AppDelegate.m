@@ -1911,7 +1911,9 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [r appendFormat:@"Spotify     : %@\n", [self playerDiagnosticsLine:spotify  enabled:[_spotifyBtn state]  != NSControlStateValueOff]];
     [r appendFormat:@"Doppler     : %@\n", [self playerDiagnosticsLine:doppler  enabled:[_dopplerBtn state]  != NSControlStateValueOff]];
     [r appendFormat:@"Swinsian    : %@\n", [self playerDiagnosticsLine:swinsian enabled:[_swinsianBtn state] != NSControlStateValueOff]];
-    [r appendFormat:@"System      : %@\n", ([_systemBtn state] != NSControlStateValueOff) ? @"targeted" : @"NOT targeted"];
+    [r appendFormat:@"System      : %@\n", [systemAudio hasControllableVolume]
+        ? @"targeted, volume controllable"
+        : @"targeted, no software volume control (keys are passed on to macOS)"];
     return r;
 }
 
@@ -2140,8 +2142,12 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 		{
 			currentPlayer = swinsian;
 		}
-		else if([_systemBtn state])
+		else
 		{
+			// The System check mark only shows whether the output device has a
+			// software volume control (see -setSystemVolume:). It must not decide
+			// the target: without it, a key pressed while no player plays found no
+			// target and was dropped instead of being passed on to macOS.
 			currentPlayer = systemAudio;
 		}
 	}

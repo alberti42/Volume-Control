@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- **Copy Diagnostics**: the "System" line says whether Volume Control can control the system volume, instead of "NOT targeted" when the output device has no software volume control.
+
+### Fixed
+
+- When the output device has no software volume control and no music player was playing, the volume keys did nothing. Volume Control now passes them on to macOS, as it already did with ⌘ + volume key, so an app such as BetterDisplay can change the display's volume.
+
 ## [2.5.0] - 2026-10-13
 
 ### Added
