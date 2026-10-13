@@ -34,6 +34,15 @@ void handleSIGTERM(int sig) {
 #define TAPPING_ID 1
 #define HIDE_FROM_STATUS_BAR_ID 5
 #define HIDE_VOLUME_WINDOW_ID 6
+#define KEEP_VOLUME_KEYS_AHEAD_ID 10
+
+// "Keep volume keys ahead of other apps": how often the tap order is checked,
+// and the race rule. If Volume Control has to move its tap back in front
+// kKeepAheadRaceCount times within kKeepAheadRaceWindow, another app is doing
+// the same, and the option turns itself off.
+static const NSTimeInterval kKeepAheadCheckInterval = 1.0;
+static const NSUInteger     kKeepAheadRaceCount     = 3;
+static const NSTimeInterval kKeepAheadRaceWindow    = 10.0;
 
 #pragma mark - Tapping key stroke events
 
@@ -202,6 +211,11 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 	BOOL      _lastKeyPressKeyboardCmd;  // ⌘ held on the keyboard (HID state)
 	NSString* _lastKeyPressTarget;
 	NSDate*   _eventTapCreatedDate;      // nil while there is no tap
+	NSTimer*  _keepAheadTimer;           // checks the tap order while "Keep volume keys ahead" is on
+	NSUInteger _keepAheadRecreations;    // taps re-created since the option was turned on
+	NSDate*   _keepAheadFirstRecreation; // nil until the first re-creation
+	NSMutableArray<NSDictionary *> *_keepAheadRecent; // last re-creations: @{@"date", @"app"}, newest last
+	NSString* _keepAheadStopReason;      // why the option turned itself off; nil otherwise
 	//StatusItemView* _statusBarItemView;
 	NSTimer* _statusBarHideTimer;
 	NSPopover* _hideFromStatusBarHintPopover;
@@ -520,6 +534,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 // @synthesize AppleRemoteConnected=_AppleRemoteConnected;
 @synthesize StartAtLogin=_StartAtLogin;
 @synthesize Tapping=_Tapping;
+@synthesize KeepVolumeKeysAhead=_KeepVolumeKeysAhead;
 @synthesize UseAppleCMDModifier=_UseAppleCMDModifier;
 @synthesize LockSystemAndPlayerVolume=_LockSystemAndPlayerVolume;
 @synthesize AppleCMDModifierPressed=_AppleCMDModifierPressed;
@@ -1279,6 +1294,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 						  [NSNumber numberWithBool:true],  @"swinsianControl",
 						  [NSNumber numberWithBool:true],  @"systemControl",
 						  [NSNumber numberWithBool:true],  @"PlaySoundFeedback",
+						  [NSNumber numberWithBool:false], @"KeepVolumeKeysAhead",
 						  nil ]; // terminate the list
 	[preferences registerDefaults:dict];
     
@@ -1300,6 +1316,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[[self systemBtn] setState:true];  // hard coded always to true
 	[[self systemBtn] setEnabled:false];
 	[self setPlaySoundFeedback:[preferences boolForKey:     @"PlaySoundFeedback"]];
+	[self setKeepVolumeKeysAhead:[preferences boolForKey:   @"KeepVolumeKeysAhead"]];
 
 	NSInteger volumeIncSetting = [preferences integerForKey:@"volumeIncrement"];
 	[self setVolumeInc:volumeIncSetting];
@@ -1433,6 +1450,115 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [preferences synchronize];
 
     _Tapping = enabled;
+}
+
+- (IBAction)toggleKeepVolumeKeysAhead:(id)sender
+{
+    if (![self KeepVolumeKeysAhead]) {
+        NSAlert *alert = [[NSAlert alloc] init];
+        alert.messageText = @"Keep Volume Keys Ahead of Other Apps";
+        alert.informativeText =
+            @"Another app that handles the volume keys, such as BetterDisplay or MonitorControl, "
+            @"can take them away from Volume Control. If you can, turn off that app's handling "
+            @"of the volume keys instead of using this option.\n\n"
+            @"When this option is on, Volume Control checks every second whether such an app "
+            @"receives the system keys before it. If one does, Volume Control reconnects to the "
+            @"keyboard, which puts it in front again. Each check takes about 30 µs.\n\n"
+            @"If the other app also moves itself back in front, the two apps would keep taking "
+            @"turns. Volume Control then turns this option off and tells you which app it is.";
+        [alert addButtonWithTitle:@"Turn On"];
+        [alert addButtonWithTitle:@"Cancel"];
+        [NSApp activateIgnoringOtherApps:YES];
+        if ([alert runModal] != NSAlertFirstButtonReturn)
+            return;
+    }
+    [self setKeepVolumeKeysAhead:![self KeepVolumeKeysAhead]];
+}
+
+- (void)setKeepVolumeKeysAhead:(bool)enabled
+{
+    NSMenuItem *menuItem = [_statusMenu itemWithTag:KEEP_VOLUME_KEYS_AHEAD_ID];
+    [menuItem setState:enabled];
+
+    [preferences setBool:enabled forKey:@"KeepVolumeKeysAhead"];
+    [preferences synchronize];
+
+    _KeepVolumeKeysAhead = enabled;
+
+    [_keepAheadTimer invalidate];
+    _keepAheadTimer = nil;
+    if (enabled) {
+        _keepAheadRecreations     = 0;
+        _keepAheadFirstRecreation = nil;
+        _keepAheadRecent          = [NSMutableArray array];
+        _keepAheadStopReason      = nil;
+        _keepAheadTimer = [NSTimer timerWithTimeInterval:kKeepAheadCheckInterval
+                                                  target:self
+                                                selector:@selector(checkVolumeKeysAhead:)
+                                                userInfo:nil
+                                                 repeats:YES];
+        _keepAheadTimer.tolerance = 0.2;
+        [[NSRunLoop mainRunLoop] addTimer:_keepAheadTimer forMode:NSRunLoopCommonModes];
+    }
+}
+
+// If another app's tap that can block system keys comes before ours, creates
+// a new tap, which macOS puts in front (kCGHeadInsertEventTap). Only taps at
+// the session level count: a tap at the HID level comes before every session
+// tap, so a new tap of ours could never get ahead of it.
+- (void)checkVolumeKeysAhead:(NSTimer *)timer
+{
+    if (![self Tapping] || eventTap == NULL)
+        return;
+
+    pid_t first = [self firstBlockingSystemKeyTapProcess];
+    if (first == 0 || first == getpid())
+        return;
+
+    NSString *app = [self nameOfProcess:first];
+    NSDate *now = [NSDate date];
+    _keepAheadRecreations++;
+    if (!_keepAheadFirstRecreation)
+        _keepAheadFirstRecreation = now;
+    [_keepAheadRecent addObject:@{@"date": now, @"app": app}];
+    while (_keepAheadRecent.count > kKeepAheadRaceCount)
+        [_keepAheadRecent removeObjectAtIndex:0];
+
+    if (_keepAheadRecent.count == kKeepAheadRaceCount &&
+        [now timeIntervalSinceDate:_keepAheadRecent.firstObject[@"date"]] <= kKeepAheadRaceWindow) {
+        [self stopKeepingVolumeKeysAheadBecauseOf:app];
+        return;
+    }
+
+    NSLog(@"[Volume Control] %@ receives system keys before Volume Control; creating a new tap.", app);
+    [self setTapping:YES];
+}
+
+- (void)stopKeepingVolumeKeysAheadBecauseOf:(NSString *)app
+{
+    [self setKeepVolumeKeysAhead:NO];
+
+    NSDateFormatter *f = [[NSDateFormatter alloc] init];
+    f.dateFormat = @"HH:mm:ss";
+    _keepAheadStopReason = [NSString stringWithFormat:@"turned off at %@: %@ moved itself back in front %lu times within %.0f s",
+                            [f stringFromDate:[NSDate date]], app,
+                            (unsigned long)kKeepAheadRaceCount, kKeepAheadRaceWindow];
+    NSLog(@"[Volume Control] Keep volume keys ahead %@.", _keepAheadStopReason);
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSAlert *alert = [[NSAlert alloc] init];
+        alert.messageText = @"Keep Volume Keys Ahead of Other Apps Is Off";
+        alert.informativeText = [NSString stringWithFormat:
+            @"%@ moved itself back in front of Volume Control %lu times within %.0f seconds, "
+            @"so the two apps were taking turns with the volume keys. Volume Control turned the "
+            @"option off.\n\n"
+            @"To use the volume keys with Volume Control, turn off %@'s handling of the volume keys, "
+            @"or quit %@.",
+            app, (unsigned long)kKeepAheadRaceCount, kKeepAheadRaceWindow, app, app];
+        [alert addButtonWithTitle:@"OK"];
+        [NSApp activateIgnoringOtherApps:YES];
+        [alert runModal];
+    });
 }
 
 - (IBAction)toggleTapping:(id)sender
@@ -1621,6 +1747,74 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     return r;
 }
 
+- (NSString *)nameOfProcess:(pid_t)pid
+{
+    NSString *name = [[NSRunningApplication runningApplicationWithProcessIdentifier:pid] localizedName];
+    if (!name) {
+        char buf[2 * MAXCOMLEN] = {0};
+        name = (proc_name(pid, buf, sizeof(buf)) > 0)
+            ? [NSString stringWithUTF8String:buf] : @"unknown process";
+    }
+    return name;
+}
+
+// The process of the first enabled, session-level tap that can block
+// NX_SYSDEFINED events (the system keys), in the order CGGetEventTapList
+// returns them; 0 if there is none or the list is not available.
+- (pid_t)firstBlockingSystemKeyTapProcess
+{
+    uint32_t count = 0;
+    if (CGGetEventTapList(0, NULL, &count) != kCGErrorSuccess || count == 0)
+        return 0;
+
+    CGEventTapInformation *taps = calloc(count, sizeof(CGEventTapInformation));
+    if (!taps)
+        return 0;
+    pid_t first = 0;
+    if (CGGetEventTapList(count, taps, &count) == kCGErrorSuccess) {
+        for (uint32_t i = 0; i < count; i++) {
+            CGEventTapInformation t = taps[i];
+            if (t.enabled && (t.eventsOfInterest & CGEventMaskBit(NX_SYSDEFINED)) &&
+                t.options == kCGEventTapOptionDefault && t.tapPoint == kCGSessionEventTap) {
+                first = t.tappingProcess;
+                break;
+            }
+        }
+    }
+    free(taps);
+    return first;
+}
+
+// State of "Keep volume keys ahead of other apps", for the diagnostics report.
+- (NSString *)keepAheadDiagnostics
+{
+    NSMutableString *r = [NSMutableString string];
+    if ([self KeepVolumeKeysAhead])
+        [r appendFormat:@"Setting                 : on, check every %.0f s\n", kKeepAheadCheckInterval];
+    else if (_keepAheadStopReason)
+        [r appendFormat:@"Setting                 : off (%@)\n", _keepAheadStopReason];
+    else
+        [r appendString:@"Setting                 : off\n"];
+
+    if (_keepAheadRecreations == 0)
+        return r;
+
+    [r appendFormat:@"Taps re-created         : %lu since the option was turned on\n", (unsigned long)_keepAheadRecreations];
+    if (_keepAheadRecreations >= 2) {
+        NSDate *last = [_keepAheadRecent.lastObject objectForKey:@"date"];
+        [r appendFormat:@"Average time between    : %.1f s\n",
+            [last timeIntervalSinceDate:_keepAheadFirstRecreation] / (double)(_keepAheadRecreations - 1)];
+    }
+    NSDateFormatter *f = [[NSDateFormatter alloc] init];
+    f.dateFormat = @"HH:mm:ss";
+    NSString *label = @"Last re-creations       : ";
+    for (NSDictionary *e in [_keepAheadRecent reverseObjectEnumerator]) {
+        [r appendFormat:@"%@%@ (%@ was ahead)\n", label, [f stringFromDate:e[@"date"]], e[@"app"]];
+        label = @"                          ";
+    }
+    return r;
+}
+
 // Every enabled event tap that receives NX_SYSDEFINED events (the volume
 // keys), in the order CGGetEventTapList returns them, with the owning
 // process. A tap that can block and sits before ours can take the volume keys
@@ -1647,12 +1841,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
         if (!t.enabled || !(t.eventsOfInterest & CGEventMaskBit(NX_SYSDEFINED)))
             continue;
 
-        NSString *name = [[NSRunningApplication runningApplicationWithProcessIdentifier:t.tappingProcess] localizedName];
-        if (!name) {
-            char buf[2 * MAXCOMLEN] = {0};
-            name = (proc_name(t.tappingProcess, buf, sizeof(buf)) > 0)
-                ? [NSString stringWithUTF8String:buf] : @"unknown process";
-        }
+        NSString *name = [self nameOfProcess:t.tappingProcess];
         if (t.tappingProcess == ownPid)
             name = [name stringByAppendingString:@" (this app)"];
 
@@ -1815,6 +2004,13 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [r appendString:@"# from reaching the apps after it; \"listens\" = it only watches. An app\n"];
     [r appendString:@"# that can block, listed before Volume Control, may take the volume keys away.\n\n"];
     [r appendString:[self volumeKeyTapsDiagnostics]];
+    [r appendString:@"\n"];
+
+    [r appendString:@"## Keep volume keys ahead of other apps\n"];
+    [r appendString:@"# When on, Volume Control reconnects to the keyboard whenever another app\n"];
+    [r appendString:@"# that can block system keys is listed before it. Re-creations a few seconds\n"];
+    [r appendString:@"# apart mean the other app moves itself back in front as well.\n\n"];
+    [r appendString:[self keepAheadDiagnostics]];
     [r appendString:@"\n"];
 
     [r appendString:@"## Players targeted by the volume keys\n"];

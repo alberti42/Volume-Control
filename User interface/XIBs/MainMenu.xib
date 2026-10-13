@@ -108,6 +108,12 @@
                         <action selector="toggleAutomaticUpdates:" target="3" id="39"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Keep volume keys ahead of other apps..." tag="10" id="kva-01-menu" userLabel="Keep volume keys ahead">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="toggleKeepVolumeKeysAhead:" target="3" id="kva-02-actn"/>
+                    </connections>
+                </menuItem>
                 <menuItem title="Copy Diagnostics..." id="dgn-01-menu" userLabel="Copy Diagnostics">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
