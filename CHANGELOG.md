@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-### Added
+### Changed
 
 - **Copy Diagnostics** lists the apps that intercept system keys (the volume, brightness and media keys), and whether each can block them. An app that can block them and is listed before Volume Control may take the volume keys away.
 
