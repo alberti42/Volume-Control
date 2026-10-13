@@ -1749,10 +1749,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         alert.informativeText =
             @"The speakers of most monitors and TVs have no software volume control, so macOS "
             @"cannot change their volume. BetterDisplay can, and Volume Control can use it for the "
-            @"volume keys. The free version of BetterDisplay is enough.\n\n"
-            @"MonitorControl, by the same developer, also controls display volume, but other apps "
-            @"cannot send it requests. If you use MonitorControl, keep its handling of the volume "
-            @"keys and turn on \"Stay ahead of other apps\" instead.";
+            @"volume keys. The free version of BetterDisplay is enough.";
         [alert addButtonWithTitle:@"Get BetterDisplay"];
         [alert addButtonWithTitle:@"Cancel"];
         [NSApp activateIgnoringOtherApps:YES];
