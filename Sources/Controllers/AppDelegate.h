@@ -83,7 +83,6 @@
 @property (assign, nonatomic) bool StartAtLogin;
 @property (assign, nonatomic) bool PlaySoundFeedback;
 @property (assign, nonatomic) bool Tapping;
-@property (assign, nonatomic) bool KeepVolumeKeysAlive;
 @property (assign, nonatomic) bool UseAppleCMDModifier;
 @property (assign, nonatomic) bool LockSystemAndPlayerVolume;
 @property (assign, nonatomic) bool AppleCMDModifierPressed;
@@ -100,7 +99,6 @@
 - (IBAction)toggleStartAtLogin:(id)sender;
 - (IBAction)togglePlaySoundFeedback:(id)sender;
 - (IBAction)toggleTapping:(id)sender;
-- (IBAction)toggleKeepVolumeKeysAlive:(id)sender;
 - (IBAction)aboutPanel:(id)sender;
 - (IBAction)copyDiagnostics:(id)sender;
 - (IBAction)sliderValueChanged:(NSSliderCell*)slider;
