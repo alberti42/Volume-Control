@@ -2180,6 +2180,10 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 		{
 			currentPlayer = spotify;
 		}
+		else if([_spotifastBtn state] && [spotifast isRunning] && [spotifast playerState] == SpotifyEPlSPlaying)
+		{
+			currentPlayer = spotifast;
+		}
 		else if([_dopplerBtn state] && [doppler isRunning] && (DopplerEPlS)[doppler playerState] == DopplerEPlSPlaying)
 		{
 			currentPlayer = doppler;
@@ -2187,10 +2191,6 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 		else if([_swinsianBtn state] && [swinsian isRunning] && (SwinsianPlayerState)[swinsian playerState] == SwinsianPlayerStatePlaying)
 		{
 			currentPlayer = swinsian;
-		}
-		else if([_spotifastBtn state] && [spotifast isRunning] && [spotifast playerState] == SpotifyEPlSPlaying)
-		{
-			currentPlayer = spotifast;
 		}
 		else
 		{
