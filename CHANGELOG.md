@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - With Spotify, volume up changed the volume by less than volume down: at the default increment, 2 per press instead of 3.4 ([#43](https://github.com/alberti42/Volume-Control/issues/43)). Both now change it by the same amount.
 - **Copy Diagnostics** could freeze Volume Control when macOS did not answer whether Volume Control may control a player, as happened with Spotify on macOS 27. The report now shows "macOS did not answer within 1 s" for that player.
+- Option + volume or mute key opens the Sound settings again, and Option + Shift + volume key changes the system volume in fine steps. Volume Control used to take these key presses.
 
 ## [2.4.0] - 2026-10-11
 

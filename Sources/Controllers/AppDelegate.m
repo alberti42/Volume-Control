@@ -160,6 +160,18 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
                        keyCode == NX_KEYTYPE_SOUND_UP ||
                        keyCode == NX_KEYTYPE_SOUND_DOWN);
 
+    // With Option held, macOS opens the Sound settings (Option + volume or mute
+    // key) or changes the volume in fine steps (Option + Shift + volume key).
+    // Hand such a press to macOS, with its auto-repeats and release. Option
+    // counts as held if either the event or the keyboard says so, as Command
+    // does in -handleAsynchronouslyTappedEventWithKeyCode:.
+    BOOL optionHeld = (CGEventGetFlags(event) & kCGEventFlagMaskAlternate) != 0 ||
+                      (keyboardModifier & kCGEventFlagMaskAlternate) != 0;
+    if (isMediaKey && keyState == 1 && optionHeld) {
+        atomic_store(&gPassThroughKeyCode, keyCode);
+        return event;
+    }
+
     if(isMediaKey /*&& keyModifier==1114111*/) {
         // Hand off all actual logic to main thread
         dispatch_async(dispatch_get_main_queue(), ^{
