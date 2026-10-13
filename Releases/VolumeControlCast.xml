@@ -6,6 +6,34 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.5.1</title>
+            <pubDate>Tue, 13 Oct 2026 05:42:33 +0000</pubDate>
+            <sparkle:version>312</sparkle:version>
+            <sparkle:shortVersionString>2.5.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/alberti42/Volume-Control/releases/download/v2.5.1/VolumeControl.zip" length="6232239" type="application/octet-stream" sparkle:edSignature="qQU/G0FqtOkEsun4sSDc7V/luLOjpiWvdWzkcMbIKRR9nWwzZ7IDZk1sLvhDeBWEq2Manw4v2zlY4FyS3p7bBA=="/>
+        
+            <description><![CDATA[
+<h3>Changed</h3>
+<ul>
+<li><strong>Copy Diagnostics</strong>: the "System" line says whether Volume Control can control the system volume, instead of "NOT targeted" when the output device has no software volume control.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>When the output device has no software volume control and no music player was playing, the volume keys did nothing. Volume Control now passes them on to macOS, as it already did with ⌘ + volume key, so an app such as BetterDisplay can change the display's volume.</li>
+</ul>
+<h2>Changes since v2.5.0</h2>
+<ul>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/8f7a877">8f7a877</a> Version bump to v2.5.1 (build 308)</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/911175b">911175b</a> Fall back to the system volume when no player plays, whatever the check mark</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/815df51">815df51</a> List 2.4.1 among the README's older versions</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/dfccfce">dfccfce</a> Release v2.5.0 (automatic appcast update)</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/cc7fdea">cc7fdea</a> Say that Stay ahead of other apps lets BetterDisplay keep the display volume</li>
+</ul>
+<p><strong>Full diff:</strong> https://github.com/alberti42/Volume-Control/compare/v2.5.0...v2.5.1</p>
+            ]]></description>
+        </item>
+        <item>
             <title>2.5.0</title>
             <pubDate>Tue, 13 Oct 2026 05:30:31 +0000</pubDate>
             <sparkle:version>307</sparkle:version>
