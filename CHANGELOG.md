@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **Stay ahead of other apps** in the menu, off by default. Another app that handles the volume keys, such as BetterDisplay or MonitorControl, can take them away from Volume Control. With this option on, Volume Control checks every second whether such an app receives the system keys before it, and if so, reconnects to the keyboard, which puts it in front again. If the other app moves itself back in front 3 times within 10 s, Volume Control turns the option off and says which app it is. Copy Diagnostics shows how often Volume Control moved back in front, and which app was ahead.
+- **Stay ahead of other apps** in the menu, off by default. Another app that handles the volume keys, such as BetterDisplay or MonitorControl, can take them away from Volume Control. With this option on, Volume Control checks every second whether such an app receives the system keys before it, and if so, reconnects to the keyboard, which puts it in front again. If the other app moves itself back in front 3 times within 10 s, Volume Control turns the option off and says which app it is. Copy Diagnostics shows how often Volume Control moved back in front, and which app was ahead. With this option on and an app such as BetterDisplay handling the volume keys, both apps work together: when Volume Control acts on the system volume and the output device has no software volume control, it passes the key on, and BetterDisplay changes the display's volume.
 
 ## [2.4.1] - 2026-10-13
 
