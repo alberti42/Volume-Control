@@ -301,7 +301,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Spt-Bn-001" userLabel="Spotifast checkbox">
-                    <rect key="frame" x="13" y="71" width="80" height="19"/>
+                    <rect key="frame" x="13" y="70" width="80" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Spotifast" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Spt-Cb-001">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -317,7 +317,7 @@
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" id="Spt-Ci-001"/>
                 </imageView>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Spt-Pc-001" userLabel="Spotifast volume">
-                    <rect key="frame" x="128" y="72" width="48" height="17"/>
+                    <rect key="frame" x="128" y="71" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="Spt-Cp-001">
                         <font key="font" metaFont="system"/>
