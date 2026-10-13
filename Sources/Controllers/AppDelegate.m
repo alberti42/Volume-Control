@@ -1954,8 +1954,8 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 
 - (NSString *)outputLabelForPlayer:(id)player
 {
-    if (player == spotifast)
-        return [spotifast playbackDeviceName] ?: @"Spotifast";
+    if (player == spotifast && [spotifast playbackDeviceName].length)
+        return [spotifast playbackDeviceName];
     return [systemAudio getDefaultOutputDeviceName];
 }
 
