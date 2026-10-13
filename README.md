@@ -44,7 +44,6 @@ On macOS 26 and later, the volume HUD looks like the system volume HUD, with the
 - When Music, Spotify, Doppler, or Swinsian is playing, volume keys affect their volume; otherwise, they adjust system volume.
 - Holding `⌘` (Command) key inverts this behavior.
 - Toggle behavior with the "Use ⌘ modifier" option.
-- **Keep volume keys alive** (from 2.4.1, off by default): brings the volume keys back when they stop reaching Volume Control. See [Troubleshooting](#troubleshooting).
 
 ---
 
@@ -95,7 +94,7 @@ The app requires Accessibility and Automation permissions to control other apps'
 
 ## Troubleshooting
 
-**The volume keys stop working after a while.** On some Macs the volume keys stop reaching Volume Control after a while, and unticking and re-ticking **Enable** in the menu brings them back. From 2.4.1, tick **Keep volume keys alive** in the menu: every 5 s, or at an interval you set between 2 and 60 s, Volume Control checks that the volume keys still reach it, and reconnects to the keyboard if they don't, as unticking and re-ticking **Enable** does.
+**The volume keys stop working after a while.** Another app that handles the volume keys, such as BetterDisplay or MonitorControl (apps that control the volume of external displays), may take them away from Volume Control. Unticking and re-ticking **Enable** in the menu brings them back until that app takes them again. Turn off that app's handling of the volume keys. To see which apps intercept system keys (the volume, brightness and media keys), choose **Copy Diagnostics...** and look at the section "Apps that intercept system keys" (from 2.4.1).
 
 **The volume keys never work, although Accessibility is granted.** The permission record is probably stale: quit Volume Control, remove it from **System Settings → Privacy & Security → Accessibility** with the "−" button, then add it again and relaunch.
 
