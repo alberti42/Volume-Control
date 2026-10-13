@@ -20,6 +20,9 @@
 -(bool)isMuted;
 -(bool)hasControllableVolume;
 -(NSString *)getDefaultOutputDeviceName;
+// Unique ID of the default output device (kAudioDevicePropertyDeviceUID), or
+// nil. For a display's audio device, macOS builds it from the display's EDID.
+-(NSString *)getDefaultOutputDeviceUID;
 
 // Builds a human-readable, self-documenting report of every audio output device
 // and the volume controls it exposes (master / per-channel / mute). Used by the

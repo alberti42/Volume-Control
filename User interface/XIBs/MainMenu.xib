@@ -108,6 +108,12 @@
                         <action selector="toggleAutomaticUpdates:" target="3" id="39"/>
                     </connections>
                 </menuItem>
+                <menuItem title="Control display volume..." tag="11" id="cdv-01-menu" userLabel="Control display volume">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="toggleControlDisplayVolume:" target="3" id="cdv-02-actn"/>
+                    </connections>
+                </menuItem>
                 <menuItem title="Stay ahead of other apps..." tag="10" id="sta-01-menu" userLabel="Stay ahead of other apps">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>

@@ -326,6 +326,24 @@
 	return ((double)volume) * 100.0;
 }
 
+- (NSString *)getDefaultOutputDeviceUID
+{
+    AudioDeviceID deviceID = [self getDefaultOutputDevice];
+    if (deviceID == kAudioObjectUnknown)
+        return nil;
+
+    CFStringRef uid = NULL;
+    UInt32 dataSize = sizeof(uid);
+    AudioObjectPropertyAddress address = {
+        kAudioDevicePropertyDeviceUID,
+        kAudioObjectPropertyScopeGlobal,
+        kAudioObjectPropertyElementMain
+    };
+    if (AudioObjectGetPropertyData(deviceID, &address, 0, NULL, &dataSize, &uid) != kAudioHardwareNoError || uid == NULL)
+        return nil;
+    return (__bridge_transfer NSString *)uid;
+}
+
 - (NSString *)getDefaultOutputDeviceName
 {
     AudioDeviceID defaultOutputDeviceID = [self getDefaultOutputDevice];
