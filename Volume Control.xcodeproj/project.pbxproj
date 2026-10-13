@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A0F17A570000000000000003 /* SpotifastApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = A0F17A570000000000000002 /* SpotifastApplication.m */; };
 		65533217267F5D86004231D6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 65533216267F5D86004231D6 /* README.md */; };
 		65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 65996CFF267EAB9E0080A9A5 /* AccessibilityDialog.m */; };
 		65996D10267EAD240080A9A5 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65996D0F267EAD240080A9A5 /* CoreAudio.framework */; };
@@ -53,6 +54,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A0F17A570000000000000001 /* SpotifastApplication.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpotifastApplication.h; sourceTree = "<group>"; };
+		A0F17A570000000000000002 /* SpotifastApplication.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpotifastApplication.m; sourceTree = "<group>"; };
 		65220C75267F49CB007BE316 /* generate_keys.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = generate_keys.rb; sourceTree = "<group>"; };
 		65220C76267F49D4007BE316 /* sign_update.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; path = sign_update.rb; sourceTree = "<group>"; };
 		6546E1892E8C66FB0087E95F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -215,6 +218,8 @@
 			children = (
 				65996E14267EB14F0080A9A5 /* AppDelegate.h */,
 				65996E13267EB14F0080A9A5 /* AppDelegate.m */,
+				A0F17A570000000000000001 /* SpotifastApplication.h */,
+				A0F17A570000000000000002 /* SpotifastApplication.m */,
 				65996E10267EB14F0080A9A5 /* OSD.h */,
 				65996E15267EB14F0080A9A5 /* SystemVolume.h */,
 				65996E16267EB14F0080A9A5 /* SystemVolume.m */,
@@ -416,6 +421,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				65996E1A267EB14F0080A9A5 /* AppDelegate.m in Sources */,
+				A0F17A570000000000000003 /* SpotifastApplication.m in Sources */,
 				65996D01267EAB9E0080A9A5 /* AccessibilityDialog.m in Sources */,
 				65996E1B267EB14F0080A9A5 /* SystemVolume.m in Sources */,
 				65996E09267EB0FF0080A9A5 /* main.m in Sources */,

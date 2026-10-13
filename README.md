@@ -3,7 +3,7 @@
 [![notarized download](https://img.shields.io/github/actions/workflow/status/alberti42/Volume-Control/verify-release.yml?branch=main&label=notarized%20download&logo=apple)](https://github.com/alberti42/Volume-Control/actions/workflows/verify-release.yml)
 [![Homebrew cask](https://img.shields.io/homebrew/cask/v/volume-control?logo=homebrew)](https://formulae.brew.sh/cask/volume-control)
 
-♫ **Control the volume of Apple Music, Spotify, and Doppler using your keyboard — seamlessly.**
+♫ **Control the volume of Apple Music, Spotify, Spotifast, and Doppler using your keyboard — seamlessly.**
 
 > 🚀 Now compatible with macOS 27 Golden Gate (supports Ventura and newer).<br>
 > ✅ Fully notarized — no workarounds required to install.
@@ -36,12 +36,12 @@ On macOS 26 and later, the volume HUD looks like the system volume HUD, with the
 
 ## Features
 
-- Control the volume of Apple Music, Spotify, Doppler, and Swinsian 3.0+ using the `volume up` and `volume down` keys.
+- Control the volume of Apple Music, Spotify, Spotifast, Doppler, and Swinsian 3.0+ using the `volume up` and `volume down` keys.
 - Especially useful when using AirPlay devices or external speakers.
 - Customize the volume step size.
 - On macOS 26 and later, the volume HUD matches the system volume HUD: the same Liquid Glass, slider with tick marks, size and position.
 - Option to hide the volume bezel overlay (HUD).
-- When Music, Spotify, Doppler, or Swinsian is playing, volume keys affect their volume; otherwise, they adjust system volume.
+- When Music, Spotify, Spotifast, Doppler, or Swinsian is playing, volume keys affect their volume; otherwise, they adjust system volume.
 - Holding `⌘` (Command) key inverts this behavior.
 - Toggle behavior with the "Use ⌘ modifier" option.
 
@@ -53,7 +53,7 @@ On macOS 26 and later, the volume HUD looks like the system volume HUD, with the
 - AirPlay speakers depend on **app-specific** volume, not system volume.
 - This app restores fine-grained volume control directly from your keyboard.
 - Avoid the intrusive volume HUD overlay when watching movies.
-- Works seamlessly with Spotify, Doppler, and Swinsian, too.
+- Works seamlessly with Spotify, Spotifast, Doppler, and Swinsian, too.
 
 ---
 
@@ -79,6 +79,8 @@ Homebrew installs the app into `Applications`. After that, the app updates itsel
 ## Permissions
 
 The app requires Accessibility and Automation permissions to control other apps' volumes.
+
+Spotifast uses local commands and does not require Automation permission.
 
 1. When prompted, allow access to control **Music**, **Spotify**, **Doppler**, and **Swinsian**.
 2. If you missed it or need to reset:

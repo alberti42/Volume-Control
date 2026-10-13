@@ -9,6 +9,7 @@
 
 #import "AppDelegate.h"
 #import "SystemVolume.h"
+#import "SpotifastApplication.h"
 #import "AccessibilityDialog.h"
 #import "TahoeVolumeHUD.h"
 
@@ -247,6 +248,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 - (void) setSpotifyVolume:(NSInteger)volume;
 - (void) setDopplerVolume:(NSInteger)volume;
 - (void) setSwinsianVolume:(NSInteger)volume;
+- (void) setSpotifastVolume:(NSInteger)volume;
 - (void) setSystemVolume:(NSInteger)volume;
 - (void)stopVolumeRampTimer;
 - (void)updatePercentages;
@@ -549,12 +551,15 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 @synthesize systemBtn = _systemBtn;
 @synthesize dopplerBtn = _dopplerBtn;
 @synthesize swinsianBtn = _swinsianBtn;
+@synthesize spotifastBtn = _spotifastBtn;
+@synthesize spotifastIcon = _spotifastIcon;
 
 @synthesize iTunesPerc = _iTunesPerc;
 @synthesize spotifyPerc = _spotifyPerc;
 @synthesize systemPerc = _systemPerc;
 @synthesize dopplerPerc = _dopplerPerc;
 @synthesize swinsianPerc = _swinsianPerc;
+@synthesize spotifastPerc = _spotifastPerc;
 
 @synthesize sparkle_updater = _sparkle_updater;
 
@@ -581,6 +586,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     spotify = nil;
     doppler = nil;
     swinsian = nil;
+    spotifast = nil;
     
     _statusBar = nil;
     
@@ -1013,7 +1019,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             if(!_hideVolumeWindow){
                 if (@available(macOS 16.0, *)) {
                     // On Tahoe, show the new popover HUD.
-                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:0 usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName]  anchoredToStatusButton:([self hideFromStatusBar] ? nil : self.statusBar.button)];
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:0 usingMusicPlayer:runningPlayerPtr andLabel:[self outputLabelForPlayer:runningPlayerPtr]  anchoredToStatusButton:([self hideFromStatusBar] ? nil : self.statusBar.button)];
                 } else {
                     // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
@@ -1035,7 +1041,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             {
                 if (@available(macOS 16.0, *)) {
                     // On Tahoe, show the new popover HUD.
-                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:[runningPlayerPtr oldVolume] usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName] anchoredToStatusButton:([self hideFromStatusBar] ? nil : self.statusBar.button)];
+                    [[TahoeVolumeHUD sharedManager] showHUDWithVolume:[runningPlayerPtr oldVolume] usingMusicPlayer:runningPlayerPtr andLabel:[self outputLabelForPlayer:runningPlayerPtr] anchoredToStatusButton:([self hideFromStatusBar] ? nil : self.statusBar.button)];
                 } else {
                     // On older systems, use the classic OSD.
                     id osdMgr = [self->OSDManager sharedManager];
@@ -1056,6 +1062,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 			[self setDopplerVolume:[runningPlayerPtr currentVolume]];
 		else if (runningPlayerPtr == swinsian)
 			[self setSwinsianVolume:[runningPlayerPtr currentVolume]];
+		else if (runningPlayerPtr == spotifast)
+			[self setSpotifastVolume:[runningPlayerPtr currentVolume]];
 
 		// Update system UI if system volume is affected or when locked
 		if (_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio) {
@@ -1143,6 +1151,9 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     doppler = [[PlayerApplication alloc] initWithBundleIdentifier:@"co.brushedtype.doppler-macos" andIcon:[NSImage imageNamed:@"doppler"]];
 
     swinsian = [[PlayerApplication alloc] initWithBundleIdentifier:@"com.swinsian.Swinsian" andIcon:[NSImage imageNamed:@"swinsian"]];
+
+    spotifast = [[SpotifastApplication alloc] init];
+    [[self spotifastIcon] setImage:[spotifast icon]];
 
 	// Force MacOS to ask for authorization to AppleEvents if this was not already given
 	if([iTunes isRunning])
@@ -1292,6 +1303,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 						  [NSNumber numberWithBool:true],  @"spotifyControl",
 						  [NSNumber numberWithBool:true],  @"dopplerControl",
 						  [NSNumber numberWithBool:true],  @"swinsianControl",
+						  [NSNumber numberWithBool:true],  @"spotifastControl",
 						  [NSNumber numberWithBool:true],  @"systemControl",
 						  [NSNumber numberWithBool:true],  @"PlaySoundFeedback",
 						  [NSNumber numberWithBool:false], @"StayAheadOfOtherApps",
@@ -1312,6 +1324,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[[self spotifyBtn] setState:[preferences boolForKey:   @"spotifyControl"]];
 	[[self dopplerBtn] setState:[preferences boolForKey:   @"dopplerControl"]];
 	[[self swinsianBtn] setState:[preferences boolForKey:  @"swinsianControl"]];
+	[[self spotifastBtn] setState:[preferences boolForKey: @"spotifastControl"]];
+	[spotifast setEnabled:[preferences boolForKey:@"spotifastControl"]];
 	//[[self systemBtn] setState:[preferences boolForKey:    @"systemControl"]];
 	[[self systemBtn] setState:true];  // hard coded always to true
 	[[self systemBtn] setEnabled:false];
@@ -1886,6 +1900,15 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     }
     [s appendString:@", running"];
 
+    if (player == spotifast) {
+        [s appendFormat:@", %@", [spotifast controlStatus]];
+        if ([spotifast playbackDeviceName].length)
+            [s appendFormat:@", device: %@", [spotifast playbackDeviceName]];
+        if (![spotifast isUnresponsive])
+            [s appendFormat:@", %@", [self descriptionForPlayerState:[spotifast playerState]]];
+        return s;
+    }
+
     // -playerState sends an Apple Event. Only ask when we know it is permitted,
     // so building the report can never stall on, or trigger, a consent prompt.
     if ([player isUnresponsive]) {
@@ -1909,12 +1932,20 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     NSMutableString *r = [NSMutableString string];
     [r appendFormat:@"Apple Music : %@\n", [self playerDiagnosticsLine:iTunes   enabled:[_iTunesBtn state]   != NSControlStateValueOff]];
     [r appendFormat:@"Spotify     : %@\n", [self playerDiagnosticsLine:spotify  enabled:[_spotifyBtn state]  != NSControlStateValueOff]];
+    [r appendFormat:@"Spotifast   : %@\n", [self playerDiagnosticsLine:spotifast enabled:[_spotifastBtn state] != NSControlStateValueOff]];
     [r appendFormat:@"Doppler     : %@\n", [self playerDiagnosticsLine:doppler  enabled:[_dopplerBtn state]  != NSControlStateValueOff]];
     [r appendFormat:@"Swinsian    : %@\n", [self playerDiagnosticsLine:swinsian enabled:[_swinsianBtn state] != NSControlStateValueOff]];
     [r appendFormat:@"System      : %@\n", [systemAudio hasControllableVolume]
         ? @"targeted, volume controllable"
         : @"targeted, no software volume control (keys are passed on to macOS)"];
     return r;
+}
+
+- (NSString *)outputLabelForPlayer:(id)player
+{
+    if (player == spotifast)
+        return [spotifast playbackDeviceName] ?: @"Spotifast";
+    return [systemAudio getDefaultOutputDeviceName];
 }
 
 - (NSString *)nameOfPlayer:(id)player
@@ -1924,6 +1955,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     if (player == spotify)     return @"Spotify";
     if (player == doppler)     return @"Doppler";
     if (player == swinsian)    return @"Swinsian";
+    if (player == spotifast)   return @"Spotifast";
     if (player == systemAudio) return @"System";
     return @"?";
 }
@@ -1988,6 +2020,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [r appendString:@"Automation (control music players):\n"];
     [r appendFormat:@"  Apple Music : %@\n", [self automationStatusForBundleID:@"com.apple.Music"]];
     [r appendFormat:@"  Spotify     : %@\n", [self automationStatusForBundleID:@"com.spotify.client"]];
+    [r appendString:@"  Spotifast   : not required (local commands)\n"];
     [r appendFormat:@"  Doppler     : %@\n", [self automationStatusForBundleID:@"co.brushedtype.doppler-macos"]];
     [r appendFormat:@"  Swinsian    : %@\n\n", [self automationStatusForBundleID:@"com.swinsian.Swinsian"]];
 
@@ -2142,6 +2175,10 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 		{
 			currentPlayer = swinsian;
 		}
+		else if([_spotifastBtn state] && [spotifast isRunning] && [spotifast playerState] == SpotifyEPlSPlaying)
+		{
+			currentPlayer = spotifast;
+		}
 		else
 		{
 			// The System check mark only shows whether the output device has a
@@ -2219,7 +2256,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
         {
             if (@available(macOS 16.0, *)) {
                 // On Tahoe, show the new popover HUD anchored to the status item.
-                [[TahoeVolumeHUD sharedManager] showHUDWithVolume:volume usingMusicPlayer:runningPlayerPtr andLabel:[systemAudio getDefaultOutputDeviceName] anchoredToStatusButton:([self hideFromStatusBar] ? nil : self.statusBar.button)];
+                [[TahoeVolumeHUD sharedManager] showHUDWithVolume:volume usingMusicPlayer:runningPlayerPtr andLabel:[self outputLabelForPlayer:runningPlayerPtr] anchoredToStatusButton:([self hideFromStatusBar] ? nil : self.statusBar.button)];
             } else {
                 if(image) {
                     id osdMgr = [self->OSDManager sharedManager];
@@ -2253,6 +2290,8 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 			[self setDopplerVolume:volume];
 		else if (runningPlayerPtr == swinsian)
 			[self setSwinsianVolume:volume];
+		else if (runningPlayerPtr == spotifast)
+			[self setSpotifastVolume:volume];
 
 		if(_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio)
 			[self setSystemVolume:volume];
@@ -2302,6 +2341,17 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 	{
 		[[self swinsianPerc] setHidden:NO];
 		[[self swinsianPerc] setStringValue:[NSString stringWithFormat:@"(%d%%)",(int)volume]];
+	}
+}
+
+- (void) setSpotifastVolume:(NSInteger)volume
+{
+	if (volume == -1)
+		[[self spotifastPerc] setHidden:YES];
+	else
+	{
+		[[self spotifastPerc] setHidden:NO];
+		[[self spotifastPerc] setStringValue:[NSString stringWithFormat:@"(%d%%)",(int)volume]];
 	}
 }
 
@@ -2367,6 +2417,14 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 			[self setSwinsianVolume:volume];
 	} else
 		[self setSwinsianVolume:-1];
+
+	if ([spotifast isRunning]) {
+		double volume = [spotifast currentVolume];
+		if (![self showNotAvailableForPlayer:spotifast inField:[self spotifastPerc]])
+			[self setSpotifastVolume:volume];
+	} else
+		[self setSpotifastVolume:-1];
+	[[self spotifastIcon] setImage:[spotifast icon]];
 
 	[self setSystemVolume:[systemAudio currentVolume]];
 }
@@ -2572,6 +2630,12 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 		[preferences setBool:[sender state] forKey:@"swinsianControl"];
 	}
 
+	else if (sender == _spotifastBtn)
+	{
+		[preferences setBool:[sender state] forKey:@"spotifastControl"];
+		[spotifast setEnabled:[sender state] != NSControlStateValueOff];
+	}
+
 	[preferences synchronize];
 }
 
@@ -2653,6 +2717,8 @@ static const OSStatus kAutomationCheckTimedOut = 1;
             [self setDopplerVolume:volumePercent];
         } else if (runningPlayerPtr == swinsian) {
             [self setSwinsianVolume:volumePercent];
+        } else if (runningPlayerPtr == spotifast) {
+            [self setSpotifastVolume:volumePercent];
         }
 
         if (_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio) {

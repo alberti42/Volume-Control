@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Support for Spotifast on macOS, using its local commands for playback state and volume. Spotifast has its own checkbox and volume percentage in the menu and appears in Copy Diagnostics.
+
 ## [2.5.1] - 2026-10-13
 
 ### Changed

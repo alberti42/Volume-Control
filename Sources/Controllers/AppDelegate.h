@@ -18,7 +18,7 @@
 #import "Doppler.h"
 #import "Swinsian.h"
 
-@class IntroWindowController, AccessibilityDialog, StatusBarItem, PlayerApplication, SystemApplication;
+@class IntroWindowController, AccessibilityDialog, StatusBarItem, PlayerApplication, SystemApplication, SpotifastApplication;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuItemValidation, SPUUpdaterDelegate, SPUStandardUserDriverDelegate, TahoeVolumeHUDDelegate> {
     CALayer *volumeImageLayer;
@@ -54,6 +54,7 @@
     SystemApplication* systemAudio;
     PlayerApplication* doppler;
     PlayerApplication* swinsian;
+    SpotifastApplication* spotifast;
 
     IntroWindowController *introWindowController;
     AccessibilityDialog *accessibilityDialog;
@@ -67,12 +68,15 @@
 @property (nonatomic, assign) IBOutlet NSButton* systemBtn;
 @property (nonatomic, assign) IBOutlet NSButton* dopplerBtn;
 @property (nonatomic, assign) IBOutlet NSButton* swinsianBtn;
+@property (nonatomic, assign) IBOutlet NSButton* spotifastBtn;
+@property (nonatomic, assign) IBOutlet NSImageView* spotifastIcon;
 
 @property (nonatomic, assign) IBOutlet NSTextField* iTunesPerc;
 @property (nonatomic, assign) IBOutlet NSTextField* spotifyPerc;
 @property (nonatomic, assign) IBOutlet NSTextField* systemPerc;
 @property (nonatomic, assign) IBOutlet NSTextField* dopplerPerc;
 @property (nonatomic, assign) IBOutlet NSTextField* swinsianPerc;
+@property (nonatomic, assign) IBOutlet NSTextField* spotifastPerc;
 
 @property (assign, nonatomic) IBOutlet SPUStandardUpdaterController* sparkle_updater;
 

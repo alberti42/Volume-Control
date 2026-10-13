@@ -25,6 +25,9 @@
                 <outlet property="statusMenu" destination="5" id="34"/>
                 <outlet property="swinsianBtn" destination="hv4-nY-et4" id="XTg-lv-nbh"/>
                 <outlet property="swinsianPerc" destination="SWy-tG-Uaq" id="n6s-oY-ul5"/>
+                <outlet property="spotifastBtn" destination="Spt-Bn-001" id="Spt-Ob-001"/>
+                <outlet property="spotifastPerc" destination="Spt-Pc-001" id="Spt-Op-001"/>
+                <outlet property="spotifastIcon" destination="Spt-Ic-001" id="Spt-Oi-001"/>
                 <outlet property="systemBtn" destination="0bg-hh-XNT" id="OGo-XQ-z8N"/>
                 <outlet property="systemPerc" destination="tqe-nv-xjS" id="ZpI-lj-eHB"/>
                 <outlet property="volumeIncrementsSlider" destination="99" id="196"/>
@@ -210,11 +213,11 @@
             <point key="canvasLocation" x="-3" y="119"/>
         </customView>
         <customView id="516" userLabel="Select music player">
-            <rect key="frame" x="0.0" y="0.0" width="193" height="182"/>
+            <rect key="frame" x="0.0" y="0.0" width="193" height="215"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="526">
-                    <rect key="frame" x="13" y="163" width="151" height="17"/>
+                    <rect key="frame" x="13" y="196" width="151" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Controlled music player:" id="527">
                         <font key="font" metaFont="system"/>
@@ -223,7 +226,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0bg-hh-XNT">
-                    <rect key="frame" x="13" y="136" width="72" height="19"/>
+                    <rect key="frame" x="13" y="169" width="72" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="System" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="gn3-1v-oHN">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -234,12 +237,12 @@
                     </connections>
                 </button>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6Dq-gA-3QC" userLabel="System icon">
-                    <rect key="frame" x="96" y="134" width="24" height="24"/>
+                    <rect key="frame" x="96" y="167" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="FinderTahoe" id="ZtE-IF-hUt"/>
                 </imageView>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tqe-nv-xjS" userLabel="System volume">
-                    <rect key="frame" x="127" y="137" width="48" height="17"/>
+                    <rect key="frame" x="127" y="170" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(100%)" id="dks-w9-Z2B">
                         <font key="font" metaFont="system"/>
@@ -248,7 +251,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="i0t-Ei-94H" userLabel="Apple Music checkbox">
-                    <rect key="frame" x="13" y="103" width="72" height="19"/>
+                    <rect key="frame" x="13" y="136" width="72" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="iTunes" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="4RS-28-iPU">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -259,12 +262,12 @@
                     </connections>
                 </button>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="N1r-k3-3vR" userLabel="Apple Music icon">
-                    <rect key="frame" x="96" y="101" width="24" height="24"/>
+                    <rect key="frame" x="96" y="134" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="AppleMusicTahoe" id="iGx-TR-YJX"/>
                 </imageView>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Gbm-9b-kdp" userLabel="Apple Music volume">
-                    <rect key="frame" x="128" y="104" width="48" height="17"/>
+                    <rect key="frame" x="128" y="137" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="Slf-tf-lOn">
                         <font key="font" metaFont="system"/>
@@ -273,7 +276,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hrb-gt-hEq" userLabel="Spotify checkbox">
-                    <rect key="frame" x="13" y="70" width="72" height="19"/>
+                    <rect key="frame" x="13" y="103" width="72" height="19"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Spotify" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="WHM-96-Dj4">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -284,14 +287,39 @@
                     </connections>
                 </button>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Q1i-LR-meS" userLabel="Spotify icon">
-                    <rect key="frame" x="96" y="68" width="24" height="24"/>
+                    <rect key="frame" x="96" y="101" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="spotify" id="5hJ-Vf-wie"/>
                 </imageView>
                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="q1C-RX-nra" userLabel="Spotify volume">
-                    <rect key="frame" x="128" y="71" width="48" height="17"/>
+                    <rect key="frame" x="128" y="104" width="48" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="9Qg-R9-iWN">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Spt-Bn-001" userLabel="Spotifast checkbox">
+                    <rect key="frame" x="13" y="71" width="80" height="19"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="check" title="Spotifast" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Spt-Cb-001">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="toggleMusicPlayer:" target="3" id="Spt-Ab-001"/>
+                    </connections>
+                </button>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Spt-Ic-001" userLabel="Spotifast icon">
+                    <rect key="frame" x="96" y="68" width="24" height="24"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" id="Spt-Ci-001"/>
+                </imageView>
+                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Spt-Pc-001" userLabel="Spotifast volume">
+                    <rect key="frame" x="128" y="72" width="48" height="17"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="(0%)" id="Spt-Cp-001">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
