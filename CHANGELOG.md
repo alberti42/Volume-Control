@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-10-13
+
 ### Added
 
 - **Stay ahead of other apps** in the menu, off by default. Another app that handles the volume keys, such as BetterDisplay or MonitorControl, can take them away from Volume Control. With this option on, Volume Control checks every second whether such an app receives the system keys before it, and if so, reconnects to the keyboard, which puts it in front again. If the other app moves itself back in front 3 times within 10 s, Volume Control turns the option off and says which app it is. Copy Diagnostics shows how often Volume Control moved back in front, and which app was ahead.
@@ -147,7 +149,8 @@ Tagged but not published as a release; the fix shipped in 2.1.0.
 - Volume keys from the MacBook Pro Touch Bar are handled.
 - The system volume can be muted completely; 0 was not silent before.
 
-[Unreleased]: https://github.com/alberti42/Volume-Control/compare/v2.4.1...HEAD
+[Unreleased]: https://github.com/alberti42/Volume-Control/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/alberti42/Volume-Control/compare/v2.4.1...v2.5.0
 [2.4.1]: https://github.com/alberti42/Volume-Control/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/alberti42/Volume-Control/compare/v2.3.2...v2.4.0
 [2.3.4]: https://github.com/alberti42/Volume-Control/compare/v2.3.3...v2.3.4
