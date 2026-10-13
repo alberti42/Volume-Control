@@ -994,6 +994,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 - (void)MuteVol
 {
+	[spotifast cancelHUDVolume];
 	id runningPlayerPtr = [self runningPlayer];
 
 	if (runningPlayerPtr != nil)
@@ -1010,6 +1011,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 			[runningPlayerPtr setOldVolume:volume];
 			[runningPlayerPtr setCurrentVolume:0];
+			if (runningPlayerPtr == spotifast && [spotifast volumeReadTimedOut])
+				return;
 
 			if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
 				[systemAudio setOldVolume:[systemAudio currentVolume]];
@@ -1032,6 +1035,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 		else
 		{
 			[runningPlayerPtr setCurrentVolume:[runningPlayerPtr oldVolume]];
+			if (runningPlayerPtr == spotifast && [spotifast volumeReadTimedOut])
+				return;
 
 			if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
 				[systemAudio setCurrentVolume:[systemAudio oldVolume]];
@@ -1079,7 +1084,12 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         checkPlayerTimer = nil;
 
         SEL selector = increase ? @selector(rampVolumeUp:) : @selector(rampVolumeDown:);
-        volumeRampTimer = [NSTimer timerWithTimeInterval:volumeRampTimeInterval * (NSTimeInterval)increment
+        NSTimeInterval interval = volumeRampTimeInterval * (NSTimeInterval)increment;
+        // Spotifast commits every socket write, including a network request
+        // for Connect. Keep the HUD and writes at the same bounded cadence.
+        if (currentPlayer == spotifast)
+            interval = MAX(interval, 0.125);
+        volumeRampTimer = [NSTimer timerWithTimeInterval:interval
                                                   target:self
                                                 selector:selector
                                                 userInfo:nil
@@ -1901,11 +1911,12 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [s appendString:@", running"];
 
     if (player == spotifast) {
+        NSInteger state = [spotifast playerState];
         [s appendFormat:@", %@", [spotifast controlStatus]];
         if ([spotifast playbackDeviceName].length)
             [s appendFormat:@", device: %@", [spotifast playbackDeviceName]];
-        if (![spotifast isUnresponsive])
-            [s appendFormat:@", %@", [self descriptionForPlayerState:[spotifast playerState]]];
+        if (state)
+            [s appendFormat:@", %@", [self descriptionForPlayerState:state]];
         return s;
     }
 
@@ -2020,7 +2031,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [r appendString:@"Automation (control music players):\n"];
     [r appendFormat:@"  Apple Music : %@\n", [self automationStatusForBundleID:@"com.apple.Music"]];
     [r appendFormat:@"  Spotify     : %@\n", [self automationStatusForBundleID:@"com.spotify.client"]];
-    [r appendString:@"  Spotifast   : not required (local commands)\n"];
+    [r appendString:@"  Spotifast   : not required (local socket)\n"];
     [r appendFormat:@"  Doppler     : %@\n", [self automationStatusForBundleID:@"co.brushedtype.doppler-macos"]];
     [r appendFormat:@"  Swinsian    : %@\n\n", [self automationStatusForBundleID:@"com.swinsian.Swinsian"]];
 
@@ -2151,6 +2162,8 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 
 - (id)runningPlayer
 {
+	if (currentPlayer == spotifast && (![spotifast isRunning] || [spotifast isUnresponsive]))
+		[self resetCurrentPlayer:nil];
 	if(currentPlayer)
 		return currentPlayer;
 
@@ -2196,6 +2209,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 
 - (void)setVolumeUp:(bool)increase
 {
+	[spotifast cancelHUDVolume];
 	id runningPlayerPtr = [self runningPlayer];
 
 	if (runningPlayerPtr != nil)
@@ -2237,6 +2251,12 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 		}
 		if (volume<0) volume=0;
 		if (volume>100) volume=100;
+
+		if (runningPlayerPtr == spotifast) {
+			[spotifast setCurrentVolume:volume];
+			if ([spotifast volumeReadTimedOut])
+				return;
+		}
         
         OSDGraphic image = 0;
         NSInteger numFullBlks = 0;
@@ -2274,7 +2294,8 @@ static const OSStatus kAutomationCheckTimedOut = 1;
               _hideVolumeWindow ? @"hidden" : [NSString stringWithFormat:@"%.2f", volume]);
 #endif
 
-		[runningPlayerPtr setCurrentVolume:volume];
+		if (runningPlayerPtr != spotifast)
+			[runningPlayerPtr setCurrentVolume:volume];
 		if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
 			[systemAudio setCurrentVolume:volume];
 		}
@@ -2634,6 +2655,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 	{
 		[preferences setBool:[sender state] forKey:@"spotifastControl"];
 		[spotifast setEnabled:[sender state] != NSControlStateValueOff];
+		[self resetCurrentPlayer:nil];
 	}
 
 	[preferences synchronize];
@@ -2698,37 +2720,52 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 
     // 2. Get the currently active player, just like we do for the volume keys.
     id runningPlayerPtr = controlledPlayer;
+
+    if (runningPlayerPtr == spotifast) {
+        __weak AppDelegate *weakSelf = self;
+        __weak PlayerApplication *weakPlayer = controlledPlayer;
+        [spotifast setHUDVolume:volumePercent completion:^(BOOL success) {
+            if (success)
+                [weakSelf updateHUDVolume:volumePercent forPlayer:weakPlayer];
+        }];
+        return;
+    }
+    [spotifast cancelHUDVolume];
     
     if (runningPlayerPtr != nil) {
         // 3. Set the volume for the active player.
         [runningPlayerPtr setCurrentVolume:volumePercent];
-        
-        // 4. If volume is locked, also set the system volume.
-        if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
-            [systemAudio setCurrentVolume:volumePercent];
-        }
+        [self updateHUDVolume:volumePercent forPlayer:runningPlayerPtr];
+    }
+}
 
-        // 5. Update the percentage labels in the status menu to reflect the change in real-time.
-        if (runningPlayerPtr == iTunes) {
-            [self setItunesVolume:volumePercent];
-        } else if (runningPlayerPtr == spotify) {
-            [self setSpotifyVolume:volumePercent];
-        } else if (runningPlayerPtr == doppler) {
-            [self setDopplerVolume:volumePercent];
-        } else if (runningPlayerPtr == swinsian) {
-            [self setSwinsianVolume:volumePercent];
-        } else if (runningPlayerPtr == spotifast) {
-            [self setSpotifastVolume:volumePercent];
-        }
+- (void)updateHUDVolume:(double)volumePercent forPlayer:(id)runningPlayerPtr {
+    // 4. If volume is locked, also set the system volume.
+    if (_LockSystemAndPlayerVolume && runningPlayerPtr != systemAudio) {
+        [systemAudio setCurrentVolume:volumePercent];
+    }
 
-        if (_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio) {
-            [self setSystemVolume:volumePercent];
-        }
+    // 5. Update the percentage labels in the status menu to reflect the change in real-time.
+    if (runningPlayerPtr == iTunes) {
+        [self setItunesVolume:volumePercent];
+    } else if (runningPlayerPtr == spotify) {
+        [self setSpotifyVolume:volumePercent];
+    } else if (runningPlayerPtr == doppler) {
+        [self setDopplerVolume:volumePercent];
+    } else if (runningPlayerPtr == swinsian) {
+        [self setSwinsianVolume:volumePercent];
+    } else if (runningPlayerPtr == spotifast) {
+        [self setSpotifastVolume:volumePercent];
+    }
+
+    if (_LockSystemAndPlayerVolume || runningPlayerPtr == systemAudio) {
+        [self setSystemVolume:volumePercent];
     }
 }
 
 - (void)didChangeVolumeFinal:(TahoeVolumeHUD *)hud {
-    // This is called when the HUD fades out. We can play the feedback sound here
+    [spotifast flushHUDVolume];
+    // The slider has been released; apply its final value before feedback.
     [self emitAcousticFeedback];
 }
 

@@ -1,64 +1,86 @@
 #import "SpotifastApplication.h"
-#import <signal.h>
+#import <sys/socket.h>
+#import <sys/un.h>
+#import <fcntl.h>
+#import <poll.h>
+#import <unistd.h>
+#import <errno.h>
 #import <math.h>
+#import <string.h>
 
-static const NSTimeInterval kSnapshotInterval = 0.3;
-static const NSTimeInterval kSnapshotMaxAge = 3.0;
+static const NSTimeInterval kRequestTimeout = 0.1;
 static const NSTimeInterval kVolumeSettleInterval = 0.5;
-static const NSTimeInterval kVolumeWriteInterval = 0.05;
+static const NSTimeInterval kHUDWriteInterval = 0.125;
+static const NSUInteger kReplyLimit = 16 * 1024;
+
+// Use one deadline for connect, write and read, including partial replies.
+static BOOL WaitForSocket(int fd, short events, NSTimeInterval deadline)
+{
+    for (;;) {
+        NSTimeInterval remaining = deadline - NSProcessInfo.processInfo.systemUptime;
+        if (remaining <= 0) {
+            errno = ETIMEDOUT;
+            return NO;
+        }
+        struct pollfd descriptor = {fd, events, 0};
+        int result = poll(&descriptor, 1, (int)ceil(remaining * 1000));
+        if (result > 0)
+            return YES; // send/recv/getsockopt report a closed or failed socket.
+        if (result == 0) {
+            errno = ETIMEDOUT;
+            return NO;
+        }
+        if (errno != EINTR)
+            return NO;
+    }
+}
 
 @interface SpotifastApplication () {
     NSRunningApplication *_application;
     NSImage *_applicationIcon;
-    dispatch_queue_t _commandQueue;
-    NSTimer *_snapshotTimer;
-    NSDate *_snapshotDate;
-    NSDate *_lastWriteDate;
     NSString *_lastFailure;
+    NSString *_lastWriteFailure;
     NSString *_playbackDeviceName;
     NSInteger _state;
-    NSUInteger _revision;
-    NSUInteger _session; // Changes when the process or enabled preference changes.
     BOOL _hasVolume;
-    BOOL _readInFlight;
-    BOOL _writeInFlight;
-    double _pendingVolume;
+    NSTimeInterval _lastWriteTime;
+    NSTimer *_hudWriteTimer;
+    double _hudVolume;
+    pid_t _hudProcessID;
+    NSString *_hudDevice;
+    void (^_hudCompletion)(BOOL);
 }
-- (void)refreshSnapshot;
-- (void)scheduleVolumeWrite:(double)volume;
-- (void)writeVolume:(double)volume;
-- (BOOL)canRunCommandForSession:(NSUInteger)session;
+- (NSString *)sendCommand:(NSString *)command;
+- (BOOL)readPlayback;
+- (void)resetPlayback;
 @end
 
 @implementation SpotifastApplication
 
 - (instancetype)init
 {
-    // Do not create an SBApplication: all communication is through Spotifast's
-    // executable, discovered from the running app rather than the shell PATH.
+    // No SBApplication: Spotifast uses a local socket rather than Apple Events.
     if ((self = [super init])) {
         _bundleIdentifier = @"rocks.spotifast.Spotifast";
-        _commandQueue = dispatch_queue_create("io.alberti42.VolumeControl.spotifast", DISPATCH_QUEUE_SERIAL);
-        _pendingVolume = -1;
-        self.doubleVolume = -100;
-        self.oldVolume = -1;
+        [self resetPlayback];
         NSURL *appURL = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:_bundleIdentifier];
         if (appURL) {
             _applicationIcon = [[NSWorkspace sharedWorkspace] iconForFile:appURL.path];
             self.icon = _applicationIcon;
         }
-        __weak SpotifastApplication *weakSelf = self;
-        _snapshotTimer = [NSTimer timerWithTimeInterval:kSnapshotInterval repeats:YES block:^(NSTimer *timer) {
-            [weakSelf refreshSnapshot];
-        }];
-        [[NSRunLoop mainRunLoop] addTimer:_snapshotTimer forMode:NSRunLoopCommonModes];
     }
     return self;
 }
 
-- (void)dealloc
+- (void)resetPlayback
 {
-    [_snapshotTimer invalidate];
+    [self cancelHUDVolume];
+    _state = 0;
+    _hasVolume = NO;
+    _lastWriteTime = 0;
+    _playbackDeviceName = nil;
+    self.doubleVolume = -100;
+    self.oldVolume = -1;
 }
 
 - (void)setEnabled:(BOOL)enabled
@@ -66,32 +88,18 @@ static const NSTimeInterval kVolumeWriteInterval = 0.05;
     if (_enabled == enabled)
         return;
     _enabled = enabled;
-    _revision++;
-    _session++;
-    _pendingVolume = -1;
-    _snapshotDate = nil;
-    _lastWriteDate = nil;
+    [self resetPlayback];
     _lastFailure = nil;
-    self.oldVolume = -1;
-    if (enabled)
-        [self refreshSnapshot];
+    _lastWriteFailure = nil;
 }
 
 - (BOOL)isRunning
 {
     NSRunningApplication *app = [NSRunningApplication runningApplicationsWithBundleIdentifier:self.bundleIdentifier].firstObject;
     if (app.processIdentifier != _application.processIdentifier) {
-        _revision++;
-        _session++;
-        _snapshotDate = nil;
-        _lastWriteDate = nil;
+        [self resetPlayback];
         _lastFailure = nil;
-        _playbackDeviceName = nil;
-        _hasVolume = NO;
-        _state = 0;
-        _pendingVolume = -1;
-        self.doubleVolume = -100;
-        self.oldVolume = -1;
+        _lastWriteFailure = nil;
         if (app) {
             _applicationIcon = app.icon;
             self.icon = _applicationIcon;
@@ -101,252 +109,271 @@ static const NSTimeInterval kVolumeWriteInterval = 0.05;
     return app != nil;
 }
 
-// The queue may still be finishing a read when the user disables or restarts
-// the player. Check its session on the main thread before launching a command.
-- (BOOL)canRunCommandForSession:(NSUInteger)session
+- (NSString *)socketFailure:(NSString *)reason
 {
-    __block BOOL canRun = NO;
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        canRun = self.enabled && [self isRunning] && session == self->_session;
-    });
-    return canRun;
+    [self resetPlayback];
+    _lastFailure = reason;
+    return nil;
 }
 
-// Runs only on _commandQueue. A command addresses the already running player;
-// it never launches the GUI. Bound the wait so a stuck CLI cannot fill the queue.
-- (NSString *)runArguments:(NSArray<NSString *> *)arguments
-             executableURL:(NSURL *)executableURL
-                   failure:(NSString **)failure
+- (NSString *)socketError
 {
-    if (!executableURL) {
-        *failure = @"executable not found";
-        return nil;
-    }
-    NSTask *task = [[NSTask alloc] init];
-    NSPipe *output = [NSPipe pipe];
-    NSMutableData *data = [NSMutableData data];
-    // Drain while the process runs: waiting for termination first can fill the
-    // pipe with track metadata and block the child before it can exit.
-    output.fileHandleForReading.readabilityHandler = ^(NSFileHandle *handle) {
-        @synchronized (data) {
-            NSData *chunk = [handle availableData];
-            if (chunk.length)
-                [data appendData:chunk];
-            else
-                handle.readabilityHandler = nil;
-        }
-    };
-    task.executableURL = executableURL;
-    task.arguments = arguments;
-    task.standardInput = [NSFileHandle fileHandleWithNullDevice];
-    task.standardOutput = output;
-    task.standardError = [NSFileHandle fileHandleWithNullDevice];
-    dispatch_semaphore_t done = dispatch_semaphore_create(0);
-    task.terminationHandler = ^(NSTask *finished) {
-        dispatch_semaphore_signal(done);
-    };
-    NSError *error = nil;
-    if (![task launchAndReturnError:&error]) {
-        output.fileHandleForReading.readabilityHandler = nil;
-        *failure = [NSString stringWithFormat:@"command could not start: %@", error.localizedDescription];
-        return nil;
-    }
-    [output.fileHandleForWriting closeFile];
-    if (dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC)) != 0) {
-        if (task.running)
-            kill(task.processIdentifier, SIGKILL);
-        dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 2));
-        output.fileHandleForReading.readabilityHandler = nil;
-        *failure = @"command did not answer within 2 s";
-        return nil;
-    }
-    output.fileHandleForReading.readabilityHandler = nil;
-    if (task.terminationStatus != 0) {
-        *failure = [NSString stringWithFormat:@"command exited with status %d", task.terminationStatus];
-        return nil;
-    }
-    NSString *result;
-    @synchronized (data) {
-        [data appendData:[output.fileHandleForReading readDataToEndOfFile]];
-        result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    }
-    if (!result)
-        *failure = @"invalid command output";
-    return result;
+    int code = errno;
+    NSString *reason = code == ETIMEDOUT ? @"socket did not answer within 100 ms" :
+        [NSString stringWithFormat:@"socket: %@", [NSError errorWithDomain:NSPOSIXErrorDomain code:code userInfo:nil].localizedDescription];
+    return [self socketFailure:reason];
 }
 
-- (void)refreshSnapshot
+// Spotifast 0.12 uses one prefixed line per connection. This is an internal
+// protocol: reject unexpected replies and expose the failure in diagnostics.
+- (NSString *)sendCommand:(NSString *)command
 {
-    if (!self.enabled || ![self isRunning] || _readInFlight || _writeInFlight)
-        return;
-    // The CLI acknowledges a queued action, not its completion. Let the app
-    // apply the final write before reconciling the local cache with its snapshot.
-    if (_lastWriteDate && -_lastWriteDate.timeIntervalSinceNow < kVolumeSettleInterval)
-        return;
-    _readInFlight = YES;
-    NSUInteger revision = _revision;
-    NSUInteger session = _session;
-    NSURL *executableURL = _application.executableURL;
-    dispatch_async(_commandQueue, ^{
-        NSString *failure = nil;
-        NSString *output = nil;
-        if ([self canRunCommandForSession:session])
-            output = [self runArguments:@[@"now-playing", @"--raw"] executableURL:executableURL failure:&failure];
-        // Remove only the final newline: whitespace inside a track's fields
-        // must not move the tab-separated volume field (index 6).
-        if ([output hasSuffix:@"\n"])
-            output = [output substringToIndex:output.length - 1];
-        NSArray<NSString *> *fields = [output componentsSeparatedByString:@"\t"];
-        NSInteger state = 0;
-        NSInteger volume = 0;
-        BOOL hasVolume = NO;
-        NSString *deviceName = nil;
-        if ([output isEqualToString:@"stopped"]) {
-            state = 'kPSS';
-        } else if (fields.count >= 7 && ([fields[0] isEqualToString:@"playing"] || [fields[0] isEqualToString:@"paused"])) {
-            NSScanner *scanner = [NSScanner scannerWithString:fields[6]];
-            hasVolume = [scanner scanInteger:&volume] && scanner.isAtEnd && volume >= 0 && volume <= 100;
-            if (hasVolume)
-                state = [fields[0] isEqualToString:@"playing"] ? 'kPSP' : 'kPSp';
-            if (state && fields.count >= 12 && fields[11].length)
-                deviceName = fields[11];
-        }
-        if (!state && !failure)
-            failure = @"unrecognised now-playing output";
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self->_readInFlight = NO;
-            [self isRunning];
-            if (revision != self->_revision)
-                return; // A newer write, restart or preference change won.
-            BOOL deviceChanged = state && !((deviceName == self->_playbackDeviceName) ||
-                [deviceName isEqualToString:self->_playbackDeviceName]);
-            if (deviceChanged) {
-                // A Connect transfer does not restart Spotifast. Adopt the new
-                // target's volume even if it is close to the fractional cache,
-                // and never restore the previous device's muted volume to it.
-                self->_revision++;
-                self.oldVolume = -1;
-                self->_pendingVolume = -1;
-                self->_lastWriteDate = nil;
+    struct sockaddr_un address = {0};
+    address.sun_family = AF_UNIX;
+    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"spotifast/instance.sock"];
+    if (![path getFileSystemRepresentation:address.sun_path maxLength:sizeof(address.sun_path)])
+        return [self socketFailure:@"socket path is too long"];
+    address.sun_len = SUN_LEN(&address);
+    int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (fd < 0)
+        return [self socketError];
+    @try {
+        int noSignal = 1;
+        if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0 ||
+            setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &noSignal, sizeof(noSignal)) < 0)
+            return [self socketError];
+        NSTimeInterval deadline = NSProcessInfo.processInfo.systemUptime + kRequestTimeout;
+        if (connect(fd, (struct sockaddr *)&address, address.sun_len) < 0) {
+            if (errno != EINPROGRESS && errno != EAGAIN && errno != EINTR)
+                return [self socketError];
+            if (!WaitForSocket(fd, POLLOUT, deadline))
+                return [self socketError];
+            int error = 0;
+            socklen_t length = sizeof(error);
+            if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &length) < 0)
+                return [self socketError];
+            if (error) {
+                errno = error;
+                return [self socketError];
             }
-            if (state)
-                self->_playbackDeviceName = [deviceName copy];
-            self->_lastFailure = failure;
-            self->_state = state;
-            self->_hasVolume = hasVolume;
-            self->_snapshotDate = state ? [NSDate date] : nil;
-            if (hasVolume && (deviceChanged || fabs(volume - self.doubleVolume) >= 1.0))
-                self.doubleVolume = volume;
-        });
-    });
+        }
+        NSData *request = [[NSString stringWithFormat:@"spotifast:%@\n", command] dataUsingEncoding:NSUTF8StringEncoding];
+        NSUInteger offset = 0;
+        while (offset < request.length) {
+            if (!WaitForSocket(fd, POLLOUT, deadline))
+                return [self socketError];
+            ssize_t count = send(fd, (const char *)request.bytes + offset, request.length - offset, 0);
+            if (count < 0 && (errno == EAGAIN || errno == EINTR))
+                continue;
+            if (count <= 0)
+                return [self socketError];
+            offset += count;
+        }
+        NSMutableData *data = [NSMutableData data];
+        while (data.length < kReplyLimit) {
+            if (!WaitForSocket(fd, POLLIN, deadline))
+                return [self socketError];
+            char buffer[4096];
+            ssize_t count = recv(fd, buffer, MIN(sizeof(buffer), kReplyLimit - data.length), 0);
+            if (count < 0 && (errno == EAGAIN || errno == EINTR))
+                continue;
+            if (count < 0)
+                return [self socketError];
+            if (count == 0)
+                return [self socketFailure:@"socket closed before a complete reply"];
+            [data appendBytes:buffer length:count];
+            if (memchr(buffer, '\n', count)) {
+                NSString *reply = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                if (![reply hasPrefix:@"spotifast:"] || ![reply hasSuffix:@"\n"])
+                    return [self socketFailure:@"unrecognised socket reply"];
+                reply = [reply substringWithRange:NSMakeRange(10, reply.length - 11)];
+                if ([reply containsString:@"\n"])
+                    return [self socketFailure:@"unexpected extra socket reply"];
+                return reply;
+            }
+        }
+        return [self socketFailure:@"socket reply exceeds 16 KiB"];
+    } @finally {
+        close(fd);
+    }
 }
 
-- (BOOL)hasFreshSnapshot
+- (BOOL)readPlayback
 {
-    if (!_snapshotDate || _lastFailure)
+    if (!self.enabled || ![self isRunning])
         return NO;
-    // During a key hold, the locally cached target is the current volume.
-    if (_writeInFlight || (_lastWriteDate && -_lastWriteDate.timeIntervalSinceNow < kVolumeSettleInterval))
+    NSString *reply = [self sendCommand:@"nowplaying"];
+    if (!reply)
+        return NO;
+    if (![reply hasPrefix:@"now "]) {
+        [self socketFailure:@"unrecognised nowplaying reply"];
+        return NO;
+    }
+    NSString *output = [reply substringFromIndex:4];
+    if ([output isEqualToString:@"stopped"]) {
+        [self resetPlayback];
+        _state = 'kPSS';
+        _lastFailure = nil;
         return YES;
-    return -_snapshotDate.timeIntervalSinceNow < kSnapshotMaxAge;
+    }
+    NSArray<NSString *> *fields = [output componentsSeparatedByString:@"\t"];
+    NSInteger volume = 0;
+    NSScanner *scanner = fields.count >= 7 ? [NSScanner scannerWithString:fields[6]] : nil;
+    if (fields.count < 7 ||
+        !([fields[0] isEqualToString:@"playing"] || [fields[0] isEqualToString:@"paused"]) ||
+        ![scanner scanInteger:&volume] || !scanner.isAtEnd || volume < 0 || volume > 100) {
+        [self socketFailure:@"unrecognised nowplaying fields"];
+        return NO;
+    }
+    NSString *device = fields.count >= 12 && fields[11].length ? fields[11] : nil;
+    BOOL deviceChanged = !((_playbackDeviceName == device) || [_playbackDeviceName isEqualToString:device]);
+    if (deviceChanged) {
+        [self cancelHUDVolume];
+        self.oldVolume = -1;
+        _lastWriteTime = 0;
+    }
+    // An accepted write is queued by Spotifast, not necessarily applied yet.
+    // Preserve rapid key increments briefly, but always adopt a new device.
+    BOOL settling = _lastWriteTime && NSProcessInfo.processInfo.systemUptime - _lastWriteTime < kVolumeSettleInterval;
+    if (!_hasVolume || deviceChanged || (!settling && fabs(volume - self.doubleVolume) >= 1.0))
+        self.doubleVolume = volume;
+    _playbackDeviceName = [device copy];
+    _state = [fields[0] isEqualToString:@"playing"] ? 'kPSP' : 'kPSp';
+    _hasVolume = YES;
+    _lastFailure = nil;
+    return YES;
 }
 
 - (NSInteger)playerState
 {
-    return [self hasFreshSnapshot] ? _state : 0;
+    return [self readPlayback] ? _state : 0;
 }
 
 - (BOOL)isUnresponsive
 {
-    return ![self hasFreshSnapshot];
+    return _lastFailure != nil;
 }
 
 - (BOOL)volumeReadTimedOut
 {
-    return !_hasVolume || ![self hasFreshSnapshot];
+    return !_hasVolume || _lastFailure != nil;
 }
 
 - (double)currentVolume
 {
-    return [self volumeReadTimedOut] ? 0 : self.doubleVolume;
+    return [self readPlayback] && _hasVolume ? self.doubleVolume : 0;
 }
 
 - (void)setCurrentVolume:(double)volume
 {
-    if (!isfinite(volume) || volume < 0 || !self.enabled || ![self isRunning] || [self volumeReadTimedOut])
+    [self cancelHUDVolume];
+    if (!isfinite(volume) || volume < 0 || !self.enabled || ![self isRunning] || !_hasVolume)
         return;
-    self.doubleVolume = fmin(volume, 100);
-    _revision++;
-    [self scheduleVolumeWrite:self.doubleVolume];
+    NSString *device = _playbackDeviceName;
+    if (![self readPlayback] || !_hasVolume)
+        return;
+    if (!(device == _playbackDeviceName || [device isEqualToString:_playbackDeviceName])) {
+        [self socketFailure:@"playback device changed before the volume command"];
+        return;
+    }
+    volume = fmin(volume, 100);
+    // Keep fractional steps without repeatedly committing the same integer,
+    // especially while a held key has already reached either volume limit.
+    if (!_lastWriteFailure && lround(volume) == lround(self.doubleVolume)) {
+        self.doubleVolume = volume;
+        return;
+    }
+    NSString *reply = [self sendCommand:[NSString stringWithFormat:@"volume-set %ld", (long)lround(volume)]];
+    if (![reply isEqualToString:@"ok"]) {
+        if (reply)
+            [self socketFailure:@"unrecognised volume-set reply"];
+        _lastWriteFailure = _lastFailure;
+        return;
+    }
+    _lastWriteFailure = nil;
+    self.doubleVolume = volume;
+    _lastWriteTime = NSProcessInfo.processInfo.systemUptime;
 }
 
-- (void)scheduleVolumeWrite:(double)volume
+- (void)dealloc
 {
-    _pendingVolume = volume;
-    if (_writeInFlight)
-        return;
-    _writeInFlight = YES;
-    // A key-hold ramp ticks every 10 ms. Keep its latest target, but do not
-    // create a CLI process for each tick (at most 20 volume commands per s).
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kVolumeWriteInterval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        if (!self.enabled || ![self isRunning] || self->_pendingVolume < 0) {
-            self->_writeInFlight = NO;
-            return;
-        }
-        double next = self->_pendingVolume;
-        [self writeVolume:next];
-    });
+    [_hudWriteTimer invalidate];
 }
 
-- (void)writeVolume:(double)volume
+- (void)cancelHUDVolume
 {
-    _pendingVolume = -1;
-    NSUInteger session = _session;
-    NSURL *executableURL = _application.executableURL;
-    NSString *percent = [NSString stringWithFormat:@"%ld", (long)lround(volume)];
-    dispatch_async(_commandQueue, ^{
-        NSString *failure = nil;
-        if ([self canRunCommandForSession:session])
-            [self runArguments:@[@"volume", percent] executableURL:executableURL failure:&failure];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self->_writeInFlight = NO;
-            [self isRunning];
-            if (session != self->_session)
-                return;
-            self->_lastFailure = failure;
-            self->_lastWriteDate = [NSDate date];
-            if (failure) {
-                self->_pendingVolume = -1;
-                self->_snapshotDate = nil;
-                return;
-            }
-            if (self->_pendingVolume >= 0 && self.enabled) {
-                double next = self->_pendingVolume;
-                [self scheduleVolumeWrite:next];
-            }
-        });
-    });
+    [_hudWriteTimer invalidate];
+    _hudWriteTimer = nil;
+    _hudCompletion = nil;
+    _hudDevice = nil;
+}
+
+- (void)setHUDVolume:(double)volume completion:(void (^)(BOOL))completion
+{
+    if (!isfinite(volume) || volume < 0 || !self.enabled || ![self isRunning] || !_hasVolume) {
+        [self cancelHUDVolume];
+        if (completion) completion(NO);
+        return;
+    }
+    _hudVolume = fmin(volume, 100);
+    _hudCompletion = [completion copy];
+    if (_hudWriteTimer)
+        return;
+    _hudDevice = [_playbackDeviceName copy];
+    _hudProcessID = _application.processIdentifier;
+    NSTimeInterval delay = MAX(0, kHUDWriteInterval - (NSProcessInfo.processInfo.systemUptime - _lastWriteTime));
+    // Only a drag schedules this one-shot timer. Keep its latest target,
+    // and let a key press, restart or disable cancel the deferred write.
+    __weak SpotifastApplication *weakSelf = self;
+    _hudWriteTimer = [NSTimer timerWithTimeInterval:delay repeats:NO block:^(NSTimer *timer) {
+        [weakSelf flushHUDVolume];
+    }];
+    [[NSRunLoop mainRunLoop] addTimer:_hudWriteTimer forMode:NSRunLoopCommonModes];
+}
+
+- (void)flushHUDVolume
+{
+    if (!_hudWriteTimer)
+        return;
+    double volume = _hudVolume;
+    pid_t processID = _hudProcessID;
+    NSString *device = _hudDevice;
+    void (^completion)(BOOL) = _hudCompletion;
+    [self cancelHUDVolume];
+    if (!self.enabled || ![self isRunning] || processID != _application.processIdentifier)
+        return;
+    if (![self readPlayback] || !_hasVolume) {
+        if (completion) completion(NO);
+        return;
+    }
+    if (!(device == _playbackDeviceName || [device isEqualToString:_playbackDeviceName])) {
+        [self socketFailure:@"playback device changed before the HUD volume command"];
+        if (completion) completion(NO);
+        return;
+    }
+    [self setCurrentVolume:volume];
+    if (completion) completion(![self volumeReadTimedOut]);
 }
 
 - (void)scheduleVolumeVerification
 {
-    // The base implementation verifies through ScriptingBridge in Debug.
-    // This adapter reconciles through its regular CLI poll in every build.
-    [self refreshSnapshot];
+    // No ScriptingBridge verification; the next interaction reads the socket.
 }
 
 - (NSString *)controlStatus
 {
     if (!self.enabled)
-        return @"local command polling disabled";
+        return @"local socket control disabled";
     if (_lastFailure)
         return _lastFailure;
-    return [self hasFreshSnapshot] ? @"local commands responding" : @"waiting for a current playback snapshot";
+    if (_lastWriteFailure)
+        return [NSString stringWithFormat:@"last volume command failed: %@", _lastWriteFailure];
+    return _state ? @"local socket responding" : @"local socket not queried yet";
 }
 
 - (NSString *)playbackDeviceName
 {
-    return [self hasFreshSnapshot] ? _playbackDeviceName : nil;
+    return _lastFailure ? nil : _playbackDeviceName;
 }
 
 @end

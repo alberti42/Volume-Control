@@ -80,7 +80,7 @@ Homebrew installs the app into `Applications`. After that, the app updates itsel
 
 The app requires Accessibility and Automation permissions to control other apps' volumes.
 
-Spotifast uses local commands and does not require Automation permission.
+Spotifast uses a local socket and does not require Automation permission.
 
 1. When prompted, allow access to control **Music**, **Spotify**, **Doppler**, and **Swinsian**.
 2. If you missed it or need to reset:
