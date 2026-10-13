@@ -6,6 +6,31 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.5.0</title>
+            <pubDate>Tue, 13 Oct 2026 05:30:31 +0000</pubDate>
+            <sparkle:version>307</sparkle:version>
+            <sparkle:shortVersionString>2.5.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/alberti42/Volume-Control/releases/download/v2.5.0/VolumeControl.zip" length="6232026" type="application/octet-stream" sparkle:edSignature="E2otYWGHs/eyAEUCKfVww9HakNOIKQ+qAUy5ub447IbCTWFE4i+RJV79BdlGGFHIhWuEH0sYzmhF/j3LFGKwCA=="/>
+        
+            <description><![CDATA[
+<h3>Added</h3>
+<ul>
+<li><strong>Stay ahead of other apps</strong> in the menu, off by default. Another app that handles the volume keys, such as BetterDisplay or MonitorControl, can take them away from Volume Control. With this option on, Volume Control checks every second whether such an app receives the system keys before it, and if so, reconnects to the keyboard, which puts it in front again. If the other app moves itself back in front 3 times within 10 s, Volume Control turns the option off and says which app it is. Copy Diagnostics shows how often Volume Control moved back in front, and which app was ahead. With this option on and an app such as BetterDisplay handling the volume keys, both apps work together: when Volume Control acts on the system volume and the output device has no software volume control, it passes the key on, and BetterDisplay changes the display's volume.</li>
+</ul>
+<h2>Changes since v2.4.1</h2>
+<ul>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/892b9c6">892b9c6</a> Version bump to v2.5.0 (build 302)</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/a1c75fc">a1c75fc</a> Rename the option to "Stay ahead of other apps"</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/48d334c">48d334c</a> Mention Keep volume keys ahead in the README's Troubleshooting</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/aeed0a4">aeed0a4</a> Add "Keep volume keys ahead of other apps"</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/61294a2">61294a2</a> List 2.4.0 among the README's older versions</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/9c8398c">9c8398c</a> Release v2.4.1 (automatic appcast update)</li>
+</ul>
+<p><strong>Full diff:</strong> https://github.com/alberti42/Volume-Control/compare/v2.4.1...v2.5.0</p>
+            ]]></description>
+        </item>
+        <item>
             <title>2.4.1</title>
             <pubDate>Tue, 13 Oct 2026 04:40:31 +0000</pubDate>
             <sparkle:version>301</sparkle:version>
