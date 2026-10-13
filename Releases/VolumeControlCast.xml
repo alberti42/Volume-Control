@@ -6,6 +6,48 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.4.1</title>
+            <pubDate>Tue, 13 Oct 2026 04:40:31 +0000</pubDate>
+            <sparkle:version>301</sparkle:version>
+            <sparkle:shortVersionString>2.4.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/alberti42/Volume-Control/releases/download/v2.4.1/VolumeControl.zip" length="6224343" type="application/octet-stream" sparkle:edSignature="eleIz8VeZpmSaRPYBFv9KV6pxJUomMryDty5aIBizPfDK6P6Q6KUH0VWtRQuTxrNlLEbs1fxRBgPZJfeOPkiBw=="/>
+        
+            <description><![CDATA[
+<h3>Changed</h3>
+<ul>
+<li><strong>Copy Diagnostics</strong> lists the apps that intercept system keys (the volume, brightness and media keys), and whether each can block them. An app that can block them and is listed before Volume Control may take the volume keys away.</li>
+</ul>
+<h3>Fixed</h3>
+<ul>
+<li>With Spotify, volume up changed the volume by less than volume down: at the default increment, 2 per press instead of 3.4 (<a href="https://github.com/alberti42/Volume-Control/issues/43">#43</a>). Both now change it by the same amount.</li>
+<li><strong>Copy Diagnostics</strong> could freeze Volume Control when macOS did not answer whether Volume Control may control a player, as happened with Spotify on macOS 27. The report now shows "macOS did not answer within 1 s" for that player.</li>
+<li>Option + volume or mute key opens the Sound settings again, and Option + Shift + volume key changes the system volume in fine steps. Volume Control used to take these key presses.</li>
+</ul>
+<h2>Changes since v2.4.0</h2>
+<ul>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/3e09bdf">3e09bdf</a> Version bump to v2.4.1 (build 287)</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/f5a29a7">f5a29a7</a> File the system-key list under Changed in CHANGELOG.md</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/92537fd">92537fd</a> Let Option + volume and mute keys through to macOS</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/205d216">205d216</a> Name BetterDisplay in the README's Troubleshooting</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/439cead">439cead</a> Remove "Keep volume keys alive"</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/7db7c81">7db7c81</a> Version bump to v2.4.1-beta.2 (build 286)</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/53041e2">53041e2</a> Call the tap list "Apps that intercept system keys"</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/9ad7550">9ad7550</a> List the apps whose event taps receive the volume keys in Copy Diagnostics</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/e0510ce">e0510ce</a> Check Automation permission off the main thread, with a 1 s limit</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/7dbc5c7">7dbc5c7</a> Say "reconnects to the keyboard" instead of "event tap" to users</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/b66ab7d">b66ab7d</a> Add a Troubleshooting section to the README</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/6e2c53c">6e2c53c</a> Version bump to v2.4.1-beta.1 (build 285)</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/f3ac792">f3ac792</a> Add "Keep volume keys alive" to recover a tap that stops receiving keys</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/1b6bdcd">1b6bdcd</a> Step Spotify's volume by the same amount up and down</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/eb0f8b2">eb0f8b2</a> Adopt Keep a Changelog and Semantic Versioning</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/b648b85">b648b85</a> Release v2.4.0 (automatic appcast update)</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/d4c902d">d4c902d</a> Show the new HUD and menu in the README</li>
+</ul>
+<p><strong>Full diff:</strong> https://github.com/alberti42/Volume-Control/compare/v2.4.0...v2.4.1</p>
+            ]]></description>
+        </item>
+        <item>
             <title>2.4.0</title>
             <pubDate>Sun, 11 Oct 2026 15:15:45 +0000</pubDate>
             <sparkle:version>284</sparkle:version>
