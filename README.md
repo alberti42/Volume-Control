@@ -153,6 +153,7 @@ What changed in each version since 2.0.0 is listed in [CHANGELOG.md](CHANGELOG.m
 
 You can download older versions here:
 
+- [2.4.1](https://github.com/alberti42/Volume-Control/releases/download/v2.4.1/VolumeControl.zip): Spotify's volume steps the same amount up and down; Copy Diagnostics lists the apps that intercept system keys and no longer freezes; Option + volume key opens the Sound settings again.
 - [2.4.0](https://github.com/alberti42/Volume-Control/releases/download/v2.4.0/VolumeControl.zip): On macOS 26 and later, the volume HUD looks like the system volume HUD; holding Command switches the volume keys on Macs where the volume key event arrived without the Command key; unticking and re-ticking Enable brings back volume keys that stopped working.
 - [2.3.2](https://github.com/alberti42/Volume-Control/releases/download/v2.3.2/VolumeControl.zip): Compatible with macOS 27 Golden Gate; a player that stops responding no longer freezes Volume Control; more detail in Copy Diagnostics.
 - [2.3.0](https://github.com/alberti42/Volume-Control/releases/download/v2.3.0/VolumeControl.zip): Better support for displays and devices without a standard volume control; added the Copy Diagnostics menu item.
