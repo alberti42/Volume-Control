@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.4.1] - 2026-10-13
+
 ### Changed
 
 - **Copy Diagnostics** lists the apps that intercept system keys (the volume, brightness and media keys), and whether each can block them. An app that can block them and is listed before Volume Control may take the volume keys away.
@@ -141,7 +143,8 @@ Tagged but not published as a release; the fix shipped in 2.1.0.
 - Volume keys from the MacBook Pro Touch Bar are handled.
 - The system volume can be muted completely; 0 was not silent before.
 
-[Unreleased]: https://github.com/alberti42/Volume-Control/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/alberti42/Volume-Control/compare/v2.4.1...HEAD
+[2.4.1]: https://github.com/alberti42/Volume-Control/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/alberti42/Volume-Control/compare/v2.3.2...v2.4.0
 [2.3.4]: https://github.com/alberti42/Volume-Control/compare/v2.3.3...v2.3.4
 [2.3.3]: https://github.com/alberti42/Volume-Control/compare/v2.3.2...v2.3.3
