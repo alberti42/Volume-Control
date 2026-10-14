@@ -1815,7 +1815,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             @"BetterDisplay controls.";
         if ([self->_betterDisplay listensToNativeAudioKeys])
             explanation = [explanation stringByAppendingString:
-                @"\n\n\"Listen to native audio keys\" is on in BetterDisplay's settings. Open "
+                @"\n\n⚠️ \"Listen to native audio keys\" is on in BetterDisplay's settings. Open "
                 @"BetterDisplay's settings and turn it off, so that only Volume Control handles "
                 @"the volume keys."];
         alert.messageText = @"Use BetterDisplay to control the display's volume?";
