@@ -2015,6 +2015,26 @@ static NSDictionary *EDIDFieldsFromAudioDeviceUID(NSString *uid)
     }];
 }
 
+// Marks the menu item with ⚠️ while the option is on but cannot work as
+// intended; the tooltip says why.
+- (void)updateControlDisplayVolumeMenuItem
+{
+    NSMenuItem *item = [_statusMenu itemWithTag:CONTROL_DISPLAY_VOLUME_ID];
+    NSString *problem = nil;
+    if ([self ControlDisplayVolume]) {
+        BetterDisplayClient *client = _betterDisplay ?: [[BetterDisplayClient alloc] init];
+        if (![client isInstalled])
+            problem = @"BetterDisplay is not installed.";
+        else if ([client listensToNativeAudioKeys])
+            problem = @"\"Listen to native audio keys\" is on in BetterDisplay's settings. Turn it off, "
+                      @"so that only Volume Control handles the volume keys.";
+        else if (![client isRunning])
+            problem = @"BetterDisplay is not running.";
+    }
+    item.title = problem ? @"⚠️ Control display volume..." : @"Control display volume...";
+    item.toolTip = problem;
+}
+
 - (NSString *)controlDisplayVolumeDiagnostics
 {
     NSMutableString *r = [NSMutableString string];
@@ -3079,6 +3099,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 - (void)menuWillOpen:(NSMenu *)menu
 {
 	[self updatePercentages];
+	[self updateControlDisplayVolumeMenuItem];
 
 	if(!_Tapping)
 	{
