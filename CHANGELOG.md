@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Support for Spotifast on macOS**, using its local socket for playback state and volume. Spotifast has its own checkbox and volume percentage in the menu and appears in Copy Diagnostics.
 - **Control display volume** in the menu, off by default. The speakers of most monitors and TVs have no software volume control, so macOS cannot change their volume. With this option on and [BetterDisplay](https://github.com/waydabber/BetterDisplay#readme) running (its free version is enough), the volume keys change the display's volume through BetterDisplay when they act on the system volume, and Volume Control shows its HUD. Turn off "Listen to native audio keys" in BetterDisplay, so that only Volume Control handles the volume keys.
 
 ## [2.5.1] - 2026-10-13
