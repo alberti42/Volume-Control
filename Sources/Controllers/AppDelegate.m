@@ -1803,8 +1803,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         alert.messageText = @"Control Display Volume";
         alert.informativeText =
             @"The speakers of most monitors and TVs have no software volume control, so macOS "
-            @"cannot change their volume. BetterDisplay can, and Volume Control can use it for the "
-            @"volume keys. The free version of BetterDisplay is enough.";
+            @"cannot change their volume.\n\n"
+            @"BetterDisplay is a free app for managing displays. Among other things, it changes the "
+            @"volume of monitor and TV speakers, and Volume Control can use it for the volume keys. "
+            @"The free version of BetterDisplay is enough:";
+        alert.accessoryView = [self linkFieldWithURL:@"https://github.com/waydabber/BetterDisplay"];
         [alert addButtonWithTitle:@"Get BetterDisplay"];
         [alert addButtonWithTitle:@"Cancel"];
         [NSApp activateIgnoringOtherApps:YES];
@@ -1844,9 +1847,10 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             return;
         }
         NSString *explanation =
-            @"Volume Control can change the volume of a display through BetterDisplay. It does so "
-            @"when the volume keys act on the system volume and the output is a display that "
-            @"BetterDisplay controls.";
+            @"BetterDisplay, an app for managing displays that is installed on this Mac, can change "
+            @"the volume of monitor and TV speakers, which macOS cannot. Volume Control can use it "
+            @"for the volume keys: it does so when they act on the system volume and the output is "
+            @"a display that BetterDisplay controls.";
         if ([self->_betterDisplay listensToNativeAudioKeys])
             explanation = [explanation stringByAppendingString:
                 @"\n\n⚠️ \"Listen to native audio keys\" is on in BetterDisplay's settings. Open "
@@ -2579,6 +2583,12 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 // for use as an NSAlert accessory view.
 - (NSTextField *)diagnosticsLinkField
 {
+    return [self linkFieldWithURL:kGitHubIssuesURL];
+}
+
+// A clickable link for a dialog's accessory view.
+- (NSTextField *)linkFieldWithURL:(NSString *)url
+{
     NSTextField *field = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 420, 18)];
     [field setBezeled:NO];
     [field setDrawsBackground:NO];
@@ -2586,9 +2596,9 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [field setSelectable:YES];
     [field setAllowsEditingTextAttributes:YES];
 
-    NSMutableAttributedString *attr = [[NSMutableAttributedString alloc] initWithString:kGitHubIssuesURL];
-    NSRange range = NSMakeRange(0, kGitHubIssuesURL.length);
-    [attr addAttribute:NSLinkAttributeName value:kGitHubIssuesURL range:range];
+    NSMutableAttributedString *attr = [[NSMutableAttributedString alloc] initWithString:url];
+    NSRange range = NSMakeRange(0, url.length);
+    [attr addAttribute:NSLinkAttributeName value:url range:range];
     [attr addAttribute:NSForegroundColorAttributeName value:[NSColor linkColor] range:range];
     [attr addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:range];
     [field setAttributedStringValue:attr];
