@@ -88,6 +88,7 @@
 @property (assign, nonatomic) bool PlaySoundFeedback;
 @property (assign, nonatomic) bool Tapping;
 @property (assign, nonatomic) bool StayAheadOfOtherApps;
+@property (assign, nonatomic) bool ControlDisplayVolume;
 @property (assign, nonatomic) bool UseAppleCMDModifier;
 @property (assign, nonatomic) bool LockSystemAndPlayerVolume;
 @property (assign, nonatomic) bool AppleCMDModifierPressed;
@@ -105,6 +106,7 @@
 - (IBAction)togglePlaySoundFeedback:(id)sender;
 - (IBAction)toggleTapping:(id)sender;
 - (IBAction)toggleStayAheadOfOtherApps:(id)sender;
+- (IBAction)toggleControlDisplayVolume:(id)sender;
 - (IBAction)aboutPanel:(id)sender;
 - (IBAction)copyDiagnostics:(id)sender;
 - (IBAction)sliderValueChanged:(NSSliderCell*)slider;
