@@ -1366,6 +1366,20 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(applicationDidLaunch:)
 	                                                           name:NSWorkspaceDidLaunchApplicationNotification object:nil];
 
+	// Look up the BetterDisplay display as soon as the output device changes,
+	// so the first key press afterwards already finds it. Without this, that
+	// press started the lookup and went to macOS.
+	AudioObjectPropertyAddress defaultOutput = {
+		kAudioHardwarePropertyDefaultOutputDevice,
+		kAudioObjectPropertyScopeGlobal,
+		kAudioObjectPropertyElementMain
+	};
+	__weak AppDelegate *weakSelf = self;
+	AudioObjectAddPropertyListenerBlock(kAudioObjectSystemObject, &defaultOutput, dispatch_get_main_queue(),
+		^(UInt32 count, const AudioObjectPropertyAddress *addresses) {
+			[weakSelf prefetchDisplayVolumeTarget];
+		});
+
 	// Install icon into the menu bar
 	[self showInStatusBarWithCompletion:^{
 		// This code will only run AFTER the icon has been created and is visible.
