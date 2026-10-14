@@ -287,6 +287,11 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDisplay";
 
+// Debug aid: set to 1 to make -isInstalled report NO, so the dialog for users
+// without BetterDisplay can be shown on a Mac that has it. MUST be 0 in
+// shipping builds.
+#define FAKE_BETTERDISPLAY_NOT_INSTALLED 0
+
 // Sends requests to BetterDisplay through its notification-based integration
 // (https://betterdisplay.pro/guide/integration/third-party-apps/): a JSON
 // object with uuid, commands and parameters, posted as the object of
@@ -330,7 +335,11 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
 
 - (BOOL)isInstalled
 {
+#if FAKE_BETTERDISPLAY_NOT_INSTALLED
+    return NO;
+#else
     return [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:kBetterDisplayBundleID] != nil;
+#endif
 }
 
 - (BOOL)isRunning
