@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **Control display volume** in the menu, off by default. The speakers of most monitors and TVs have no software volume control, so macOS cannot change their volume. With this option on and [BetterDisplay](https://github.com/waydabber/BetterDisplay#readme) running (its free version is enough), the volume keys change the display's volume through BetterDisplay when they act on the system volume, and Volume Control shows its HUD. Turn off "Listen to native audio keys" in BetterDisplay, so that only Volume Control handles the volume keys.
+- **Control display volume** in the menu, off by default. The speakers of most monitors and TVs have no software volume control, so macOS cannot change their volume. With this option on and [BetterDisplay](https://github.com/waydabber/BetterDisplay#readme) running (its free version is enough), the volume keys change the display's volume through BetterDisplay when they act on the system volume, and Volume Control shows its HUD. Turn off "Listen to native audio keys" in BetterDisplay, so that only Volume Control handles the volume keys. While the option is on but BetterDisplay is not installed, not running, or still listens to native audio keys, the menu item shows ⚠️ and its tooltip gives the reason. When BetterDisplay controls the display, the menu's System line shows the display's volume instead of "n/a". Copy Diagnostics has a "Control display volume" section.
 
 ## [2.5.1] - 2026-10-13
 
