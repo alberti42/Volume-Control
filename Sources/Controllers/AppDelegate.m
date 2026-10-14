@@ -295,6 +295,7 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
 @interface BetterDisplayClient : NSObject
 - (BOOL)isInstalled;
 - (BOOL)isRunning;
+- (BOOL)listensToNativeAudioKeys;
 // Calls completion on the main thread: answered = NO if BetterDisplay did not
 // answer within timeout. A parameter value of NSNull is sent as a flag.
 - (void)send:(NSString *)command
@@ -334,6 +335,26 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
 - (BOOL)isRunning
 {
     return [NSRunningApplication runningApplicationsWithBundleIdentifier:kBetterDisplayBundleID].count > 0;
+}
+
+// BetterDisplay's "Listen to native audio keys", read from its user defaults
+// (BetterDisplay is not sandboxed). The setting is stored inverted as
+// audioMediaKeyDisabled; the key is missing until the user changes the
+// setting, and then the setting is on.
+- (BOOL)listensToNativeAudioKeys
+{
+    CFStringRef app = (__bridge CFStringRef)kBetterDisplayBundleID;
+    CFPreferencesAppSynchronize(app);
+    CFPropertyListRef value = CFPreferencesCopyAppValue(CFSTR("audioMediaKeyDisabled"), app);
+    BOOL disabled = NO;
+    if (value) {
+        if (CFGetTypeID(value) == CFBooleanGetTypeID())
+            disabled = CFBooleanGetValue((CFBooleanRef)value);
+        else if (CFGetTypeID(value) == CFNumberGetTypeID())
+            disabled = [(__bridge NSNumber *)value boolValue];
+        CFRelease(value);
+    }
+    return !disabled;
 }
 
 - (void)send:(NSString *)command
@@ -1627,7 +1648,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 {
     if (![self StayAheadOfOtherApps]) {
         NSAlert *alert = [[NSAlert alloc] init];
-        alert.messageText = @"Stay Ahead of Other Apps";
+        alert.messageText = @"Keep Volume Control ahead of other apps?";
         alert.informativeText =
             @"Another app that handles the volume keys, such as BetterDisplay or MonitorControl, "
             @"can take them away from Volume Control. If you can, turn off that app's handling "
@@ -1637,8 +1658,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             @"keyboard, which puts it in front again. Each check takes about 30 µs.\n\n"
             @"If the other app also moves itself back in front, the two apps would keep taking "
             @"turns. Volume Control then turns this option off and tells you which app it is.";
-        [alert addButtonWithTitle:@"Turn On"];
-        [alert addButtonWithTitle:@"Cancel"];
+        [alert addButtonWithTitle:@"Yes"];
+        [alert addButtonWithTitle:@"No"];
         [NSApp activateIgnoringOtherApps:YES];
         if ([alert runModal] != NSAlertFirstButtonReturn)
             return;
@@ -1788,15 +1809,19 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             [alert runModal];
             return;
         }
-        alert.messageText = @"Control Display Volume";
-        alert.informativeText =
-            @"When the volume keys act on the system volume and the output is a display whose volume "
-            @"BetterDisplay controls, Volume Control asks BetterDisplay to change the display's volume "
-            @"and shows its own HUD.\n\n"
-            @"In BetterDisplay's settings, turn off \"Listen to native audio keys\", so that only "
-            @"Volume Control handles the volume keys.";
-        [alert addButtonWithTitle:@"Turn On"];
-        [alert addButtonWithTitle:@"Cancel"];
+        NSString *explanation =
+            @"Volume Control can change the volume of a display through BetterDisplay. It does so "
+            @"when the volume keys act on the system volume and the output is a display that "
+            @"BetterDisplay controls.";
+        if ([self->_betterDisplay listensToNativeAudioKeys])
+            explanation = [explanation stringByAppendingString:
+                @"\n\n\"Listen to native audio keys\" is on in BetterDisplay's settings. Open "
+                @"BetterDisplay's settings and turn it off, so that only Volume Control handles "
+                @"the volume keys."];
+        alert.messageText = @"Use BetterDisplay to control the display's volume?";
+        alert.informativeText = explanation;
+        [alert addButtonWithTitle:@"Yes"];
+        [alert addButtonWithTitle:@"No"];
         [NSApp activateIgnoringOtherApps:YES];
         if ([alert runModal] == NSAlertFirstButtonReturn)
             [self setControlDisplayVolume:YES];
@@ -1997,6 +2022,8 @@ static NSDictionary *EDIDFieldsFromAudioDeviceUID(NSString *uid)
     BetterDisplayClient *client = _betterDisplay ?: [[BetterDisplayClient alloc] init];
     [r appendFormat:@"BetterDisplay : %@\n", ![client isInstalled] ? @"not installed"
                                             : [client isRunning] ? @"running" : @"installed, not running"];
+    if ([client isInstalled])
+        [r appendFormat:@"Listen to native audio keys (BetterDisplay) : %@\n", [client listensToNativeAudioKeys] ? @"on" : @"off"];
     if ([self ControlDisplayVolume])
         [r appendFormat:@"Display       : %@\n", _displayMatchNote ?: @"not looked up yet"];
     return r;
