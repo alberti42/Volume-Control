@@ -154,6 +154,7 @@ What changed in each version since 2.0.0 is listed in [CHANGELOG.md](CHANGELOG.m
 
 You can download older versions here:
 
+- [2.5.1](https://github.com/alberti42/Volume-Control/releases/download/v2.5.1/VolumeControl.zip): On a display without software volume control, the volume keys are passed on to macOS when no player is playing; Copy Diagnostics says whether Volume Control can control the system volume.
 - [2.5.0](https://github.com/alberti42/Volume-Control/releases/download/v2.5.0/VolumeControl.zip): Added the "Stay ahead of other apps" option, which keeps the volume keys with Volume Control when another app, such as BetterDisplay, takes them.
 - [2.4.1](https://github.com/alberti42/Volume-Control/releases/download/v2.4.1/VolumeControl.zip): Spotify's volume steps the same amount up and down; Copy Diagnostics lists the apps that intercept system keys and no longer freezes; Option + volume key opens the Sound settings again.
 - [2.4.0](https://github.com/alberti42/Volume-Control/releases/download/v2.4.0/VolumeControl.zip): On macOS 26 and later, the volume HUD looks like the system volume HUD; holding Command switches the volume keys on Macs where the volume key event arrived without the Command key; unticking and re-ticking Enable brings back volume keys that stopped working.
