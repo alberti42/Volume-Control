@@ -6,6 +6,50 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.6.0</title>
+            <pubDate>Wed, 14 Oct 2026 12:38:09 +0000</pubDate>
+            <sparkle:version>328</sparkle:version>
+            <sparkle:shortVersionString>2.6.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/alberti42/Volume-Control/releases/download/v2.6.0/VolumeControl.zip" length="6257764" type="application/octet-stream" sparkle:edSignature="fb+W2cXkvUrS6ZjovqHmrxfMoUW7eXvPQV+w0pnchNd1JngdeOfbSYAtbXv3ZPUNjvWfXLmNAft/OwqSnKYWAQ=="/>
+        
+            <description><![CDATA[
+<p>Volume Control had several releases in the last weeks. If you are updating from 2.4.0 or earlier, these are the main changes since 2.3.2:</p>
+<ul>
+<li><strong>Liquid Glass HUD</strong> (2.4.0): on macOS 26 and later, the volume HUD looks like the system volume HUD, with the icon of the player it controls.</li>
+<li><strong>Control display volume</strong> (2.6.0): the volume keys change the volume of monitors and TVs, whose speakers have no software volume control (it requires the free version of BetterDisplay to be installed).</li>
+<li><strong>Stay ahead of other apps</strong> (2.5.0): keeps the volume keys with Volume Control when another app, such as BetterDisplay or MonitorControl, takes them.</li>
+<li><strong>Copy Diagnostics</strong> (2.3.3 to 2.5.1): the report lists the apps that intercept the volume keys, shows whether the keys reach Volume Control, and no longer freezes when a player does not answer.</li>
+<li><strong>Fixes</strong>: holding ⌘ works on Macs where the volume key event arrived without it; Spotify's volume steps the same amount up and down; Option + volume key opens the Sound settings again; on a display without software volume control, the volume keys are passed on to macOS when no player is playing.</li>
+</ul>
+<h2>Changes in 2.6.0</h2>
+<h3>Added</h3>
+<ul>
+<li><strong>Control display volume</strong> in the menu, off by default. The speakers of most monitors and TVs have no software volume control, so macOS cannot change their volume. With this option on and <a href="https://github.com/waydabber/BetterDisplay#readme">BetterDisplay</a> running (its free version is enough), the volume keys change the display's volume through BetterDisplay when they act on the system volume, and Volume Control shows its HUD. Turn off "Listen to native audio keys" in BetterDisplay, so that only Volume Control handles the volume keys. While the option is on but BetterDisplay is not installed, not running, or still listens to native audio keys, the menu item shows ⚠️ and its tooltip gives the reason. When BetterDisplay controls the display, the menu's System line shows the display's volume instead of "n/a". Copy Diagnostics has a "Control display volume" section.</li>
+</ul>
+<h2>Changes since v2.5.1</h2>
+<ul>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/114b323">114b323</a> Add a debug switch that fakes BetterDisplay as not installed</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/f0404a8">f0404a8</a> Reword the BetterDisplay explanation in the Yes/No dialog</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/85f32cd">85f32cd</a> Say what BetterDisplay is in the Control display volume dialogs</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/6d4d373">6d4d373</a> Version bump to v2.6.0 (build 314)</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/9607179">9607179</a> Describe the menu warning, System line and diagnostics in CHANGELOG.md</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/4c60eb6">4c60eb6</a> Look up the BetterDisplay display when the output device changes</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/9468427">9468427</a> Read the display's volume from BetterDisplay before each key press</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/6897f55">6897f55</a> Mark "Control display volume" with ⚠️ when it cannot work</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/e3d28aa">e3d28aa</a> Mark the BetterDisplay setting warning with ⚠️ in the dialog</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/f80294f">f80294f</a> Ask before turning on display volume and staying ahead; check BetterDisplay's setting</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/3e4191c">3e4191c</a> Recommend only BetterDisplay in the Control display volume dialog</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/4d929ec">4d929ec</a> Version bump to v2.6.0-beta.1 (build 313)</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/208561f">208561f</a> Mention Control display volume in the README</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/937799d">937799d</a> Add "Control display volume" through BetterDisplay</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/d402959">d402959</a> List 2.5.0 among the README's older versions</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/77ea630">77ea630</a> Release v2.5.1 (automatic appcast update)</li>
+</ul>
+<p><strong>Full diff:</strong> https://github.com/alberti42/Volume-Control/compare/v2.5.1...v2.6.0</p>
+            ]]></description>
+        </item>
+        <item>
             <title>2.5.1</title>
             <pubDate>Tue, 13 Oct 2026 05:42:33 +0000</pubDate>
             <sparkle:version>312</sparkle:version>
