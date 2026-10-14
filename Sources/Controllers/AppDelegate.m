@@ -1847,10 +1847,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
             return;
         }
         NSString *explanation =
-            @"BetterDisplay, an app for managing displays that is installed on this Mac, can change "
-            @"the volume of monitor and TV speakers, which macOS cannot. Volume Control can use it "
-            @"for the volume keys: it does so when they act on the system volume and the output is "
-            @"a display that BetterDisplay controls.";
+            @"BetterDisplay is a third-party app for managing displays, which is already installed "
+            @"on this Mac.\n\n"
+            @"Volume Control can use it to change the volume of monitor and TV speakers, which macOS "
+            @"cannot. It does so when the volume keys act on the system volume and the audio output "
+            @"is set to a display that BetterDisplay controls.";
         if ([self->_betterDisplay listensToNativeAudioKeys])
             explanation = [explanation stringByAppendingString:
                 @"\n\n⚠️ \"Listen to native audio keys\" is on in BetterDisplay's settings. Open "
