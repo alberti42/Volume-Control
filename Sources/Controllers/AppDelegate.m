@@ -226,6 +226,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 	BOOL      _displayLookupInFlight;
 	NSString* _displayMatchNote;          // how the display was found, or why not; for diagnostics
 	BOOL      _betterDisplayMissingShown; // the "not running" dialog was shown since BetterDisplay last ran
+	BOOL      _displayVolumeJustRead;     // set while acting on a key press right after reading the display's volume
 	//StatusItemView* _statusBarItemView;
 	NSTimer* _statusBarHideTimer;
 	NSPopover* _hideFromStatusBarHintPopover;
@@ -407,9 +408,12 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
 @end
 
 // A volume target, like a player or the system volume, for a display whose
-// volume BetterDisplay controls (DDC). currentVolume (0-100) is a cache: it is
-// read from BetterDisplay when the target is created and after each change,
-// and each change is sent to BetterDisplay as an absolute value (0-1).
+// volume BetterDisplay controls (DDC). BetterDisplay answers through
+// distributed notifications, which macOS delivers on the main thread, so the
+// volume cannot be read synchronously like a player's. Instead AppDelegate
+// calls -refreshVolume: before each key press and acts in its completion;
+// currentVolume (0-100) holds the value read or last set. Each change is sent
+// as an absolute value (0-1).
 @interface DisplayVolumeTarget : NSObject
 - (instancetype)initWithClient:(BetterDisplayClient *)client tagID:(NSString *)tagID name:(NSString *)name icon:(NSImage *)icon;
 - (void)refreshVolume:(void (^)(BOOL ok))completion;
@@ -418,6 +422,7 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
 @property (strong, nonatomic) NSImage *icon;
 @property (copy, nonatomic, readonly) NSString *tagID;
 @property (copy, nonatomic, readonly) NSString *name;
+@property (assign, nonatomic, readonly) BOOL lastReadOK; // NO until a read succeeds, and after a failed one
 @end
 
 @implementation DisplayVolumeTarget {
@@ -447,9 +452,10 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
 
 - (void)refreshVolume:(void (^)(BOOL))completion
 {
-    [_client send:@"get" parameters:@{@"tagID": _tagID, @"volume": [NSNull null]} timeout:1.0
+    [_client send:@"get" parameters:@{@"tagID": _tagID, @"volume": [NSNull null]} timeout:0.25
        completion:^(BOOL answered, BOOL result, NSString *payload) {
         BOOL ok = answered && result && payload.length > 0;
+        self->_lastReadOK = ok;
         if (ok)
             self->_currentVolume = [payload doubleValue] * 100.0;
         if (completion) completion(ok);
@@ -1177,6 +1183,20 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 {
 	id runningPlayerPtr = [self runningPlayer];
 
+	// Muting stores the current volume to restore it later: read a display's
+	// volume from BetterDisplay first (see -setVolumeUp:).
+	if ([runningPlayerPtr isKindOfClass:[DisplayVolumeTarget class]] &&
+	    [runningPlayerPtr oldVolume] < 0 && !_displayVolumeJustRead) {
+		[(DisplayVolumeTarget *)runningPlayerPtr refreshVolume:^(BOOL ok) {
+			if (!ok)
+				return;
+			self->_displayVolumeJustRead = YES;
+			[self MuteVol];
+			self->_displayVolumeJustRead = NO;
+		}];
+		return;
+	}
+
 	if (runningPlayerPtr != nil)
 	{
 		if([runningPlayerPtr oldVolume]<0)
@@ -1460,7 +1480,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[[self systemBtn] setState:controllable ? NSControlStateValueOn : NSControlStateValueOff];
 
 	if(!controllable)
-		[[self systemPerc] setStringValue:@"(n/a)"];
+		[self showUncontrollableSystemPercentage];
 	else if([systemAudio isMuted])
 		[[self systemPerc] setStringValue:[NSString stringWithFormat:@"(%d%%)",0]];
 	else
@@ -2664,6 +2684,22 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 {
 	id runningPlayerPtr = [self runningPlayer];
 
+	// A display's volume is read from BetterDisplay before each key press, as
+	// a player's is; the answer arrives asynchronously, so step in its
+	// completion. During a ramp no read happens: the step starts from the
+	// value just set, as for players. No answer: ignore the key press.
+	if ([runningPlayerPtr isKindOfClass:[DisplayVolumeTarget class]] &&
+	    self->volumeRampTimer == nil && !_displayVolumeJustRead) {
+		[(DisplayVolumeTarget *)runningPlayerPtr refreshVolume:^(BOOL ok) {
+			if (!ok)
+				return;
+			self->_displayVolumeJustRead = YES;
+			[self setVolumeUp:increase];
+			self->_displayVolumeJustRead = NO;
+		}];
+		return;
+	}
+
 	if (runningPlayerPtr != nil)
 	{
         // During a ramp (key held) use the locally-cached doubleVolume for
@@ -2808,6 +2844,37 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 	}
 }
 
+// The System line in the menu when the output device has no software volume
+// control: the display's volume through BetterDisplay if available, else n/a.
+- (DisplayVolumeTarget *)menuDisplayTarget
+{
+	if (![self ControlDisplayVolume] || !_displayTarget || ![_betterDisplay isRunning])
+		return nil;
+	NSString *uid = [systemAudio getDefaultOutputDeviceUID];
+	return (uid && [uid isEqualToString:_displayTargetDeviceUID]) ? _displayTarget : nil;
+}
+
+- (void)showUncontrollableSystemPercentage
+{
+	DisplayVolumeTarget *display = [self menuDisplayTarget];
+	BOOL readable = display && display.lastReadOK;
+	[[self systemBtn] setState:readable ? NSControlStateValueOn : NSControlStateValueOff];
+	[[self systemPerc] setStringValue:readable ? [NSString stringWithFormat:@"(%d%%)", (int)round(display.currentVolume)] : @"(n/a)"];
+}
+
+// Reads the display's volume for the menu; the System line updates when
+// BetterDisplay answers.
+- (void)refreshMenuDisplayVolume
+{
+	DisplayVolumeTarget *display = [self menuDisplayTarget];
+	if (!display || [systemAudio hasControllableVolume])
+		return;
+	[display refreshVolume:^(BOOL ok) {
+		if (![self->systemAudio hasControllableVolume])
+			[self showUncontrollableSystemPercentage];
+	}];
+}
+
 - (void) setSystemVolume:(NSInteger)volume
 {
 	if (volume == -1)
@@ -2827,7 +2894,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 	if (controllable)
 		[[self systemPerc] setStringValue:[NSString stringWithFormat:@"(%d%%)",(int)volume]];
 	else
-		[[self systemPerc] setStringValue:@"(n/a)"];
+		[self showUncontrollableSystemPercentage];
 }
 
 // Shows "(n/a)" in the player's menu field when its last volume read
@@ -3100,6 +3167,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 {
 	[self updatePercentages];
 	[self updateControlDisplayVolumeMenuItem];
+	[self refreshMenuDisplayVolume];
 
 	if(!_Tapping)
 	{
