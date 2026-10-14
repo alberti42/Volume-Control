@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-10-14
+
 ### Added
 
 - **Control display volume** in the menu, off by default. The speakers of most monitors and TVs have no software volume control, so macOS cannot change their volume. With this option on and [BetterDisplay](https://github.com/waydabber/BetterDisplay#readme) running (its free version is enough), the volume keys change the display's volume through BetterDisplay when they act on the system volume, and Volume Control shows its HUD. Turn off "Listen to native audio keys" in BetterDisplay, so that only Volume Control handles the volume keys. While the option is on but BetterDisplay is not installed, not running, or still listens to native audio keys, the menu item shows ⚠️ and its tooltip gives the reason. When BetterDisplay controls the display, the menu's System line shows the display's volume instead of "n/a". Copy Diagnostics has a "Control display volume" section.
@@ -163,7 +165,8 @@ Tagged but not published as a release; the fix shipped in 2.1.0.
 - Volume keys from the MacBook Pro Touch Bar are handled.
 - The system volume can be muted completely; 0 was not silent before.
 
-[Unreleased]: https://github.com/alberti42/Volume-Control/compare/v2.5.1...HEAD
+[Unreleased]: https://github.com/alberti42/Volume-Control/compare/v2.6.0...HEAD
+[2.6.0]: https://github.com/alberti42/Volume-Control/compare/v2.5.1...v2.6.0
 [2.5.1]: https://github.com/alberti42/Volume-Control/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/alberti42/Volume-Control/compare/v2.4.1...v2.5.0
 [2.4.1]: https://github.com/alberti42/Volume-Control/compare/v2.4.0...v2.4.1
