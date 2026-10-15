@@ -41,7 +41,7 @@ On macOS 26 and later, the volume HUD looks like the system volume HUD, with the
 - Customize the volume step size.
 - On macOS 26 and later, the volume HUD matches the system volume HUD: the same Liquid Glass, slider with tick marks, size and position.
 - Option to hide the volume bezel overlay (HUD).
-- Control the volume of monitor and TV speakers through [BetterDisplay](https://github.com/waydabber/BetterDisplay#readme) (free version) with **Control display volume** (from 2.6.0).
+- Control the volume of monitor and TV speakers through [BetterDisplay](https://github.com/waydabber/BetterDisplay#readme) (free version) with **Control display volume** (from 2.6.0), or through [Lunar](https://github.com/alin23/Lunar) (free version, from 2.7.0).
 - When Music, Spotify, Doppler, or Swinsian is playing, volume keys affect their volume; otherwise, they adjust system volume.
 - Holding `⌘` (Command) key inverts this behavior.
 - Toggle behavior with the "Use ⌘ modifier" option.
@@ -99,7 +99,7 @@ The app requires Accessibility and Automation permissions to control other apps'
 
 **The volume keys never work, although Accessibility is granted.** The permission record is probably stale: quit Volume Control, remove it from **System Settings → Privacy & Security → Accessibility** with the "−" button, then add it again and relaunch.
 
-**The volume keys do not change the system volume.** Some output devices, for example some displays and TVs, expose no software volume control; their volume must be changed on the device itself. From 2.6.0, **Control display volume** in the menu changes their volume through [BetterDisplay](https://github.com/waydabber/BetterDisplay#readme), if BetterDisplay controls the display.
+**The volume keys do not change the system volume.** Some output devices, for example some displays and TVs, expose no software volume control; their volume must be changed on the device itself. From 2.6.0, **Control display volume** in the menu changes their volume through [BetterDisplay](https://github.com/waydabber/BetterDisplay#readme), if BetterDisplay controls the display. From 2.7.0, it can use [Lunar](https://github.com/alin23/Lunar) instead.
 
 **Reporting a problem.** Choose **Copy Diagnostics...** in the menu. Volume Control copies a diagnostics report to your clipboard. Nothing is sent over the Internet — it is plain text you can read and edit before sharing. Paste it into a [GitHub issue](https://github.com/alberti42/Volume-Control/issues).
 
