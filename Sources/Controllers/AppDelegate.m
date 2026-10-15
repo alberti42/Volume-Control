@@ -18,6 +18,9 @@
 #import <CoreServices/CoreServices.h>
 #import <sys/sysctl.h>
 #import <libproc.h>
+#import <sys/socket.h>
+#import <netinet/in.h>
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
 #import "OSD.h"
 
@@ -203,7 +206,7 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 
 #pragma mark - Class extension for status menu
 
-@class BetterDisplayClient, DisplayVolumeTarget;
+@class BetterDisplayClient, LunarClient, DisplayVolumeTarget;
 
 @interface AppDelegate () <NSMenuDelegate>
 {
@@ -220,12 +223,13 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 	NSMutableArray<NSDictionary *> *_stayAheadRecent; // last re-creations: @{@"date", @"app"}, newest last
 	NSString* _stayAheadStopReason;      // why the option turned itself off; nil otherwise
 	BetterDisplayClient* _betterDisplay;
-	DisplayVolumeTarget* _displayTarget;  // nil unless BetterDisplay controls the output display
+	LunarClient* _lunar;
+	DisplayVolumeTarget* _displayTarget;  // nil unless the display app controls the output display
 	NSString* _displayTargetDeviceUID;    // output device the lookup below was made for
 	NSDate*   _displayLookupDate;         // when that lookup finished; nil while none
 	BOOL      _displayLookupInFlight;
 	NSString* _displayMatchNote;          // how the display was found, or why not; for diagnostics
-	BOOL      _betterDisplayMissingShown; // the "not running" dialog was shown since BetterDisplay last ran
+	BOOL      _displayAppMissingShown;    // the "not running" dialog was shown since the display app last ran
 	BOOL      _displayVolumeJustRead;     // set while acting on a key press right after reading the display's volume
 	//StatusItemView* _statusBarItemView;
 	NSTimer* _statusBarHideTimer;
@@ -283,7 +287,120 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 }
 @end
 
-#pragma mark - BetterDisplay integration
+#pragma mark - Dialog views
+
+// A link in a dialog: opens url when clicked, and shows the pointing-hand
+// cursor while the mouse is over it.
+@interface LinkButton : NSButton
+- (instancetype)initWithURL:(NSString *)url title:(NSString *)title font:(NSFont *)font;
+@end
+
+@implementation LinkButton {
+    NSString *_url;
+}
+
+- (instancetype)initWithURL:(NSString *)url title:(NSString *)title font:(NSFont *)font
+{
+    if (self = [super initWithFrame:NSZeroRect]) {
+        _url = [url copy];
+        self.bordered = NO;
+        self.attributedTitle = [[NSAttributedString alloc] initWithString:title attributes:@{
+            NSFontAttributeName: font,
+            NSForegroundColorAttributeName: [NSColor linkColor],
+            NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)}];
+        self.toolTip = url;
+        self.target = self;
+        self.action = @selector(openURL:);
+        [self sizeToFit];
+    }
+    return self;
+}
+
+- (void)openURL:(id)sender
+{
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:_url]];
+}
+
+- (void)resetCursorRects
+{
+    [self addCursorRect:self.bounds cursor:[NSCursor pointingHandCursor]];
+}
+
+@end
+
+// Lays out its subviews from the top.
+@interface FlippedView : NSView
+@end
+
+@implementation FlippedView
+- (BOOL)isFlipped { return YES; }
+@end
+
+#pragma mark - Display volume apps (BetterDisplay, Lunar)
+
+// For a display's audio device, macOS builds the UID from the display's EDID,
+// e.g. "1D742532-0000-0000-1523-0104C5462778": vendor (1D74), product with its
+// two bytes swapped (2532 = 0x3225), serial number (0000-0000), week (15 hex)
+// and year (23 hex, + 1990). Returns nil if the UID does not have this form.
+static NSDictionary *EDIDFieldsFromAudioDeviceUID(NSString *uid)
+{
+    NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:
+        @"^([0-9A-F]{4})([0-9A-F]{2})([0-9A-F]{2})-([0-9A-F]{2})([0-9A-F]{2})-([0-9A-F]{2})([0-9A-F]{2})-([0-9A-F]{2})([0-9A-F]{2})-"
+        options:NSRegularExpressionCaseInsensitive error:NULL];
+    NSTextCheckingResult *m = [re firstMatchInString:uid options:0 range:NSMakeRange(0, uid.length)];
+    if (!m)
+        return nil;
+    unsigned v[10] = {0};
+    for (NSUInteger i = 1; i <= 9; i++)
+        [[NSScanner scannerWithString:[uid substringWithRange:[m rangeAtIndex:i]]] scanHexInt:&v[i]];
+    unsigned serialLE = v[4] | (v[5] << 8) | (v[6] << 16) | ((unsigned)v[7] << 24);
+    unsigned serialBE = ((unsigned)v[4] << 24) | (v[5] << 16) | (v[6] << 8) | v[7];
+    return @{@"vendor": @(v[1]),
+             @"model": @(v[2] | (v[3] << 8)),
+             @"serials": @[@(serialLE), @(serialBE)],
+             @"week": @(v[8]),
+             @"year": @(v[9] + 1990)};
+}
+
+static BOOL BoolPreferenceOfApp(NSString *bundleID, NSString *key, BOOL missing)
+{
+    CFStringRef app = (__bridge CFStringRef)bundleID;
+    CFPreferencesAppSynchronize(app);
+    CFPropertyListRef value = CFPreferencesCopyAppValue((__bridge CFStringRef)key, app);
+    BOOL result = missing;
+    if (value) {
+        if (CFGetTypeID(value) == CFBooleanGetTypeID())
+            result = CFBooleanGetValue((CFBooleanRef)value);
+        else if (CFGetTypeID(value) == CFNumberGetTypeID())
+            result = [(__bridge NSNumber *)value boolValue];
+        CFRelease(value);
+    }
+    return result;
+}
+
+// A third-party app that changes the volume of a display's speakers (DDC),
+// which macOS cannot. Volume Control uses it when the volume keys act on the
+// system volume and the output device has no software volume control.
+// Volumes are 0-100. Completions run on the main thread.
+@protocol DisplayVolumeApp <NSObject>
+@property (readonly, nonatomic) NSString *name;
+@property (readonly, nonatomic) NSString *bundleID;
+@property (readonly, nonatomic) NSString *webURL;
+// The app's setting that makes it handle the volume keys itself.
+@property (readonly, nonatomic) NSString *volumeKeysSetting;
+// What to do when the app runs but does not answer.
+@property (readonly, nonatomic) NSString *notAnsweringAdvice;
+- (BOOL)isInstalled;
+- (BOOL)isRunning;
+- (BOOL)listensToVolumeKeys;
+- (void)checkAnswers:(void (^)(BOOL answered))completion;
+// Finds the display whose audio device has this UID. displayID is nil if
+// there is none; note says how the display was found, or why not.
+- (void)findDisplayForDeviceUID:(NSString *)uid name:(NSString *)deviceName
+                     completion:(void (^)(NSString *displayID, NSString *displayName, NSString *note))completion;
+- (void)readVolumeOfDisplay:(NSString *)displayID completion:(void (^)(BOOL ok, double volume))completion;
+- (void)setVolume:(double)volume ofDisplay:(NSString *)displayID;
+@end
 
 static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDisplay";
 
@@ -298,10 +415,7 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
 // pro.betterdisplay.BetterDisplay.request. BetterDisplay answers on
 // pro.betterdisplay.BetterDisplay.response with the same uuid, a result and a
 // payload. The integration is on by default and works in the free version.
-@interface BetterDisplayClient : NSObject
-- (BOOL)isInstalled;
-- (BOOL)isRunning;
-- (BOOL)listensToNativeAudioKeys;
+@interface BetterDisplayClient : NSObject <DisplayVolumeApp>
 // Calls completion on the main thread: answered = NO if BetterDisplay did not
 // answer within timeout. A parameter value of NSNull is sent as a flag.
 - (void)send:(NSString *)command
@@ -333,6 +447,17 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:_observer];
 }
 
+- (NSString *)name { return @"BetterDisplay"; }
+- (NSString *)bundleID { return kBetterDisplayBundleID; }
+- (NSString *)webURL { return @"https://github.com/waydabber/BetterDisplay"; }
+- (NSString *)volumeKeysSetting { return @"Listen to native audio keys"; }
+
+- (NSString *)notAnsweringAdvice
+{
+    return @"In BetterDisplay's settings, turn on \"CLI access and notification based integration\", "
+           @"then choose \"Control display volume\" again.";
+}
+
 - (BOOL)isInstalled
 {
 #if FAKE_BETTERDISPLAY_NOT_INSTALLED
@@ -351,20 +476,85 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
 // (BetterDisplay is not sandboxed). The setting is stored inverted as
 // audioMediaKeyDisabled; the key is missing until the user changes the
 // setting, and then the setting is on.
-- (BOOL)listensToNativeAudioKeys
+- (BOOL)listensToVolumeKeys
 {
-    CFStringRef app = (__bridge CFStringRef)kBetterDisplayBundleID;
-    CFPreferencesAppSynchronize(app);
-    CFPropertyListRef value = CFPreferencesCopyAppValue(CFSTR("audioMediaKeyDisabled"), app);
-    BOOL disabled = NO;
-    if (value) {
-        if (CFGetTypeID(value) == CFBooleanGetTypeID())
-            disabled = CFBooleanGetValue((CFBooleanRef)value);
-        else if (CFGetTypeID(value) == CFNumberGetTypeID())
-            disabled = [(__bridge NSNumber *)value boolValue];
-        CFRelease(value);
-    }
-    return !disabled;
+    return !BoolPreferenceOfApp(kBetterDisplayBundleID, @"audioMediaKeyDisabled", NO);
+}
+
+- (void)checkAnswers:(void (^)(BOOL))completion
+{
+    [self send:@"get" parameters:@{@"identifiers": [NSNull null]} timeout:1.0
+    completion:^(BOOL answered, BOOL result, NSString *payload) {
+        completion(answered);
+    }];
+}
+
+- (void)findDisplayForDeviceUID:(NSString *)uid name:(NSString *)deviceName
+                     completion:(void (^)(NSString *, NSString *, NSString *))completion
+{
+    [self send:@"get" parameters:@{@"identifiers": [NSNull null]} timeout:1.0
+    completion:^(BOOL answered, BOOL result, NSString *payload) {
+        if (!answered || !result || payload.length == 0) {
+            completion(nil, nil, @"BetterDisplay did not answer");
+            return;
+        }
+
+        // The payload lists one JSON object per display, separated by commas.
+        NSData *json = [[NSString stringWithFormat:@"[%@]", payload] dataUsingEncoding:NSUTF8StringEncoding];
+        NSArray *items = [NSJSONSerialization JSONObjectWithData:json options:0 error:NULL];
+        NSMutableArray<NSDictionary *> *displays = [NSMutableArray array];
+        for (id item in ([items isKindOfClass:[NSArray class]] ? items : @[]))
+            if ([item isKindOfClass:[NSDictionary class]] && [item[@"deviceType"] isEqual:@"Display"] && item[@"tagID"])
+                [displays addObject:item];
+
+        NSMutableArray<NSDictionary *> *matches = [NSMutableArray array];
+        NSString *how = @"EDID";
+        NSDictionary *edid = EDIDFieldsFromAudioDeviceUID(uid);
+        if (edid) {
+            for (NSDictionary *d in displays) {
+                if ([d[@"vendor"] integerValue] == [edid[@"vendor"] integerValue] &&
+                    [d[@"model"] integerValue] == [edid[@"model"] integerValue] &&
+                    [edid[@"serials"] containsObject:@([d[@"serial"] longLongValue])] &&
+                    [d[@"weekOfManufacture"] integerValue] == [edid[@"week"] integerValue] &&
+                    [d[@"yearOfManufacture"] integerValue] == [edid[@"year"] integerValue])
+                    [matches addObject:d];
+            }
+        }
+        if (matches.count == 0) {
+            how = @"name";
+            for (NSDictionary *d in displays)
+                if ([d[@"name"] isEqual:deviceName] || [d[@"originalName"] isEqual:deviceName] || [d[@"productName"] isEqual:deviceName])
+                    [matches addObject:d];
+        }
+        if (matches.count == 0) {
+            completion(nil, nil, [NSString stringWithFormat:@"BetterDisplay controls no display matching \"%@\"", deviceName]);
+            return;
+        }
+
+        NSDictionary *d = matches.firstObject;
+        NSString *tagID = [NSString stringWithFormat:@"%@", d[@"tagID"]];
+        NSString *name = d[@"name"] ?: deviceName;
+        NSString *note = [NSString stringWithFormat:@"\"%@\" (tagID %@), matched by %@", name, tagID, how];
+        if (matches.count > 1)
+            note = [note stringByAppendingFormat:@"; %lu displays match, the first is used", (unsigned long)matches.count];
+        completion(tagID, name, note);
+    }];
+}
+
+- (void)readVolumeOfDisplay:(NSString *)displayID completion:(void (^)(BOOL, double))completion
+{
+    [self send:@"get" parameters:@{@"tagID": displayID, @"volume": [NSNull null]} timeout:0.25
+    completion:^(BOOL answered, BOOL result, NSString *payload) {
+        BOOL ok = answered && result && payload.length > 0;
+        completion(ok, ok ? [payload doubleValue] * 100.0 : 0);
+    }];
+}
+
+// BetterDisplay takes the volume as 0-1.
+- (void)setVolume:(double)volume ofDisplay:(NSString *)displayID
+{
+    NSString *value = [NSString stringWithFormat:@"%.4f", volume / 100.0];
+    [self send:@"set" parameters:@{@"tagID": displayID, @"volume": value} timeout:1.0 completion:nil];
 }
 
 - (void)send:(NSString *)command
@@ -416,33 +606,247 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
 
 @end
 
+static NSString * const kLunarBundleID = @"fyi.lunar.Lunar";
+static const uint16_t kLunarCLIPort = 23803; // LUNAR_CLI_PORT in Lunar's source
+
+// Debug aid: set to 1 to make -isInstalled report NO, so the dialog for users
+// without Lunar can be shown on a Mac that has it. MUST be 0 in shipping
+// builds.
+#define FAKE_LUNAR_NOT_INSTALLED 0
+
+// Sends commands to the server that Lunar runs on 127.0.0.1:23803 for its
+// command-line interface (https://github.com/alin23/Lunar, Lunar/Data/CLI.swift).
+// A request is Lunar's API key followed by the arguments of a `lunar` command,
+// separated by U+0001. Lunar compares the key with the apiKey entry of its
+// user defaults (Lunar is not sandboxed, so Volume Control reads it there, as
+// Lunar's own command-line client does), runs the command and writes its
+// output. Lunar then waits for the next request on the same connection, so
+// the client shuts down its side after the request and reads until Lunar
+// closes the connection. The command-line interface works in the free version.
+@interface LunarClient : NSObject <DisplayVolumeApp>
+@end
+
+@implementation LunarClient {
+    dispatch_queue_t _queue;                         // serial: one request at a time
+    NSMutableDictionary<NSString *, NSNumber *> *_pendingVolume; // latest volume to set, per display
+    NSMutableSet<NSString *> *_settingVolume;        // displays with a set request in flight
+}
+
+- (instancetype)init
+{
+    if (self = [super init]) {
+        _queue = dispatch_queue_create("io.alberti42.VolumeControl.lunar", DISPATCH_QUEUE_SERIAL);
+        _pendingVolume = [NSMutableDictionary dictionary];
+        _settingVolume = [NSMutableSet set];
+    }
+    return self;
+}
+
+- (NSString *)name { return @"Lunar"; }
+- (NSString *)bundleID { return kLunarBundleID; }
+- (NSString *)webURL { return @"https://github.com/alin23/Lunar"; }
+- (NSString *)volumeKeysSetting { return @"Listen for volume keys"; }
+
+- (NSString *)notAnsweringAdvice
+{
+    return @"Lunar did not answer on its command-line port (23803). Quit and reopen Lunar, "
+           @"then choose \"Control display volume\" again.";
+}
+
+- (BOOL)isInstalled
+{
+#if FAKE_LUNAR_NOT_INSTALLED
+    return NO;
+#else
+    return [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:kLunarBundleID] != nil;
+#endif
+}
+
+- (BOOL)isRunning
+{
+    return [NSRunningApplication runningApplicationsWithBundleIdentifier:kLunarBundleID].count > 0;
+}
+
+// Lunar's "Listen for volume keys", read from its user defaults. The key is
+// missing until the user changes the setting; the setting is on by default.
+- (BOOL)listensToVolumeKeys
+{
+    return BoolPreferenceOfApp(kLunarBundleID, @"volumeKeysEnabled", YES);
+}
+
+// Runs one request on _queue. output is nil if Lunar did not answer within
+// timeout, rejected the key, or reported a non-zero exit status.
+- (void)run:(NSArray<NSString *> *)arguments
+    timeout:(NSTimeInterval)timeout
+ completion:(void (^)(NSString *output))completion
+{
+    dispatch_async(_queue, ^{
+        CFPreferencesAppSynchronize((__bridge CFStringRef)kLunarBundleID);
+        NSString *key = CFBridgingRelease(CFPreferencesCopyAppValue(CFSTR("apiKey"), (__bridge CFStringRef)kLunarBundleID));
+        NSString *output = nil;
+        if ([key isKindOfClass:[NSString class]] && key.length > 0) {
+            NSArray *parts = [@[key] arrayByAddingObjectsFromArray:arguments];
+            output = [self exchange:[parts componentsJoinedByString:@"\001"] timeout:timeout];
+        }
+        if ([output hasPrefix:@"Unauthorized"] || [output hasPrefix:@"Status-Code:"])
+            output = nil;
+        if (completion)
+            dispatch_async(dispatch_get_main_queue(), ^{ completion(output); });
+    });
+}
+
+- (NSString *)exchange:(NSString *)request timeout:(NSTimeInterval)timeout
+{
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0)
+        return nil;
+    struct timeval tv = { (time_t)timeout, (suseconds_t)((timeout - floor(timeout)) * 1e6) };
+    setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof tv);
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
+    int one = 1;
+    setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &one, sizeof one);
+
+    struct sockaddr_in addr = {0};
+    addr.sin_len = sizeof addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(kLunarCLIPort);
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+    NSMutableData *received = nil;
+    NSData *data = [request dataUsingEncoding:NSUTF8StringEncoding];
+    if (connect(fd, (struct sockaddr *)&addr, sizeof addr) == 0 &&
+        send(fd, data.bytes, data.length, 0) == (ssize_t)data.length &&
+        shutdown(fd, SHUT_WR) == 0) {
+        received = [NSMutableData data];
+        char buffer[4096];
+        ssize_t n;
+        while ((n = recv(fd, buffer, sizeof buffer, 0)) > 0)
+            [received appendBytes:buffer length:(NSUInteger)n];
+        if (n < 0) // timed out
+            received = nil;
+    }
+    close(fd);
+    return received ? ([[NSString alloc] initWithData:received encoding:NSUTF8StringEncoding] ?: @"") : nil;
+}
+
+// `lunar displays --quiet` writes nothing and exits with 0 if Lunar has a
+// display, so an empty answer means Lunar accepted the key.
+- (void)checkAnswers:(void (^)(BOOL))completion
+{
+    [self run:@[@"displays", @"--quiet"] timeout:1.0 completion:^(NSString *output) {
+        completion(output != nil);
+    }];
+}
+
+// Lunar names a display by its CGDirectDisplayID, which Volume Control finds
+// itself: the EDID fields in the audio device's UID against CoreGraphics'
+// vendor, model and serial number of each display, then the name.
+- (void)findDisplayForDeviceUID:(NSString *)uid name:(NSString *)deviceName
+                     completion:(void (^)(NSString *, NSString *, NSString *))completion
+{
+    CGDirectDisplayID ids[16];
+    uint32_t count = 0;
+    if (CGGetOnlineDisplayList(16, ids, &count) != kCGErrorSuccess)
+        count = 0;
+
+    NSMutableDictionary<NSNumber *, NSString *> *names = [NSMutableDictionary dictionary];
+    for (NSScreen *screen in [NSScreen screens])
+        names[screen.deviceDescription[@"NSScreenNumber"]] = screen.localizedName;
+
+    NSMutableArray<NSNumber *> *matches = [NSMutableArray array];
+    NSString *how = @"EDID";
+    NSDictionary *edid = EDIDFieldsFromAudioDeviceUID(uid);
+    if (edid) {
+        for (uint32_t i = 0; i < count; i++) {
+            if (CGDisplayVendorNumber(ids[i]) == [edid[@"vendor"] unsignedIntValue] &&
+                CGDisplayModelNumber(ids[i]) == [edid[@"model"] unsignedIntValue] &&
+                [edid[@"serials"] containsObject:@(CGDisplaySerialNumber(ids[i]))])
+                [matches addObject:@(ids[i])];
+        }
+    }
+    if (matches.count == 0) {
+        how = @"name";
+        for (uint32_t i = 0; i < count; i++)
+            if ([names[@(ids[i])] isEqual:deviceName])
+                [matches addObject:@(ids[i])];
+    }
+    if (matches.count == 0) {
+        completion(nil, nil, [NSString stringWithFormat:@"no display matches \"%@\"", deviceName]);
+        return;
+    }
+
+    NSNumber *displayID = matches.firstObject;
+    NSString *name = names[displayID] ?: deviceName;
+    NSString *note = [NSString stringWithFormat:@"\"%@\" (display ID %@), matched by %@", name, displayID, how];
+    if (matches.count > 1)
+        note = [note stringByAppendingFormat:@"; %lu displays match, the first is used", (unsigned long)matches.count];
+    completion(displayID.stringValue, name, note);
+}
+
+// `lunar displays <id> volume` writes the display's name, then the volume:
+// "0: <name>\n\tvolume: 50".
+- (void)readVolumeOfDisplay:(NSString *)displayID completion:(void (^)(BOOL, double))completion
+{
+    [self run:@[@"displays", displayID, @"volume"] timeout:0.5 completion:^(NSString *output) {
+        NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:@":\\s*([0-9.]+)\\s*$" options:0 error:NULL];
+        NSTextCheckingResult *m = output ? [re firstMatchInString:output options:0 range:NSMakeRange(0, output.length)] : nil;
+        completion(m != nil, m ? [[output substringWithRange:[m rangeAtIndex:1]] doubleValue] : 0);
+    }];
+}
+
+// Each request opens a connection, and Lunar writes the volume to the display
+// (DDC) before it answers. While one is in flight, only the latest of the
+// volumes set meanwhile is sent next, so a key held down does not queue up
+// requests.
+- (void)setVolume:(double)volume ofDisplay:(NSString *)displayID
+{
+    _pendingVolume[displayID] = @(volume);
+    if (![_settingVolume containsObject:displayID])
+        [self sendPendingVolumeOfDisplay:displayID];
+}
+
+- (void)sendPendingVolumeOfDisplay:(NSString *)displayID
+{
+    NSNumber *volume = _pendingVolume[displayID];
+    if (!volume) {
+        [_settingVolume removeObject:displayID];
+        return;
+    }
+    [_pendingVolume removeObjectForKey:displayID];
+    [_settingVolume addObject:displayID];
+    NSString *value = [NSString stringWithFormat:@"%ld", lround(volume.doubleValue)];
+    [self run:@[@"displays", displayID, @"volume", value] timeout:1.0 completion:^(NSString *output) {
+        [self sendPendingVolumeOfDisplay:displayID];
+    }];
+}
+
+@end
+
 // A volume target, like a player or the system volume, for a display whose
-// volume BetterDisplay controls (DDC). BetterDisplay answers through
-// distributed notifications, which macOS delivers on the main thread, so the
-// volume cannot be read synchronously like a player's. Instead AppDelegate
-// calls -refreshVolume: before each key press and acts in its completion;
-// currentVolume (0-100) holds the value read or last set. Each change is sent
-// as an absolute value (0-1).
+// volume BetterDisplay or Lunar controls (DDC). Both apps answer
+// asynchronously, so the volume cannot be read synchronously like a player's.
+// Instead AppDelegate calls -refreshVolume: before each key press and acts in
+// its completion; currentVolume (0-100) holds the value read or last set.
+// Each change is sent as an absolute value.
 @interface DisplayVolumeTarget : NSObject
-- (instancetype)initWithClient:(BetterDisplayClient *)client tagID:(NSString *)tagID name:(NSString *)name icon:(NSImage *)icon;
+- (instancetype)initWithApp:(id<DisplayVolumeApp>)app displayID:(NSString *)displayID name:(NSString *)name icon:(NSImage *)icon;
 - (void)refreshVolume:(void (^)(BOOL ok))completion;
 @property (assign, nonatomic) double currentVolume;
 @property (assign, nonatomic) double oldVolume;
 @property (strong, nonatomic) NSImage *icon;
-@property (copy, nonatomic, readonly) NSString *tagID;
+@property (strong, nonatomic, readonly) id<DisplayVolumeApp> app;
+@property (copy, nonatomic, readonly) NSString *displayID;
 @property (copy, nonatomic, readonly) NSString *name;
 @property (assign, nonatomic, readonly) BOOL lastReadOK; // NO until a read succeeds, and after a failed one
 @end
 
-@implementation DisplayVolumeTarget {
-    BetterDisplayClient *_client;
-}
+@implementation DisplayVolumeTarget
 
-- (instancetype)initWithClient:(BetterDisplayClient *)client tagID:(NSString *)tagID name:(NSString *)name icon:(NSImage *)icon
+- (instancetype)initWithApp:(id<DisplayVolumeApp>)app displayID:(NSString *)displayID name:(NSString *)name icon:(NSImage *)icon
 {
     if (self = [super init]) {
-        _client = client;
-        _tagID = [tagID copy];
+        _app = app;
+        _displayID = [displayID copy];
         _name = [name copy];
         _icon = icon;
         _oldVolume = -1;
@@ -455,18 +859,15 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
     _currentVolume = currentVolume;
     if (currentVolume < 0)
         return;
-    NSString *value = [NSString stringWithFormat:@"%.4f", currentVolume / 100.0];
-    [_client send:@"set" parameters:@{@"tagID": _tagID, @"volume": value} timeout:1.0 completion:nil];
+    [_app setVolume:currentVolume ofDisplay:_displayID];
 }
 
 - (void)refreshVolume:(void (^)(BOOL))completion
 {
-    [_client send:@"get" parameters:@{@"tagID": _tagID, @"volume": [NSNull null]} timeout:0.25
-       completion:^(BOOL answered, BOOL result, NSString *payload) {
-        BOOL ok = answered && result && payload.length > 0;
+    [_app readVolumeOfDisplay:_displayID completion:^(BOOL ok, double volume) {
         self->_lastReadOK = ok;
         if (ok)
-            self->_currentVolume = [payload doubleValue] * 100.0;
+            self->_currentVolume = volume;
         if (completion) completion(ok);
     }];
 }
@@ -1193,7 +1594,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	id runningPlayerPtr = [self runningPlayer];
 
 	// Muting stores the current volume to restore it later: read a display's
-	// volume from BetterDisplay first (see -setVolumeUp:).
+	// volume from BetterDisplay or Lunar first (see -setVolumeUp:).
 	if ([runningPlayerPtr isKindOfClass:[DisplayVolumeTarget class]] &&
 	    [runningPlayerPtr oldVolume] < 0 && !_displayVolumeJustRead) {
 		[(DisplayVolumeTarget *)runningPlayerPtr refreshVolume:^(BOOL ok) {
@@ -1375,7 +1776,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 	[[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(applicationDidLaunch:)
 	                                                           name:NSWorkspaceDidLaunchApplicationNotification object:nil];
 
-	// Look up the BetterDisplay display as soon as the output device changes,
+	// Look up the display as soon as the output device changes,
 	// so the first key press afterwards already finds it. Without this, that
 	// press started the lookup and went to macOS.
 	AudioObjectPropertyAddress defaultOutput = {
@@ -1529,6 +1930,7 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 						  [NSNumber numberWithBool:true],  @"PlaySoundFeedback",
 						  [NSNumber numberWithBool:false], @"StayAheadOfOtherApps",
 						  [NSNumber numberWithBool:false], @"ControlDisplayVolume",
+						  @"BetterDisplay",                @"DisplayVolumeApp",
 						  nil ]; // terminate the list
 	[preferences registerDefaults:dict];
     
@@ -1796,7 +2198,145 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     });
 }
 
-#pragma mark - Control display volume (BetterDisplay)
+#pragma mark - Control display volume (BetterDisplay, Lunar)
+
+static NSString *DisplayAppState(id<DisplayVolumeApp> app)
+{
+    return ![app isInstalled] ? @"not installed"
+         : [app isRunning]    ? @"installed and running"
+                              : @"installed, not running";
+}
+
+- (id<DisplayVolumeApp>)displayAppNamed:(NSString *)name
+{
+    if ([name isEqualToString:@"Lunar"]) {
+        if (!_lunar)
+            _lunar = [[LunarClient alloc] init];
+        return _lunar;
+    }
+    if (!_betterDisplay)
+        _betterDisplay = [[BetterDisplayClient alloc] init];
+    return _betterDisplay;
+}
+
+// The app chosen in the Control display volume dialog.
+- (id<DisplayVolumeApp>)displayApp
+{
+    return [self displayAppNamed:[preferences stringForKey:@"DisplayVolumeApp"]];
+}
+
+- (NSArray<id<DisplayVolumeApp>> *)displayApps
+{
+    return @[[self displayAppNamed:@"BetterDisplay"], [self displayAppNamed:@"Lunar"]];
+}
+
+- (NSString *)volumeKeysWarningForApp:(id<DisplayVolumeApp>)app
+{
+    return [NSString stringWithFormat:@"\"%@\" is on in %@'s settings. Turn it off, so that only "
+                                      @"Volume Control handles the volume keys.", app.volumeKeysSetting, app.name];
+}
+
+// For the dialog: one row per app, with a radio button to choose it, its
+// icon and name (a click on either also chooses it), whether it is installed
+// and running, its website, and a warning if it handles the volume keys
+// itself. The radio buttons share this view and an action, so AppKit lets
+// only one of them be on. An app that is not installed cannot be chosen.
+- (NSView *)displayAppChoiceViewWithRadios:(NSArray<NSButton *> * __autoreleasing *)radiosOut
+{
+    const CGFloat width = 440, iconSize = 32, iconX = 24, textX = iconX + iconSize + 10, rowGap = 14;
+    NSFont *font = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+    NSFont *small = [NSFont systemFontOfSize:[NSFont smallSystemFontSize]];
+    FlippedView *view = [[FlippedView alloc] initWithFrame:NSMakeRect(0, 0, width, 0)];
+    NSMutableArray<NSButton *> *radios = [NSMutableArray array];
+
+    NSArray<id<DisplayVolumeApp>> *apps = [self displayApps];
+    id<DisplayVolumeApp> preferred = [self displayApp];
+    if (![preferred isInstalled])
+        for (id<DisplayVolumeApp> app in apps)
+            if ([app isInstalled]) { preferred = app; break; }
+
+    CGFloat y = 0;
+    for (id<DisplayVolumeApp> app in apps) {
+        BOOL installed = [app isInstalled];
+        CGFloat rowTop = y;
+
+        NSURL *url = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:app.bundleID];
+        NSImage *icon = installed && url ? [[NSWorkspace sharedWorkspace] iconForFile:url.path]
+                                         : [[NSWorkspace sharedWorkspace] iconForContentType:UTTypeApplicationBundle];
+        NSButton *radio = [NSButton radioButtonWithTitle:@"" target:self action:@selector(displayAppRadioChanged:)];
+        radio.enabled = installed;
+        radio.state = (app == preferred && installed) ? NSControlStateValueOn : NSControlStateValueOff;
+        [radio sizeToFit];
+        [radio setFrameOrigin:NSMakePoint(0, y + round((iconSize - NSHeight(radio.frame)) / 2))];
+        [view addSubview:radio];
+        [radios addObject:radio];
+
+        NSImageView *iconView = [NSImageView imageViewWithImage:icon];
+        iconView.imageScaling = NSImageScaleProportionallyUpOrDown;
+        iconView.frame = NSMakeRect(iconX, y, iconSize, iconSize);
+        iconView.alphaValue = installed ? 1.0 : 0.5;
+        [view addSubview:iconView];
+
+        NSTextField *name = [NSTextField labelWithString:app.name];
+        name.font = [NSFont boldSystemFontOfSize:[NSFont systemFontSize]];
+        name.textColor = installed ? [NSColor labelColor] : [NSColor disabledControlTextColor];
+        [name sizeToFit];
+        [name setFrameOrigin:NSMakePoint(textX, y)];
+        [view addSubview:name];
+        if (installed) {
+            [iconView addGestureRecognizer:[[NSClickGestureRecognizer alloc] initWithTarget:radio action:@selector(performClick:)]];
+            [name addGestureRecognizer:[[NSClickGestureRecognizer alloc] initWithTarget:radio action:@selector(performClick:)]];
+        }
+        y = NSMaxY(name.frame) + 1;
+
+        // The state, then the link on the same line if it fits.
+        const CGFloat indent = textX;
+        NSTextField *state = [NSTextField labelWithString:DisplayAppState(app)];
+        state.font = font;
+        state.textColor = [NSColor secondaryLabelColor];
+        [state sizeToFit];
+        [state setFrameOrigin:NSMakePoint(indent, y)];
+        [view addSubview:state];
+
+        LinkButton *link = [[LinkButton alloc] initWithURL:app.webURL
+                                                     title:[app.webURL stringByReplacingOccurrencesOfString:@"https://" withString:@""]
+                                                      font:font];
+        CGFloat linkX = NSMaxX(state.frame) + 12;
+        if (linkX + NSWidth(link.frame) <= width) {
+            [link setFrameOrigin:NSMakePoint(linkX, y)];
+            y = NSMaxY(state.frame);
+        } else {
+            y = NSMaxY(state.frame) + 2;
+            [link setFrameOrigin:NSMakePoint(indent, y)];
+            y = NSMaxY(link.frame);
+        }
+        [view addSubview:link];
+
+        if (installed && [app listensToVolumeKeys]) {
+            NSTextField *warning = [NSTextField wrappingLabelWithString:
+                [NSString stringWithFormat:@"⚠️ %@", [self volumeKeysWarningForApp:app]]];
+            warning.font = small;
+            warning.preferredMaxLayoutWidth = width - indent;
+            NSSize size = [warning.cell cellSizeForBounds:NSMakeRect(0, 0, width - indent, CGFLOAT_MAX)];
+            warning.frame = NSMakeRect(indent, y + 4, width - indent, ceil(size.height));
+            [view addSubview:warning];
+            y = NSMaxY(warning.frame);
+        }
+
+        y = MAX(y, rowTop + iconSize) + rowGap;
+    }
+    [view setFrameSize:NSMakeSize(width, y - rowGap)];
+
+    if (radiosOut)
+        *radiosOut = radios;
+    return view;
+}
+
+// Radio buttons need an action to be grouped; the choice is read when the
+// dialog closes.
+- (void)displayAppRadioChanged:(NSButton *)sender
+{
+}
 
 - (IBAction)toggleControlDisplayVolume:(id)sender
 {
@@ -1804,76 +2344,66 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
         [self setControlDisplayVolume:NO];
         return;
     }
-    if (!_betterDisplay)
-        _betterDisplay = [[BetterDisplayClient alloc] init];
 
-    if (![_betterDisplay isInstalled]) {
-        NSAlert *alert = [[NSAlert alloc] init];
-        alert.messageText = @"Control Display Volume";
-        alert.informativeText =
-            @"The speakers of most monitors and TVs have no software volume control, so macOS "
-            @"cannot change their volume.\n\n"
-            @"BetterDisplay is a free app for managing displays. Among other things, it changes the "
-            @"volume of monitor and TV speakers, and Volume Control can use it for the volume keys. "
-            @"The free version of BetterDisplay is enough:";
-        alert.accessoryView = [self linkFieldWithURL:@"https://github.com/waydabber/BetterDisplay"];
-        [alert addButtonWithTitle:@"Get BetterDisplay"];
-        [alert addButtonWithTitle:@"Cancel"];
-        [NSApp activateIgnoringOtherApps:YES];
-        if ([alert runModal] == NSAlertFirstButtonReturn)
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/waydabber/BetterDisplay#readme"]];
+    NSArray<id<DisplayVolumeApp>> *apps = [self displayApps];
+    NSAlert *alert = [[NSAlert alloc] init];
+    alert.messageText = @"Control Display Volume";
+    alert.informativeText =
+        @"The speakers of most monitors and TVs have no software volume control, so macOS "
+        @"cannot change their volume.\n\n"
+        @"BetterDisplay and Lunar are third-party apps for managing displays. Both change the "
+        @"volume of monitor and TV speakers, and Volume Control can use either of them for the "
+        @"volume keys. The free version of either app is enough. Volume Control uses the app "
+        @"when the volume keys act on the system volume and the audio output is set to a display "
+        @"that the app controls. If the app is not running, Volume Control opens it.";
+    NSArray<NSButton *> *radios = nil;
+    alert.accessoryView = [self displayAppChoiceViewWithRadios:&radios];
+    NSButton *turnOn = [alert addButtonWithTitle:@"Turn On"];
+    [alert addButtonWithTitle:@"Cancel"];
+    turnOn.enabled = NO;
+    for (NSButton *radio in radios)
+        if (radio.enabled)
+            turnOn.enabled = YES;
+    [NSApp activateIgnoringOtherApps:YES];
+    if ([alert runModal] != NSAlertFirstButtonReturn)
+        return;
+    for (NSUInteger i = 0; i < radios.count; i++)
+        if (radios[i].state == NSControlStateValueOn)
+            [self useDisplayApp:apps[i]];
+}
+
+// Turns the option on with app. An app that runs must answer first; an app
+// that does not run is opened, and -applicationDidLaunch: looks the display up.
+- (void)useDisplayApp:(id<DisplayVolumeApp>)app
+{
+    if (![app isRunning]) {
+        NSURL *url = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:app.bundleID];
+        [[NSWorkspace sharedWorkspace] openApplicationAtURL:url
+                                             configuration:[NSWorkspaceOpenConfiguration configuration]
+                                         completionHandler:nil];
+        [self setDisplayVolumeApp:app.name];
+        [self setControlDisplayVolume:YES];
         return;
     }
-
-    if (![_betterDisplay isRunning]) {
-        NSAlert *alert = [[NSAlert alloc] init];
-        alert.messageText = @"BetterDisplay Is Not Running";
-        alert.informativeText = @"Volume Control controls display volume through BetterDisplay. "
-                                @"Start BetterDisplay, then choose \"Control display volume\" again.";
-        [alert addButtonWithTitle:@"Open BetterDisplay"];
-        [alert addButtonWithTitle:@"Cancel"];
-        [NSApp activateIgnoringOtherApps:YES];
-        if ([alert runModal] == NSAlertFirstButtonReturn) {
-            NSURL *url = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:kBetterDisplayBundleID];
-            [[NSWorkspace sharedWorkspace] openApplicationAtURL:url
-                                                 configuration:[NSWorkspaceOpenConfiguration configuration]
-                                             completionHandler:nil];
-        }
-        return;
-    }
-
-    // BetterDisplay runs: check that it answers requests before turning on.
-    [_betterDisplay send:@"get" parameters:@{@"identifiers": [NSNull null]} timeout:1.0
-              completion:^(BOOL answered, BOOL result, NSString *payload) {
-        NSAlert *alert = [[NSAlert alloc] init];
+    [app checkAnswers:^(BOOL answered) {
         if (!answered) {
-            alert.messageText = @"BetterDisplay Did Not Answer";
-            alert.informativeText = @"In BetterDisplay's settings, turn on \"CLI access and notification "
-                                    @"based integration\", then choose \"Control display volume\" again.";
+            NSAlert *alert = [[NSAlert alloc] init];
+            alert.messageText = [NSString stringWithFormat:@"%@ Did Not Answer", app.name];
+            alert.informativeText = app.notAnsweringAdvice;
             [alert addButtonWithTitle:@"OK"];
             [NSApp activateIgnoringOtherApps:YES];
             [alert runModal];
             return;
         }
-        NSString *explanation =
-            @"BetterDisplay is a third-party app for managing displays, which is already installed "
-            @"on this Mac.\n\n"
-            @"Volume Control can use it to change the volume of monitor and TV speakers, which macOS "
-            @"cannot. It does so when the volume keys act on the system volume and the audio output "
-            @"is set to a display that BetterDisplay controls.";
-        if ([self->_betterDisplay listensToNativeAudioKeys])
-            explanation = [explanation stringByAppendingString:
-                @"\n\n⚠️ \"Listen to native audio keys\" is on in BetterDisplay's settings. Open "
-                @"BetterDisplay's settings and turn it off, so that only Volume Control handles "
-                @"the volume keys."];
-        alert.messageText = @"Use BetterDisplay to control the display's volume?";
-        alert.informativeText = explanation;
-        [alert addButtonWithTitle:@"Yes"];
-        [alert addButtonWithTitle:@"No"];
-        [NSApp activateIgnoringOtherApps:YES];
-        if ([alert runModal] == NSAlertFirstButtonReturn)
-            [self setControlDisplayVolume:YES];
+        [self setDisplayVolumeApp:app.name];
+        [self setControlDisplayVolume:YES];
     }];
+}
+
+- (void)setDisplayVolumeApp:(NSString *)name
+{
+    [preferences setObject:name forKey:@"DisplayVolumeApp"];
+    [preferences synchronize];
 }
 
 - (void)setControlDisplayVolume:(bool)enabled
@@ -1885,25 +2415,23 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     [preferences synchronize];
 
     _ControlDisplayVolume = enabled;
-    if (enabled && !_betterDisplay)
-        _betterDisplay = [[BetterDisplayClient alloc] init];
 
     // Look the display up again on the next key press.
     _displayTarget = nil;
     _displayTargetDeviceUID = nil;
     _displayLookupDate = nil;
     _displayMatchNote = nil;
-    _betterDisplayMissingShown = NO;
+    _displayAppMissingShown = NO;
     if (enabled)
         [self prefetchDisplayVolumeTarget];
 }
 
 // Starts the display lookup ahead of the first key press, without the
 // "not running" dialog. Called when the option is turned on, after launch,
-// and when BetterDisplay starts.
+// and when the display app starts.
 - (void)prefetchDisplayVolumeTarget
 {
-    if (![self ControlDisplayVolume] || !systemAudio || [systemAudio hasControllableVolume] || ![_betterDisplay isRunning])
+    if (![self ControlDisplayVolume] || !systemAudio || [systemAudio hasControllableVolume] || ![[self displayApp] isRunning])
         return;
     NSString *uid = [systemAudio getDefaultOutputDeviceUID];
     if (uid && !_displayLookupInFlight && !(_displayTarget && [uid isEqualToString:_displayTargetDeviceUID]))
@@ -1913,8 +2441,8 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 - (void)applicationDidLaunch:(NSNotification *)note
 {
     NSRunningApplication *app = note.userInfo[NSWorkspaceApplicationKey];
-    if ([app.bundleIdentifier isEqualToString:kBetterDisplayBundleID]) {
-        // Give BetterDisplay a moment to set up its integration.
+    if ([self ControlDisplayVolume] && [app.bundleIdentifier isEqualToString:[self displayApp].bundleID]) {
+        // Give the app a moment to set up its integration.
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             self->_displayTarget = nil;
             self->_displayTargetDeviceUID = nil;
@@ -1932,20 +2460,20 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     if (![self ControlDisplayVolume] || [systemAudio hasControllableVolume])
         return nil;
 
-    if (![_betterDisplay isRunning]) {
-        [self showBetterDisplayMissingOnce];
+    if (![[self displayApp] isRunning]) {
+        [self showDisplayAppMissingOnce];
         _displayTarget = nil;
         _displayTargetDeviceUID = nil;
         return nil;
     }
-    _betterDisplayMissingShown = NO;
+    _displayAppMissingShown = NO;
 
     NSString *uid = [systemAudio getDefaultOutputDeviceUID];
     BOOL sameDevice = (uid && [uid isEqualToString:_displayTargetDeviceUID]);
     if (sameDevice && _displayTarget)
         return _displayTarget;
     // No display found for this device: look again after 10 s, in case
-    // BetterDisplay has meanwhile started controlling it.
+    // the app has meanwhile started controlling it.
     if (sameDevice && _displayLookupDate && -[_displayLookupDate timeIntervalSinceNow] < 10.0)
         return nil;
     if (uid && !_displayLookupInFlight)
@@ -1953,111 +2481,54 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     return nil;
 }
 
-- (void)showBetterDisplayMissingOnce
+- (void)showDisplayAppMissingOnce
 {
-    if (_betterDisplayMissingShown)
+    if (_displayAppMissingShown)
         return;
-    _betterDisplayMissingShown = YES;
+    _displayAppMissingShown = YES;
+    NSString *app = [self displayApp].name;
     NSString *device = [systemAudio getDefaultOutputDeviceName];
     dispatch_async(dispatch_get_main_queue(), ^{
         NSAlert *alert = [[NSAlert alloc] init];
-        alert.messageText = @"BetterDisplay Is Not Running";
+        alert.messageText = [NSString stringWithFormat:@"%@ Is Not Running", app];
         alert.informativeText = [NSString stringWithFormat:
-            @"\"Control display volume\" is on, but BetterDisplay is not running, so Volume Control "
-            @"cannot change the volume of %@. Start BetterDisplay, or turn off \"Control display volume\".",
-            device];
+            @"\"Control display volume\" is on, but %@ is not running, so Volume Control "
+            @"cannot change the volume of %@. Start %@, or turn off \"Control display volume\".",
+            app, device, app];
         [alert addButtonWithTitle:@"OK"];
         [NSApp activateIgnoringOtherApps:YES];
         [alert runModal];
     });
 }
 
-// For a display's audio device, macOS builds the UID from the display's EDID,
-// e.g. "1D742532-0000-0000-1523-0104C5462778": vendor (1D74), product with its
-// two bytes swapped (2532 = 0x3225), serial number (0000-0000), week (15 hex)
-// and year (23 hex, + 1990). Returns nil if the UID does not have this form.
-static NSDictionary *EDIDFieldsFromAudioDeviceUID(NSString *uid)
-{
-    NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:
-        @"^([0-9A-F]{4})([0-9A-F]{2})([0-9A-F]{2})-([0-9A-F]{2})([0-9A-F]{2})-([0-9A-F]{2})([0-9A-F]{2})-([0-9A-F]{2})([0-9A-F]{2})-"
-        options:NSRegularExpressionCaseInsensitive error:NULL];
-    NSTextCheckingResult *m = [re firstMatchInString:uid options:0 range:NSMakeRange(0, uid.length)];
-    if (!m)
-        return nil;
-    unsigned v[10] = {0};
-    for (NSUInteger i = 1; i <= 9; i++)
-        [[NSScanner scannerWithString:[uid substringWithRange:[m rangeAtIndex:i]]] scanHexInt:&v[i]];
-    unsigned serialLE = v[4] | (v[5] << 8) | (v[6] << 16) | ((unsigned)v[7] << 24);
-    unsigned serialBE = ((unsigned)v[4] << 24) | (v[5] << 16) | (v[6] << 8) | v[7];
-    return @{@"vendor": @(v[1]),
-             @"model": @(v[2] | (v[3] << 8)),
-             @"serials": @[@(serialLE), @(serialBE)],
-             @"week": @(v[8]),
-             @"year": @(v[9] + 1990)};
-}
-
 - (void)lookUpDisplayForDeviceUID:(NSString *)uid name:(NSString *)deviceName
 {
+    id<DisplayVolumeApp> app = [self displayApp];
     _displayLookupInFlight = YES;
-    [_betterDisplay send:@"get" parameters:@{@"identifiers": [NSNull null]} timeout:1.0
-              completion:^(BOOL answered, BOOL result, NSString *payload) {
+    [app findDisplayForDeviceUID:uid name:deviceName
+                      completion:^(NSString *displayID, NSString *displayName, NSString *note) {
         self->_displayLookupInFlight = NO;
+        // The user chose the other app meanwhile.
+        if (app != [self displayApp])
+            return;
         self->_displayTargetDeviceUID = uid;
         self->_displayLookupDate = [NSDate date];
         self->_displayTarget = nil;
-        if (!answered || !result || payload.length == 0) {
-            self->_displayMatchNote = @"BetterDisplay did not answer";
+        self->_displayMatchNote = note;
+        if (!displayID)
             return;
-        }
 
-        // The payload lists one JSON object per display, separated by commas.
-        NSData *json = [[NSString stringWithFormat:@"[%@]", payload] dataUsingEncoding:NSUTF8StringEncoding];
-        NSArray *items = [NSJSONSerialization JSONObjectWithData:json options:0 error:NULL];
-        NSMutableArray<NSDictionary *> *displays = [NSMutableArray array];
-        for (id item in ([items isKindOfClass:[NSArray class]] ? items : @[]))
-            if ([item isKindOfClass:[NSDictionary class]] && [item[@"deviceType"] isEqual:@"Display"] && item[@"tagID"])
-                [displays addObject:item];
-
-        NSMutableArray<NSDictionary *> *matches = [NSMutableArray array];
-        NSString *how = @"EDID";
-        NSDictionary *edid = EDIDFieldsFromAudioDeviceUID(uid);
-        if (edid) {
-            for (NSDictionary *d in displays) {
-                if ([d[@"vendor"] integerValue] == [edid[@"vendor"] integerValue] &&
-                    [d[@"model"] integerValue] == [edid[@"model"] integerValue] &&
-                    [edid[@"serials"] containsObject:@([d[@"serial"] longLongValue])] &&
-                    [d[@"weekOfManufacture"] integerValue] == [edid[@"week"] integerValue] &&
-                    [d[@"yearOfManufacture"] integerValue] == [edid[@"year"] integerValue])
-                    [matches addObject:d];
-            }
-        }
-        if (matches.count == 0) {
-            how = @"name";
-            for (NSDictionary *d in displays)
-                if ([d[@"name"] isEqual:deviceName] || [d[@"originalName"] isEqual:deviceName] || [d[@"productName"] isEqual:deviceName])
-                    [matches addObject:d];
-        }
-        if (matches.count == 0) {
-            self->_displayMatchNote = [NSString stringWithFormat:@"BetterDisplay controls no display matching \"%@\"", deviceName];
-            return;
-        }
-
-        NSDictionary *d = matches.firstObject;
-        DisplayVolumeTarget *target = [[DisplayVolumeTarget alloc] initWithClient:self->_betterDisplay
-                                                                            tagID:[NSString stringWithFormat:@"%@", d[@"tagID"]]
-                                                                             name:d[@"name"] ?: deviceName
-                                                                             icon:[self->systemAudio icon]];
-        NSString *note = [NSString stringWithFormat:@"\"%@\" (tagID %@), matched by %@", target.name, target.tagID, how];
-        if (matches.count > 1)
-            note = [note stringByAppendingFormat:@"; %lu displays match, the first is used", (unsigned long)matches.count];
+        DisplayVolumeTarget *target = [[DisplayVolumeTarget alloc] initWithApp:app
+                                                                     displayID:displayID
+                                                                          name:displayName
+                                                                          icon:[self->systemAudio icon]];
         [target refreshVolume:^(BOOL ok) {
-            if (![uid isEqualToString:self->_displayTargetDeviceUID])
+            if (![uid isEqualToString:self->_displayTargetDeviceUID] || app != [self displayApp])
                 return;
             if (!ok) {
-                self->_displayMatchNote = [note stringByAppendingString:@"; BetterDisplay could not read its volume"];
+                self->_displayMatchNote = [note stringByAppendingFormat:@"; %@ could not read its volume", app.name];
                 return;
             }
-            self->_displayMatchNote = note;
             self->_displayTarget = target;
         }];
     }];
@@ -2070,14 +2541,17 @@ static NSDictionary *EDIDFieldsFromAudioDeviceUID(NSString *uid)
     NSMenuItem *item = [_statusMenu itemWithTag:CONTROL_DISPLAY_VOLUME_ID];
     NSString *problem = nil;
     if ([self ControlDisplayVolume]) {
-        BetterDisplayClient *client = _betterDisplay ?: [[BetterDisplayClient alloc] init];
-        if (![client isInstalled])
-            problem = @"BetterDisplay is not installed.";
-        else if ([client listensToNativeAudioKeys])
-            problem = @"\"Listen to native audio keys\" is on in BetterDisplay's settings. Turn it off, "
-                      @"so that only Volume Control handles the volume keys.";
-        else if (![client isRunning])
-            problem = @"BetterDisplay is not running.";
+        id<DisplayVolumeApp> app = [self displayApp];
+        if (![app isInstalled])
+            problem = [NSString stringWithFormat:@"%@ is not installed.", app.name];
+        else if ([app listensToVolumeKeys])
+            problem = [self volumeKeysWarningForApp:app];
+        else if (![app isRunning])
+            problem = [NSString stringWithFormat:@"%@ is not running.", app.name];
+        else
+            for (id<DisplayVolumeApp> other in [self displayApps])
+                if (other != app && [other isRunning] && [other listensToVolumeKeys])
+                    problem = [self volumeKeysWarningForApp:other];
     }
     item.title = problem ? @"⚠️ Control display volume..." : @"Control display volume...";
     item.toolTip = problem;
@@ -2087,11 +2561,12 @@ static NSDictionary *EDIDFieldsFromAudioDeviceUID(NSString *uid)
 {
     NSMutableString *r = [NSMutableString string];
     [r appendFormat:@"Setting       : %@\n", [self ControlDisplayVolume] ? @"on" : @"off"];
-    BetterDisplayClient *client = _betterDisplay ?: [[BetterDisplayClient alloc] init];
-    [r appendFormat:@"BetterDisplay : %@\n", ![client isInstalled] ? @"not installed"
-                                            : [client isRunning] ? @"running" : @"installed, not running"];
-    if ([client isInstalled])
-        [r appendFormat:@"Listen to native audio keys (BetterDisplay) : %@\n", [client listensToNativeAudioKeys] ? @"on" : @"off"];
+    [r appendFormat:@"App           : %@\n", [self displayApp].name];
+    for (id<DisplayVolumeApp> app in [self displayApps]) {
+        [r appendFormat:@"%@ : %@\n", [app.name stringByPaddingToLength:13 withString:@" " startingAtIndex:0], DisplayAppState(app)];
+        if ([app isInstalled])
+            [r appendFormat:@"%@ (%@) : %@\n", app.volumeKeysSetting, app.name, [app listensToVolumeKeys] ? @"on" : @"off"];
+    }
     if ([self ControlDisplayVolume])
         [r appendFormat:@"Display       : %@\n", _displayMatchNote ?: @"not looked up yet"];
     return r;
@@ -2546,8 +3021,8 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 
     [r appendString:@"## Control display volume\n"];
     [r appendString:@"# When on, the volume keys change the volume of a display through\n"];
-    [r appendString:@"# BetterDisplay when the system volume is the target and the output\n"];
-    [r appendString:@"# device has no software volume control.\n\n"];
+    [r appendString:@"# BetterDisplay or Lunar (\"App\") when the system volume is the target\n"];
+    [r appendString:@"# and the output device has no software volume control.\n\n"];
     [r appendString:[self controlDisplayVolumeDiagnostics]];
     [r appendString:@"\n"];
 
@@ -2589,32 +3064,17 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     return r;
 }
 
-// A selectable text field showing the GitHub issues URL as a clickable link,
-// for use as an NSAlert accessory view.
-- (NSTextField *)diagnosticsLinkField
+// The GitHub issues URL as a clickable link, for use as an NSAlert accessory
+// view.
+- (NSView *)diagnosticsLinkField
 {
     return [self linkFieldWithURL:kGitHubIssuesURL];
 }
 
 // A clickable link for a dialog's accessory view.
-- (NSTextField *)linkFieldWithURL:(NSString *)url
+- (NSView *)linkFieldWithURL:(NSString *)url
 {
-    NSTextField *field = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 420, 18)];
-    [field setBezeled:NO];
-    [field setDrawsBackground:NO];
-    [field setEditable:NO];
-    [field setSelectable:YES];
-    [field setAllowsEditingTextAttributes:YES];
-
-    NSMutableAttributedString *attr = [[NSMutableAttributedString alloc] initWithString:url];
-    NSRange range = NSMakeRange(0, url.length);
-    [attr addAttribute:NSLinkAttributeName value:url range:range];
-    [attr addAttribute:NSForegroundColorAttributeName value:[NSColor linkColor] range:range];
-    [attr addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:range];
-    [field setAttributedStringValue:attr];
-    [field sizeToFit];
-
-    return field;
+    return [[LinkButton alloc] initWithURL:url title:url font:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
 }
 
 - (IBAction)copyDiagnostics:(id)sender
@@ -2703,7 +3163,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 	else
 		currentPlayer = systemAudio;
 
-	// A display whose volume BetterDisplay controls takes the place of the
+	// A display whose volume BetterDisplay or Lunar controls takes the place of the
 	// system volume, which Volume Control cannot change on such a display.
 	if (currentPlayer == systemAudio) {
 		DisplayVolumeTarget *display = [self displayVolumeTarget];
@@ -2718,7 +3178,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 {
 	id runningPlayerPtr = [self runningPlayer];
 
-	// A display's volume is read from BetterDisplay before each key press, as
+	// A display's volume is read from BetterDisplay or Lunar before each key press, as
 	// a player's is; the answer arrives asynchronously, so step in its
 	// completion. During a ramp no read happens: the step starts from the
 	// value just set, as for players. No answer: ignore the key press.
@@ -2879,10 +3339,10 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 }
 
 // The System line in the menu when the output device has no software volume
-// control: the display's volume through BetterDisplay if available, else n/a.
+// control: the display's volume through BetterDisplay or Lunar if available, else n/a.
 - (DisplayVolumeTarget *)menuDisplayTarget
 {
-	if (![self ControlDisplayVolume] || !_displayTarget || ![_betterDisplay isRunning])
+	if (![self ControlDisplayVolume] || !_displayTarget || ![[self displayApp] isRunning])
 		return nil;
 	NSString *uid = [systemAudio getDefaultOutputDeviceUID];
 	return (uid && [uid isEqualToString:_displayTargetDeviceUID]) ? _displayTarget : nil;
@@ -2897,7 +3357,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
 }
 
 // Reads the display's volume for the menu; the System line updates when
-// BetterDisplay answers.
+// BetterDisplay or Lunar answers.
 - (void)refreshMenuDisplayVolume
 {
 	DisplayVolumeTarget *display = [self menuDisplayTarget];
