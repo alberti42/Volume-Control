@@ -362,6 +362,14 @@ static NSDictionary *EDIDFieldsFromAudioDeviceUID(NSString *uid)
              @"year": @(v[9] + 1990)};
 }
 
+// LaunchServices also finds an app that is in the Trash, which does not
+// count as installed.
+static BOOL AppIsInstalled(NSString *bundleID)
+{
+    NSString *path = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:bundleID].path;
+    return path && ![path containsString:@"/.Trash/"] && ![path containsString:@"/.Trashes/"];
+}
+
 static BOOL BoolPreferenceOfApp(NSString *bundleID, NSString *key, BOOL missing)
 {
     CFStringRef app = (__bridge CFStringRef)bundleID;
@@ -463,7 +471,7 @@ static NSString * const kBetterDisplayBundleID = @"pro.betterdisplay.BetterDispl
 #if FAKE_BETTERDISPLAY_NOT_INSTALLED
     return NO;
 #else
-    return [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:kBetterDisplayBundleID] != nil;
+    return AppIsInstalled(kBetterDisplayBundleID);
 #endif
 }
 
@@ -658,7 +666,7 @@ static const uint16_t kLunarCLIPort = 23803; // LUNAR_CLI_PORT in Lunar's source
 #if FAKE_LUNAR_NOT_INSTALLED
     return NO;
 #else
-    return [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:kLunarBundleID] != nil;
+    return AppIsInstalled(kLunarBundleID);
 #endif
 }
 
@@ -2200,9 +2208,11 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
 
 #pragma mark - Control display volume (BetterDisplay, Lunar)
 
-static NSString *DisplayAppState(id<DisplayVolumeApp> app)
+// installed is passed in, so that one part of the dialog cannot show the app
+// as installed and another as not, if LaunchServices changes its answer.
+static NSString *DisplayAppState(id<DisplayVolumeApp> app, BOOL installed)
 {
-    return ![app isInstalled] ? @"not installed"
+    return !installed         ? @"not installed"
          : [app isRunning]    ? @"installed and running"
                               : @"installed, not running";
 }
@@ -2291,7 +2301,7 @@ static NSString *DisplayAppState(id<DisplayVolumeApp> app)
 
         // The state, then the link on the same line if it fits.
         const CGFloat indent = textX;
-        NSTextField *state = [NSTextField labelWithString:DisplayAppState(app)];
+        NSTextField *state = [NSTextField labelWithString:DisplayAppState(app, installed)];
         state.font = font;
         state.textColor = [NSColor secondaryLabelColor];
         [state sizeToFit];
@@ -2563,8 +2573,9 @@ static NSString *DisplayAppState(id<DisplayVolumeApp> app)
     [r appendFormat:@"Setting       : %@\n", [self ControlDisplayVolume] ? @"on" : @"off"];
     [r appendFormat:@"App           : %@\n", [self displayApp].name];
     for (id<DisplayVolumeApp> app in [self displayApps]) {
-        [r appendFormat:@"%@ : %@\n", [app.name stringByPaddingToLength:13 withString:@" " startingAtIndex:0], DisplayAppState(app)];
-        if ([app isInstalled])
+        BOOL installed = [app isInstalled];
+        [r appendFormat:@"%@ : %@\n", [app.name stringByPaddingToLength:13 withString:@" " startingAtIndex:0], DisplayAppState(app, installed)];
+        if (installed)
             [r appendFormat:@"%@ (%@) : %@\n", app.volumeKeysSetting, app.name, [app listensToVolumeKeys] ? @"on" : @"off"];
     }
     if ([self ControlDisplayVolume])
