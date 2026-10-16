@@ -3,12 +3,16 @@
 [![notarized download](https://img.shields.io/github/actions/workflow/status/alberti42/Volume-Control/verify-release.yml?branch=main&label=notarized%20download&logo=apple)](https://github.com/alberti42/Volume-Control/actions/workflows/verify-release.yml)
 [![Homebrew cask](https://img.shields.io/homebrew/cask/v/volume-control?logo=homebrew)](https://formulae.brew.sh/cask/volume-control)
 
-♫ **Control the volume of Apple Music, Spotify, and Doppler using your keyboard — seamlessly.**
+♫ **Control the volume of Apple Music, Spotify, Doppler, Swinsian, and your display with your keyboard's volume keys.**
+
+Free, and it will stay free. Open source (GPL-3.0).
 
 > 🚀 Now compatible with macOS 27 Golden Gate (supports Ventura and newer).<br>
 > ✅ Fully notarized — no workarounds required to install.
 
 This app is the spiritual successor to _iTunes Volume Control_, offering a simple yet powerful way to adjust volume for your favorite music apps directly from your keyboard — especially when listening via AirPlay or external speakers.
+
+Volume Control started in 2012 as "iTunes Volume Control", because AirPlay speakers follow the music app's volume, not the Mac's system volume.
 
 <img src="Images/app_menu_screenshot.png" alt="Volume Control's menu, open from its menu bar icon" width="296">
 
@@ -154,6 +158,7 @@ What changed in each version since 2.0.0 is listed in [CHANGELOG.md](CHANGELOG.m
 
 You can download older versions here:
 
+- [2.6.0](https://github.com/alberti42/Volume-Control/releases/download/v2.6.0/VolumeControl.zip): Added the "Control display volume" option, which changes the volume of the speakers of a monitor or TV through BetterDisplay.
 - [2.5.1](https://github.com/alberti42/Volume-Control/releases/download/v2.5.1/VolumeControl.zip): On a display without software volume control, the volume keys are passed on to macOS when no player is playing; Copy Diagnostics says whether Volume Control can control the system volume.
 - [2.5.0](https://github.com/alberti42/Volume-Control/releases/download/v2.5.0/VolumeControl.zip): Added the "Stay ahead of other apps" option, which keeps the volume keys with Volume Control when another app, such as BetterDisplay, takes them.
 - [2.4.1](https://github.com/alberti42/Volume-Control/releases/download/v2.4.1/VolumeControl.zip): Spotify's volume steps the same amount up and down; Copy Diagnostics lists the apps that intercept system keys and no longer freezes; Option + volume key opens the Sound settings again.
