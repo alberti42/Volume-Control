@@ -2363,8 +2363,7 @@ static NSString *DisplayAppState(id<DisplayVolumeApp> app, BOOL installed)
         @"macOS cannot change. It does so through one of two third-party apps for managing "
         @"displays, either BetterDisplay or Lunar; the free version of either app is enough.\n\n"
         @"Volume Control uses the app when the volume keys act on the system volume and the audio "
-        @"output is set to a display that the app controls. If the app is not running, Volume "
-        @"Control opens it.";
+        @"output is set to a display that the app controls.";
     NSArray<NSButton *> *radios = nil;
     alert.accessoryView = [self displayAppChoiceViewWithRadios:&radios];
     NSButton *turnOn = [alert addButtonWithTitle:@"Turn On"];
@@ -2381,15 +2380,14 @@ static NSString *DisplayAppState(id<DisplayVolumeApp> app, BOOL installed)
             [self useDisplayApp:apps[i]];
 }
 
-// Turns the option on with app. An app that runs must answer first; an app
-// that does not run is opened, and -applicationDidLaunch: looks the display up.
+// Turns the option on with app. An app that runs must answer first. An app
+// that does not run is chosen without a check: the dialog showed that it is
+// not running, the menu item shows ⚠️, and the first key press on the display
+// shows the "not running" alert. -applicationDidLaunch: looks the display up
+// when the app starts.
 - (void)useDisplayApp:(id<DisplayVolumeApp>)app
 {
     if (![app isRunning]) {
-        NSURL *url = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:app.bundleID];
-        [[NSWorkspace sharedWorkspace] openApplicationAtURL:url
-                                             configuration:[NSWorkspaceOpenConfiguration configuration]
-                                         completionHandler:nil];
         [self setDisplayVolumeApp:app.name];
         [self setControlDisplayVolume:YES];
         return;
@@ -2502,8 +2500,11 @@ static NSString *DisplayAppState(id<DisplayVolumeApp> app, BOOL installed)
         alert.messageText = [NSString stringWithFormat:@"%@ Is Not Running", app];
         alert.informativeText = [NSString stringWithFormat:
             @"\"Control display volume\" is on, but %@ is not running, so Volume Control "
-            @"cannot change the volume of %@. Start %@, or turn off \"Control display volume\".",
-            app, device, app];
+            @"cannot change the volume of %@. Start %@, or turn off \"Control display volume\" "
+            @"if you do not want Volume Control to change the display's volume.\n\n"
+            @"To have %@ start each time you log in, add it to the login items in System "
+            @"Settings > General.",
+            app, device, app, app];
         [alert addButtonWithTitle:@"OK"];
         [NSApp activateIgnoringOtherApps:YES];
         [alert runModal];

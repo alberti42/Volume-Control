@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **Control display volume** can use [Lunar](https://github.com/alin23/Lunar) (its free version is enough) instead of BetterDisplay. The dialog lists BetterDisplay and Lunar, says whether each is installed and running, and lets you choose one; an app that is not installed cannot be chosen. If the chosen app is not running, Volume Control opens it. Turn off "Listen for volume keys" in Lunar, so that only Volume Control handles the volume keys. While the option is on but the chosen app is not installed, not running, or handles the volume keys itself, the menu item shows ⚠️ and its tooltip gives the reason. Copy Diagnostics shows which app is used, and the state of both.
+- **Control display volume** can use [Lunar](https://github.com/alin23/Lunar) (its free version is enough) instead of BetterDisplay. The dialog lists BetterDisplay and Lunar, says whether each is installed and running, and lets you choose one; an app that is not installed cannot be chosen. Turn off "Listen for volume keys" in Lunar, so that only Volume Control handles the volume keys. While the option is on but the chosen app is not installed, not running, or handles the volume keys itself, the menu item shows ⚠️ and its tooltip gives the reason. Copy Diagnostics shows which app is used, and the state of both.
 
 ## [2.6.0] - 2026-10-14
 
