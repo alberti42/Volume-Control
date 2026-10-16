@@ -496,7 +496,7 @@ static NSString *VCYesNo(BOOL value)
 		[out appendFormat:@"  master VolumeScalar      : %@\n", VCYesNo(masterScalar)];
 		[out appendFormat:@"  per-channel L / R        : %@ / %@\n", VCYesNo(leftCh), VCYesNo(rightCh)];
 		[out appendFormat:@"  mute                     : %@\n", VCYesNo(mute)];
-		[out appendFormat:@"  -> Volume Control can control this device: %@\n\n", controllable ? @"YES" : @"NO"];
+		[out appendFormat:@"  -> macOS can change its volume: %@\n\n", controllable ? @"YES" : @"NO"];
 	}
 
 	free(devices);

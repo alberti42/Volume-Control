@@ -99,7 +99,7 @@ The app requires Accessibility and Automation permissions to control other apps'
 
 **The volume keys never work, although Accessibility is granted.** The permission record is probably stale: quit Volume Control, remove it from **System Settings → Privacy & Security → Accessibility** with the "−" button, then add it again and relaunch.
 
-**The volume keys do not change the system volume.** Some output devices, for example some displays and TVs, expose no software volume control; their volume must be changed on the device itself. From 2.6.0, **Control display volume** in the menu changes their volume through [BetterDisplay](https://github.com/waydabber/BetterDisplay#readme), if BetterDisplay controls the display. From 2.7.0, it can use [Lunar](https://github.com/alin23/Lunar) instead.
+**The volume keys do not change the system volume.** macOS cannot change the volume of some output devices, for example the speakers of most monitors and TVs. Volume Control can change the volume of such a display if the menu option **Control display volume** is on (from 2.6.0). It does so through one of two third-party apps for managing displays, either [BetterDisplay](https://github.com/waydabber/BetterDisplay#readme) or, from 2.7.0, [Lunar](https://github.com/alin23/Lunar); the free version of either app is enough.
 
 **Reporting a problem.** Choose **Copy Diagnostics...** in the menu. Volume Control copies a diagnostics report to your clipboard. Nothing is sent over the Internet — it is plain text you can read and edit before sharing. Paste it into a [GitHub issue](https://github.com/alberti42/Volume-Control/issues).
 

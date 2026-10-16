@@ -2359,13 +2359,12 @@ static NSString *DisplayAppState(id<DisplayVolumeApp> app, BOOL installed)
     NSAlert *alert = [[NSAlert alloc] init];
     alert.messageText = @"Control Display Volume";
     alert.informativeText =
-        @"The speakers of most monitors and TVs have no software volume control, so macOS "
-        @"cannot change their volume.\n\n"
-        @"BetterDisplay and Lunar are third-party apps for managing displays. Both change the "
-        @"volume of monitor and TV speakers, and Volume Control can use either of them for the "
-        @"volume keys. The free version of either app is enough. Volume Control uses the app "
-        @"when the volume keys act on the system volume and the audio output is set to a display "
-        @"that the app controls. If the app is not running, Volume Control opens it.";
+        @"Volume Control can change the volume of the speakers of most monitors and TVs, which "
+        @"macOS cannot change. It does so through one of two third-party apps for managing "
+        @"displays, either BetterDisplay or Lunar; the free version of either app is enough.\n\n"
+        @"Volume Control uses the app when the volume keys act on the system volume and the audio "
+        @"output is set to a display that the app controls. If the app is not running, Volume "
+        @"Control opens it.";
     NSArray<NSButton *> *radios = nil;
     alert.accessoryView = [self displayAppChoiceViewWithRadios:&radios];
     NSButton *turnOn = [alert addButtonWithTitle:@"Turn On"];
@@ -2948,7 +2947,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [r appendFormat:@"Swinsian    : %@\n", [self playerDiagnosticsLine:swinsian enabled:[_swinsianBtn state] != NSControlStateValueOff]];
     [r appendFormat:@"System      : %@\n", [systemAudio hasControllableVolume]
         ? @"targeted, volume controllable"
-        : @"targeted, no software volume control (keys are passed on to macOS)"];
+        : @"targeted, macOS cannot change the volume of the output device"];
     return r;
 }
 
@@ -3046,7 +3045,7 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [r appendString:@"## Control display volume\n"];
     [r appendString:@"# When on, the volume keys change the volume of a display through the\n"];
     [r appendString:@"# third-party app BetterDisplay or Lunar when the system volume is the\n"];
-    [r appendString:@"# target and the output device has no software volume control.\n"];
+    [r appendString:@"# target and macOS cannot change the volume of the output device.\n"];
     [r appendString:@"# \"Controlled display\" is the display that plays the audio output, as\n"];
     [r appendString:@"# the selected app knows it; the volume keys change its volume.\n\n"];
     [r appendString:[self controlDisplayVolumeDiagnostics]];
@@ -3075,9 +3074,15 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [r appendString:@"\n"];
 
     [r appendString:@"## Audio output devices\n"];
-    [r appendString:@"# If a device shows \"no\" everywhere it exposes no software volume control;\n"];
-    [r appendString:@"# its volume must be changed on the device itself. master = one volume;\n"];
-    [r appendString:@"# per-channel = separate left/right controls.\n\n"];
+    [r appendString:@"# Each device below lists the volume controls (\"knobs\") that macOS can\n"];
+    [r appendString:@"# change directly. \"master\" is one volume for all channels; \"per-channel\"\n"];
+    [r appendString:@"# means separate volumes for the left and right channels. If a device\n"];
+    [r appendString:@"# shows \"no\" on every line, macOS cannot change its volume. Volume Control\n"];
+    [r appendString:@"# can still change the volume of a display if the menu option \"Control\n"];
+    [r appendString:@"# display volume\" is on: it then uses the third-party app BetterDisplay or\n"];
+    [r appendString:@"# Lunar. If neither macOS nor a third-party app can change the volume,\n"];
+    [r appendString:@"# Volume Control passes the volume keys on to macOS, so that other apps\n"];
+    [r appendString:@"# can act on them.\n\n"];
     [r appendString:[SystemApplication outputDevicesDiagnostics]];
 
     // Collapse the trailing blank line left by the per-device blocks into a
