@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-10-16
+
 ### Added
 
 - **Control display volume** can use [Lunar](https://github.com/alin23/Lunar) (its free version is enough) instead of BetterDisplay. The dialog lists BetterDisplay and Lunar, says whether each is installed and running, and lets you choose one; an app that is not installed cannot be chosen. Turn off "Listen for volume keys" in Lunar, so that only Volume Control handles the volume keys. While the option is on but the chosen app is not installed, not running, or handles the volume keys itself, the menu item shows ⚠️ and its tooltip gives the reason. Copy Diagnostics shows which app is used, and the state of both.
@@ -173,7 +175,8 @@ Tagged but not published as a release; the fix shipped in 2.1.0.
 - Volume keys from the MacBook Pro Touch Bar are handled.
 - The system volume can be muted completely; 0 was not silent before.
 
-[Unreleased]: https://github.com/alberti42/Volume-Control/compare/v2.6.0...HEAD
+[Unreleased]: https://github.com/alberti42/Volume-Control/compare/v2.7.0...HEAD
+[2.7.0]: https://github.com/alberti42/Volume-Control/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/alberti42/Volume-Control/compare/v2.5.1...v2.6.0
 [2.5.1]: https://github.com/alberti42/Volume-Control/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/alberti42/Volume-Control/compare/v2.4.1...v2.5.0
