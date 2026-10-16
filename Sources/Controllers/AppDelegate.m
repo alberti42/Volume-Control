@@ -2570,16 +2570,29 @@ static NSString *DisplayAppState(id<DisplayVolumeApp> app, BOOL installed)
 - (NSString *)controlDisplayVolumeDiagnostics
 {
     NSMutableString *r = [NSMutableString string];
-    [r appendFormat:@"Setting       : %@\n", [self ControlDisplayVolume] ? @"on" : @"off"];
-    [r appendFormat:@"App           : %@\n", [self displayApp].name];
-    for (id<DisplayVolumeApp> app in [self displayApps]) {
-        BOOL installed = [app isInstalled];
-        [r appendFormat:@"%@ : %@\n", [app.name stringByPaddingToLength:13 withString:@" " startingAtIndex:0], DisplayAppState(app, installed)];
-        if (installed)
-            [r appendFormat:@"%@ (%@) : %@\n", app.volumeKeysSetting, app.name, [app listensToVolumeKeys] ? @"on" : @"off"];
-    }
+    [r appendFormat:@"Setting            : %@\n", [self ControlDisplayVolume] ? @"on" : @"off"];
+    [r appendFormat:@"Selected app       : %@\n", [self displayApp].name];
     if ([self ControlDisplayVolume])
-        [r appendFormat:@"Display       : %@\n", _displayMatchNote ?: @"not looked up yet"];
+        [r appendFormat:@"Controlled display : %@\n", _displayMatchNote ?: @"not looked up yet"];
+
+    // One subsection per app, with the labels padded to the longest one.
+    NSArray<id<DisplayVolumeApp>> *apps = [self displayApps];
+    NSUInteger width = @"Status".length;
+    for (id<DisplayVolumeApp> app in apps)
+        width = MAX(width, app.volumeKeysSetting.length);
+    NSString *(^label)(NSString *) = ^(NSString *s) {
+        return [s stringByPaddingToLength:width withString:@" " startingAtIndex:0];
+    };
+    for (id<DisplayVolumeApp> app in apps) {
+        BOOL installed = [app isInstalled];
+        [r appendFormat:@"\n### %@\n", app.name];
+        if (installed)
+            [r appendString:@"# The setting below must be set off, so that only Volume Control handles\n"
+                            @"# the volume keys.\n"];
+        [r appendFormat:@"\n%@ : %@\n", label(@"Status"), DisplayAppState(app, installed)];
+        if (installed)
+            [r appendFormat:@"%@ : %@\n", label(app.volumeKeysSetting), [app listensToVolumeKeys] ? @"on" : @"off"];
+    }
     return r;
 }
 
@@ -3031,9 +3044,11 @@ static const OSStatus kAutomationCheckTimedOut = 1;
     [r appendString:@"\n"];
 
     [r appendString:@"## Control display volume\n"];
-    [r appendString:@"# When on, the volume keys change the volume of a display through\n"];
-    [r appendString:@"# BetterDisplay or Lunar (\"App\") when the system volume is the target\n"];
-    [r appendString:@"# and the output device has no software volume control.\n\n"];
+    [r appendString:@"# When on, the volume keys change the volume of a display through the\n"];
+    [r appendString:@"# third-party app BetterDisplay or Lunar when the system volume is the\n"];
+    [r appendString:@"# target and the output device has no software volume control.\n"];
+    [r appendString:@"# \"Controlled display\" is the display that plays the audio output, as\n"];
+    [r appendString:@"# the selected app knows it; the volume keys change its volume.\n\n"];
     [r appendString:[self controlDisplayVolumeDiagnostics]];
     [r appendString:@"\n"];
 
