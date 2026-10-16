@@ -6,6 +6,49 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.7.0</title>
+            <pubDate>Fri, 16 Oct 2026 06:17:29 +0000</pubDate>
+            <sparkle:version>339</sparkle:version>
+            <sparkle:shortVersionString>2.7.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/alberti42/Volume-Control/releases/download/v2.7.0/VolumeControl.zip" length="6280632" type="application/octet-stream" sparkle:edSignature="CMdvCCc6+sQZhJZayVHK+QdUcCdjcgazZfoBcgIjk9rYDNG6W2Nt9xhFuZpN9jHsWEWXfVAXreB887ZfEkY+CA=="/>
+        
+            <description><![CDATA[
+<p>Volume Control had several releases in the last weeks. If you are updating from 2.4.0 or earlier, these are the main changes since 2.3.2:</p>
+<ul>
+<li><strong>Liquid Glass HUD</strong> (2.4.0): on macOS 26 and later, the volume HUD looks like the system volume HUD, with the icon of the player it controls.</li>
+<li><strong>Control display volume</strong> (2.6.0, Lunar from 2.7.0): the volume keys change the volume of the speakers of most monitors and TVs, which macOS cannot change (it requires the free version of either BetterDisplay or Lunar to be installed).</li>
+<li><strong>Stay ahead of other apps</strong> (2.5.0): keeps the volume keys with Volume Control when another app, such as BetterDisplay or MonitorControl, takes them.</li>
+<li><strong>Copy Diagnostics</strong> (2.3.3 to 2.5.1): the report lists the apps that intercept the volume keys, shows whether the keys reach Volume Control, and no longer freezes when a player does not answer.</li>
+<li><strong>Fixes</strong>: holding ⌘ works on Macs where the volume key event arrived without it; Spotify's volume steps the same amount up and down; Option + volume key opens the Sound settings again; on a display without software volume control, the volume keys are passed on to macOS when no player is playing.</li>
+</ul>
+<h2>Changes in 2.7.0</h2>
+<h3>Added</h3>
+<ul>
+<li><strong>Control display volume</strong> can use <a href="https://github.com/alin23/Lunar">Lunar</a> (its free version is enough) instead of BetterDisplay. The dialog lists BetterDisplay and Lunar, says whether each is installed and running, and lets you choose one; an app that is not installed cannot be chosen. Turn off "Listen for volume keys" in Lunar, so that only Volume Control handles the volume keys. While the option is on but the chosen app is not installed, not running, or handles the volume keys itself, the menu item shows ⚠️ and its tooltip gives the reason. Copy Diagnostics shows which app is used, and the state of both.</li>
+</ul>
+<h3>Changed</h3>
+<ul>
+<li>The alert that says BetterDisplay or Lunar is not running appears on each volume key press while the app is not running, instead of only the first time. It has a button that turns off <strong>Control display volume</strong>, and it suggests adding the app to the login items.</li>
+</ul>
+<h2>Changes since v2.6.0</h2>
+<ul>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/1d0b4e6">1d0b4e6</a> Version bump to v2.7.0 (build 329)</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/4e4cc3f">4e4cc3f</a> Describe the alert change in CHANGELOG.md</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/2b8e30d">2b8e30d</a> Show the "not running" alert on each key press</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/f2ff2b6">f2ff2b6</a> Do not open the display app on Turn On; suggest login items when it is not running</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/0a47f5f">0a47f5f</a> Say what macOS cannot do instead of "no software volume control"</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/eb5557f">eb5557f</a> Give each display app its own subsection in Copy Diagnostics</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/4ee2d29">4ee2d29</a> Count an app in the Trash as not installed</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/54ca894">54ca894</a> Describe Lunar support in CHANGELOG.md and the README</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/e9e04f6">e9e04f6</a> Control display volume through Lunar as well as BetterDisplay</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/ee15a6a">ee15a6a</a> List 2.5.1 among the README's older versions</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/ea0d404">ea0d404</a> Release v2.6.0 (automatic appcast update)</li>
+</ul>
+<p><strong>Full diff:</strong> https://github.com/alberti42/Volume-Control/compare/v2.6.0...v2.7.0</p>
+            ]]></description>
+        </item>
+        <item>
             <title>2.6.0</title>
             <pubDate>Wed, 14 Oct 2026 12:38:09 +0000</pubDate>
             <sparkle:version>328</sparkle:version>
