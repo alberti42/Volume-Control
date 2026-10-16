@@ -229,7 +229,9 @@ CGEventRef event_tap_callback(CGEventTapProxy proxy, CGEventType type, CGEventRe
 	NSDate*   _displayLookupDate;         // when that lookup finished; nil while none
 	BOOL      _displayLookupInFlight;
 	NSString* _displayMatchNote;          // how the display was found, or why not; for diagnostics
-	BOOL      _displayAppMissingShown;    // the "not running" dialog was shown since the display app last ran
+	BOOL      _handlingFreshKeyPress;     // YES while a key press that is not an auto-repeat is handled
+	BOOL      _displayAppAlertOpen;       // the "not running" alert is scheduled or on screen
+	NSDate*   _displayAppAlertClosed;     // when that alert last closed; nil if never
 	BOOL      _displayVolumeJustRead;     // set while acting on a key press right after reading the display's volume
 	//StatusItemView* _statusBarItemView;
 	NSTimer* _statusBarHideTimer;
@@ -1467,6 +1469,13 @@ static NSTimeInterval updateSystemVolumeInterval=0.1f;
     BOOL keyboardCmd = (keyboardModifier & kCGEventFlagMaskCommand) == kCGEventFlagMaskCommand;
     [self setAppleCMDModifierPressed:eventCmd || keyboardCmd];
 
+    // The "not running" alert of Control display volume appears only for a
+    // press, not for an auto-repeat (see -showDisplayAppMissing). The flag is
+    // cleared after this method returns, whichever way it returns.
+    _handlingFreshKeyPress = (keyState == 1 && !keyIsRepeat);
+    if (_handlingFreshKeyPress)
+        dispatch_async(dispatch_get_main_queue(), ^{ self->_handlingFreshKeyPress = NO; });
+
     // Record the initial press for the diagnostics report. -runningPlayer
     // caches its result, so the calls below use the same target.
     if (keyState == 1 && !keyIsRepeat) {
@@ -2428,7 +2437,6 @@ static NSString *DisplayAppState(id<DisplayVolumeApp> app, BOOL installed)
     _displayTargetDeviceUID = nil;
     _displayLookupDate = nil;
     _displayMatchNote = nil;
-    _displayAppMissingShown = NO;
     if (enabled)
         [self prefetchDisplayVolumeTarget];
 }
@@ -2468,12 +2476,11 @@ static NSString *DisplayAppState(id<DisplayVolumeApp> app, BOOL installed)
         return nil;
 
     if (![[self displayApp] isRunning]) {
-        [self showDisplayAppMissingOnce];
+        [self showDisplayAppMissing];
         _displayTarget = nil;
         _displayTargetDeviceUID = nil;
         return nil;
     }
-    _displayAppMissingShown = NO;
 
     NSString *uid = [systemAudio getDefaultOutputDeviceUID];
     BOOL sameDevice = (uid && [uid isEqualToString:_displayTargetDeviceUID]);
@@ -2488,11 +2495,16 @@ static NSString *DisplayAppState(id<DisplayVolumeApp> app, BOOL installed)
     return nil;
 }
 
-- (void)showDisplayAppMissingOnce
+// Shown on each key press while the app is not running, so that a user who
+// clicked OK without reading sees it again. It is not shown for auto-repeats,
+// while it is open, or in the first second after it closes: the presses made
+// while the alert is open reach Volume Control right after it closes.
+- (void)showDisplayAppMissing
 {
-    if (_displayAppMissingShown)
+    if (!_handlingFreshKeyPress || _displayAppAlertOpen ||
+        (_displayAppAlertClosed && -[_displayAppAlertClosed timeIntervalSinceNow] < 1.0))
         return;
-    _displayAppMissingShown = YES;
+    _displayAppAlertOpen = YES;
     NSString *app = [self displayApp].name;
     NSString *device = [systemAudio getDefaultOutputDeviceName];
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -2506,8 +2518,13 @@ static NSString *DisplayAppState(id<DisplayVolumeApp> app, BOOL installed)
             @"Settings > General.",
             app, device, app, app];
         [alert addButtonWithTitle:@"OK"];
+        [alert addButtonWithTitle:@"Turn Off Control Display Volume"];
         [NSApp activateIgnoringOtherApps:YES];
-        [alert runModal];
+        NSModalResponse response = [alert runModal];
+        self->_displayAppAlertOpen = NO;
+        self->_displayAppAlertClosed = [NSDate date];
+        if (response == NSAlertSecondButtonReturn)
+            [self setControlDisplayVolume:NO];
     });
 }
 
