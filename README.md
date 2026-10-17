@@ -12,7 +12,7 @@ Free, and it will stay free. Open source (GPL-3.0).
 
 This app is the spiritual successor to _iTunes Volume Control_, offering a simple yet powerful way to adjust volume for your favorite music apps directly from your keyboard — especially when listening via AirPlay or external speakers.
 
-Volume Control started in 2012 as "iTunes Volume Control", because AirPlay speakers follow the music app's volume, not the Mac's system volume.
+Volume Control started in 2012 as [iTunes Volume Control](https://github.com/alberti42/iTunes-Volume-Control) (now an archived repository), because AirPlay speakers follow the music app's volume, not the Mac's system volume.
 
 <img src="Images/app_menu_screenshot.png" alt="Volume Control's menu, open from its menu bar icon" width="296">
 
