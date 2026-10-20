@@ -17,6 +17,12 @@ public final class HUDVolumeSlider: NSView {
         set { model.value = min(max(newValue, 0), 1) }
     }
 
+    /// Tints the slider white, as the system volume HUD does. NO uses the default tint.
+    @objc public var whiteTint: Bool {
+        get { model.whiteTint }
+        set { model.whiteTint = newValue }
+    }
+
     /// Called with the new value on every change the user makes.
     @objc public var onValueChanged: ((Double) -> Void)?
 
@@ -50,6 +56,7 @@ public final class HUDVolumeSlider: NSView {
 // ObservableObject rather than @Observable, which needs macOS 14; the app targets 13.5.
 final class HUDVolumeSliderModel: ObservableObject {
     @Published var value: Double = 0.6
+    @Published var whiteTint = true
 }
 
 /// Takes the first click, so the slider can be dragged while the HUD panel is not key.
@@ -85,7 +92,7 @@ private struct HUDVolumeSliderContent: View {
             onEditingChanged: onEditingChanged)
         .accessibilityLabel("Volume")
         .controlSize(.small)
-        .tint(.white)
+        .tint(model.whiteTint ? .white : nil)
         // The previous slider showed its knob only while the pointer was over it.
         .sliderThumbVisibility(hovering ? .visible : .hidden)
         .onHover { hovering = $0 }

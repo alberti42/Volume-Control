@@ -29,7 +29,50 @@
 // Player
 @property (strong) PlayerApplication *controlledPlayer;
 
+// Test build: index into kVariants, and the other variants shown with the shared HUD
+@property (assign) NSInteger variantIndex;
+@property (strong) NSArray<TahoeVolumeHUD *> *galleryHUDs;
+
 @end
+
+// Test build for issue #60: each volume key press shows one HUD per entry of kVariants,
+// in a grid under the menu bar, so one screenshot compares all of them.
+#define HUD_VARIANT_GALLERY 1
+
+typedef NS_ENUM(NSInteger, HUDContent) {
+    HUDContentDark,    // NSAppearanceNameVibrantDark, white slider (the shipping HUD)
+    HUDContentSystem,  // follows the system appearance, default slider tint
+    HUDContentLight,   // NSAppearanceNameAqua, default slider tint
+};
+
+typedef struct {
+    NSGlassEffectViewStyle style;
+    BOOL privateSettings;  // NO leaves every private NSGlassEffectView setting at its default
+    NSInteger variant;
+    NSInteger adaptiveAppearance;  // 0 automatic, 1 off, 2 on
+    NSInteger scrimState;
+    CGFloat blackTintAlpha;  // 0 for no tint
+    HUDContent content;
+    const char *name;
+} HUDVariant;
+
+static const HUDVariant kVariants[] = {
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, HUDContentDark,   "current" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, HUDContentSystem, "R9 system" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 2, 0, 0.0, HUDContentSystem, "R9 adapt on, system" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 1, 0, 0.0, HUDContentSystem, "R9 adapt off, system" },
+    { NSGlassEffectViewStyleRegular, NO,  0, 0, 0, 0.0, HUDContentDark,   "R default, dark" },
+    { NSGlassEffectViewStyleRegular, NO,  0, 0, 0, 0.0, HUDContentSystem, "R default, system" },
+    { NSGlassEffectViewStyleClear,   YES, 9, 0, 0, 0.0, HUDContentDark,   "C9 dark" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 1, 0.0, HUDContentDark,   "R9 scrim 1, dark" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.2, HUDContentDark,   "R9 black 20%" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.4, HUDContentDark,   "R9 black 40%" },
+    { NSGlassEffectViewStyleClear,   YES, 5, 0, 0, 1.0, HUDContentDark,   "pre-2.4.0" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, HUDContentLight,  "R9 light" },
+};
+static const NSInteger kVariantCount = sizeof(kVariants) / sizeof(kVariants[0]);
+static const NSInteger kGalleryColumns = 3;
+static const NSTimeInterval kGalleryAutoHide = 8.0;
 
 // Tunables
 static const CGFloat kHUDHeight      = 64.0;
@@ -95,14 +138,26 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     static TahoeVolumeHUD *instance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        instance = [[TahoeVolumeHUD alloc] initPrivate];
+        instance = [[TahoeVolumeHUD alloc] initWithVariant:0];
+#if HUD_VARIANT_GALLERY
+        NSMutableArray *others = [NSMutableArray array];
+        for (NSInteger i = 1; i < kVariantCount; i++) {
+            [others addObject:[[TahoeVolumeHUD alloc] initWithVariant:i]];
+        }
+        instance.galleryHUDs = others;
+#endif
     });
     return instance;
 }
 
-- (instancetype)initPrivate {
+- (instancetype)initWithVariant:(NSInteger)variantIndex {
     self = [super init];
     if (!self) return nil;
+    _variantIndex = variantIndex;
+    HUDVariant v = kVariants[variantIndex];
+    NSAppearance *contentAppearance = (v.content == HUDContentDark)  ? [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]
+                                    : (v.content == HUDContentLight) ? [NSAppearance appearanceNamed:NSAppearanceNameAqua]
+                                    : nil;
 
     // ... (this part is correct) ...
     // Panel
@@ -115,7 +170,7 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     _panel.opaque = NO;
     _panel.backgroundColor = NSColor.clearColor;
     _panel.hasShadow = NO;
-    _panel.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
+    _panel.appearance = contentAppearance;
 
     // Set to NO to prevent the panel from hiding when the app is not active.
     _panel.hidesOnDeactivate = NO;
@@ -177,7 +232,7 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     
     // 1 of 3: Set the appearance for the entire content view.
     // This forces all subviews (labels, icons) to use their dark variants.
-    wrapper.appearance = [NSAppearance appearanceNamed:NSAppearanceNameVibrantDark];
+    wrapper.appearance = contentAppearance;
     
     // Build header row (icon + label) and slider strip
     NSView *header = [self buildHeaderRow];
@@ -200,6 +255,8 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     // Install in glass (wrapper stretches to the glass edges via LiquidGlassView)
     self.glass.contentView = wrapper;
 
+    self.slider.whiteTint = (v.content == HUDContentDark);
+
 
     return self;
 }
@@ -215,11 +272,21 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     // Update header
     self.appIconView.image = [player icon];
     self.titleLabel.stringValue = label;
-    
+#if HUD_VARIANT_GALLERY
+    self.titleLabel.stringValue = [NSString stringWithFormat:@"%ld · %s", (long)self.variantIndex, kVariants[self.variantIndex].name];
+#endif
+
     // Size fence each time
     [_panel setContentSize:NSMakeSize(kHUDWidth + 2 * kPanelPadding, kHUDHeight + 2 * kPanelPadding)];
-    
+
+#if HUD_VARIANT_GALLERY
+    [self positionPanelInGallery];
+    for (TahoeVolumeHUD *hud in self.galleryHUDs) {
+        [hud showHUDWithVolume:volume * 100.0 usingMusicPlayer:player andLabel:label anchoredToStatusButton:button];
+    }
+#else
     [self positionPanelBelowStatusButton:button];
+#endif
     
     // Animate the fade-in
     
@@ -240,7 +307,11 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
 
     // Reset the auto-hide timer
     [self.hideTimer invalidate];
+#if HUD_VARIANT_GALLERY
+    self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:kGalleryAutoHide
+#else
     self.hideTimer = [NSTimer scheduledTimerWithTimeInterval:kAutoHide
+#endif
                                                       target:self
                                                     selector:@selector(hide)
                                                     userInfo:nil
@@ -249,6 +320,7 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
 
 
 - (void)setVolume:(double)volume {
+    for (TahoeVolumeHUD *hud in self.galleryHUDs) [hud setVolume:volume];
     volume = MAX(0.0, MIN(1.0, volume / 100.0));
     self.slider.doubleValue = volume;
 }
@@ -257,6 +329,7 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     // Invalidate the timer to prevent this method from being called again
     [self.hideTimer invalidate];
     self.hideTimer = nil;
+    for (TahoeVolumeHUD *hud in self.galleryHUDs) [hud hide];
 
     // Animate the fade-out
     
@@ -272,6 +345,22 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     }];
 }
 #pragma mark - Layout / Anchoring
+
+// Test build: places variant variantIndex in a grid of kGalleryColumns columns,
+// centred on the main screen, its top row where the unanchored HUD goes.
+- (void)positionPanelInGallery {
+    NSScreen *screen = NSScreen.mainScreen ?: NSScreen.screens.firstObject;
+    if (!screen) return;
+    NSRect full = screen.frame;
+    CGFloat spacing = 10.0;
+    NSInteger column = self.variantIndex % kGalleryColumns;
+    NSInteger row = self.variantIndex / kGalleryColumns;
+    CGFloat gridWidth = kGalleryColumns * kHUDWidth + (kGalleryColumns - 1) * spacing;
+    CGFloat x = NSMidX(full) - gridWidth / 2.0 + column * (kHUDWidth + spacing);
+    CGFloat topEdge = NSMaxY(full) - menuBarHeightOfScreen(screen) - kTopMarginWhenUnanchored;
+    CGFloat y = topEdge - kHUDHeight - row * (kHUDHeight + spacing);
+    [self.panel setFrame:NSInsetRect(NSMakeRect(round(x), round(y), kHUDWidth, kHUDHeight), -kPanelPadding, -kPanelPadding) display:NO];
+}
 
 - (void)positionPanelBelowStatusButton:(NSStatusBarButton *)button {
     NSSize size = NSMakeSize(kHUDWidth, kHUDHeight);
@@ -335,9 +424,11 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
 
 - (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius {
     if (@available(macOS 26.0, *)) {
-        LiquidGlassView *glass = [LiquidGlassView glassWithStyle:NSGlassEffectViewStyleRegular
+        HUDVariant v = kVariants[self.variantIndex];
+        NSColor *tint = v.blackTintAlpha > 0 ? [NSColor colorWithCalibratedWhite:0 alpha:v.blackTintAlpha] : nil;
+        LiquidGlassView *glass = [LiquidGlassView glassWithStyle:v.style
                                                     cornerRadius:radius
-                                                       tintColor:nil];
+                                                       tintColor:tint];
         self.glass = glass;
         
         // Enable the new vibrant rim here.
@@ -355,14 +446,16 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
         // Variant 9 with the Regular style gives the same glassBackground filter
         // parameters as SwiftUI's _Glass.controlCenter, which ControlCenter uses
         // for the system volume banner (checked on macOS 27.0.1).
-        [glass setVariantIfAvailable:9];
-        [glass setScrimStateIfAvailable:0];
-        [glass setSubduedStateIfAvailable:0];
-        
-        // Setting adaptive appearance to 0 is the key to keeping it dark.
-        [glass setAdaptiveAppearanceIfAvailable:0];
-        [glass setUseReducedShadowRadiusIfAvailable:YES];
-        [glass setContentLensingIfAvailable:0];
+        if (v.privateSettings) {
+            [glass setVariantIfAvailable:v.variant];
+            [glass setScrimStateIfAvailable:v.scrimState];
+            [glass setSubduedStateIfAvailable:0];
+
+            // 0 automatic, 1 off, 2 on (from _adaptationDebugDescription, macOS 27.0.1).
+            [glass setAdaptiveAppearanceIfAvailable:v.adaptiveAppearance];
+            [glass setUseReducedShadowRadiusIfAvailable:YES];
+            [glass setContentLensingIfAvailable:0];
+        }
     } else {
         // Fallback on earlier versions
     }
