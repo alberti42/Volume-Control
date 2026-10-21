@@ -51,24 +51,25 @@ typedef struct {
     NSInteger variant;
     NSInteger adaptiveAppearance;  // 0 automatic, 1 off, 2 on
     NSInteger scrimState;
-    CGFloat blackTintAlpha;  // 0 for no tint
+    CGFloat tintWhite;  // grey level of the tint, 0 black
+    CGFloat tintAlpha;  // 0 for no tint
     HUDContent content;
     const char *name;
 } HUDVariant;
 
 static const HUDVariant kVariants[] = {
-    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, HUDContentDark,   "current" },
-    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, HUDContentSystem, "R9 system" },
-    { NSGlassEffectViewStyleRegular, YES, 9, 2, 0, 0.0, HUDContentSystem, "R9 adapt on, system" },
-    { NSGlassEffectViewStyleRegular, YES, 9, 1, 0, 0.0, HUDContentSystem, "R9 adapt off, system" },
-    { NSGlassEffectViewStyleRegular, NO,  0, 0, 0, 0.0, HUDContentDark,   "R default, dark" },
-    { NSGlassEffectViewStyleRegular, NO,  0, 0, 0, 0.0, HUDContentSystem, "R default, system" },
-    { NSGlassEffectViewStyleClear,   YES, 9, 0, 0, 0.0, HUDContentDark,   "C9 dark" },
-    { NSGlassEffectViewStyleRegular, YES, 9, 0, 1, 0.0, HUDContentDark,   "R9 scrim 1, dark" },
-    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.2, HUDContentDark,   "R9 black 20%" },
-    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.4, HUDContentDark,   "R9 black 40%" },
-    { NSGlassEffectViewStyleClear,   YES, 5, 0, 0, 1.0, HUDContentDark,   "pre-2.4.0" },
-    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, HUDContentLight,  "R9 light" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.40, HUDContentDark, "black 40% (round 1, 9)" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.25, HUDContentDark, "black 25%" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.30, HUDContentDark, "black 30%" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.35, HUDContentDark, "black 35%" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.45, HUDContentDark, "black 45%" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.50, HUDContentDark, "black 50%" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.5, 0.30, HUDContentDark, "grey 50% at 30%" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.5, 0.40, HUDContentDark, "grey 50% at 40%" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.5, 0.50, HUDContentDark, "grey 50% at 50%" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.35, 0.40, HUDContentDark, "grey 35% at 40%" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.35, 0.50, HUDContentDark, "grey 35% at 50%" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.0, HUDContentDark, "no tint (2.7.0)" },
 };
 static const NSInteger kVariantCount = sizeof(kVariants) / sizeof(kVariants[0]);
 static const NSInteger kGalleryColumns = 3;
@@ -425,7 +426,7 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
 - (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius {
     if (@available(macOS 26.0, *)) {
         HUDVariant v = kVariants[self.variantIndex];
-        NSColor *tint = v.blackTintAlpha > 0 ? [NSColor colorWithCalibratedWhite:0 alpha:v.blackTintAlpha] : nil;
+        NSColor *tint = v.tintAlpha > 0 ? [NSColor colorWithCalibratedWhite:v.tintWhite alpha:v.tintAlpha] : nil;
         LiquidGlassView *glass = [LiquidGlassView glassWithStyle:v.style
                                                     cornerRadius:radius
                                                        tintColor:tint];
