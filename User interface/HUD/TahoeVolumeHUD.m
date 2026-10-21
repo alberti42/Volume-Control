@@ -58,7 +58,7 @@ typedef struct {
 } HUDVariant;
 
 static const HUDVariant kVariants[] = {
-    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.40, HUDContentDark, "black 40% (round 1, 9)" },
+    { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.40, HUDContentDark, "black 40% (as 9)" },
     { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.25, HUDContentDark, "black 25%" },
     { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.30, HUDContentDark, "black 30%" },
     { NSGlassEffectViewStyleRegular, YES, 9, 0, 0, 0.0, 0.35, HUDContentDark, "black 35%" },
@@ -274,7 +274,8 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     self.appIconView.image = [player icon];
     self.titleLabel.stringValue = label;
 #if HUD_VARIANT_GALLERY
-    self.titleLabel.stringValue = [NSString stringWithFormat:@"%ld · %s", (long)self.variantIndex, kVariants[self.variantIndex].name];
+    // Round 2 is numbered 1a, 2a, ..., so its numbers differ from round 1's 0–11.
+    self.titleLabel.stringValue = [NSString stringWithFormat:@"%lda · %s", (long)self.variantIndex + 1, kVariants[self.variantIndex].name];
 #endif
 
     // Size fence each time
