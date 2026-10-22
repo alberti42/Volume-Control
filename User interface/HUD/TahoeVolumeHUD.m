@@ -16,6 +16,7 @@
 @property (strong) HUDPanel *panel;
 @property (strong) NSView *root;
 @property (strong) LiquidGlassView *glass;
+@property (strong) ControlCenterGlassView *controlCenterGlass;  // macOS 26, instead of glass
 
 // UI
 @property (strong) HUDVolumeSlider *slider;
@@ -50,6 +51,18 @@ static const CGFloat kTopMarginWhenUnanchored = 10.0;
 
 static const NSTimeInterval kFadeInDuration  = 0.25; // seconds
 static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
+
+// With this user default set to YES, the HUD draws the glass of macOS 26 on any version,
+// for testing that code on macOS 27.
+static NSString * const kSimulateMacOS26HUDKey = @"SimulateMacOS26HUD";
+
+// Returns YES where the HUD draws ControlCenterGlassView. On macOS 26.3, NSGlassEffectView
+// with _variant 9 draws a nearly white glass over a white page, where the system volume
+// HUD's glass is grey (issue #60).
+static BOOL usesMacOS26Glass(void) {
+    if ([NSUserDefaults.standardUserDefaults boolForKey:kSimulateMacOS26HUDKey]) return YES;
+    return NSProcessInfo.processInfo.operatingSystemVersion.majorVersion == 26;
+}
 
 // Returns the height of `screen`'s menu bar when it is shown, also while it is hidden.
 // ControlCenter places the system volume HUD with -[NSScreen _revealedMenuBarHeight]
@@ -198,7 +211,11 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
     ]];
 
     // Install in glass (wrapper stretches to the glass edges via LiquidGlassView)
-    self.glass.contentView = wrapper;
+    if (self.controlCenterGlass) {
+        self.controlCenterGlass.contentView = wrapper;
+    } else {
+        self.glass.contentView = wrapper;
+    }
 
 
     return self;
@@ -335,6 +352,24 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
 
 - (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius {
     if (@available(macOS 26.0, *)) {
+        // On macOS 26, the glass ControlCenter draws for the system volume HUD. If a private
+        // symbol it needs is missing, the HUD draws the NSGlassEffectView below.
+        if (usesMacOS26Glass()) {
+            ControlCenterGlassView *glass = [[ControlCenterGlassView alloc] initWithCornerRadius:radius];
+            if (glass) {
+                self.controlCenterGlass = glass;
+                glass.translatesAutoresizingMaskIntoConstraints = NO;
+                [host addSubview:glass];
+                [NSLayoutConstraint activateConstraints:@[
+                    [glass.leadingAnchor constraintEqualToAnchor:host.leadingAnchor],
+                    [glass.trailingAnchor constraintEqualToAnchor:host.trailingAnchor],
+                    [glass.topAnchor constraintEqualToAnchor:host.topAnchor],
+                    [glass.bottomAnchor constraintEqualToAnchor:host.bottomAnchor],
+                ]];
+                return;
+            }
+        }
+
         LiquidGlassView *glass = [LiquidGlassView glassWithStyle:NSGlassEffectViewStyleRegular
                                                     cornerRadius:radius
                                                        tintColor:nil];
@@ -359,7 +394,7 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
         [glass setScrimStateIfAvailable:0];
         [glass setSubduedStateIfAvailable:0];
         
-        // Setting adaptive appearance to 0 is the key to keeping it dark.
+        // 0 automatic, 1 off, 2 on (from _adaptationDebugDescription, macOS 27.0.1).
         [glass setAdaptiveAppearanceIfAvailable:0];
         [glass setUseReducedShadowRadiusIfAvailable:YES];
         [glass setContentLensingIfAvailable:0];
