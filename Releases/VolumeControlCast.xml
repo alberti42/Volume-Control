@@ -6,6 +6,34 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>2.7.1</title>
+            <pubDate>Tue, 27 Oct 2026 21:53:04 +0000</pubDate>
+            <sparkle:version>347</sparkle:version>
+            <sparkle:shortVersionString>2.7.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/alberti42/Volume-Control/releases/download/v2.7.1/VolumeControl.zip" length="6281111" type="application/octet-stream" sparkle:edSignature="LCwCM8NmmAI527fS55mtZzblm7pOOSY5YVB/X1MjaN6XOVMxeXvX9YsSy3JWRGQxRUtqM4jDqFdo8XWJF1ipBA=="/>
+        
+            <description><![CDATA[
+<h3>Fixed</h3>
+<ul>
+<li>On macOS 26, the volume HUD's glass turned nearly white over light backgrounds, so its white title and slider could not be read (<a href="https://github.com/alberti42/Volume-Control/issues/60">#60</a>). The glass now has a black tint, which keeps it grey, as the system volume HUD is.</li>
+</ul>
+<p>Thanks to @benstankich, who tested three pre-releases on macOS 26.3 and measured the colours of the system volume HUD with a colour picker.</p>
+<h2>Changes since v2.7.0</h2>
+<ul>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/294e9b3">294e9b3</a> Version bump to v2.7.1 (build 340)</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/e1885a7">e1885a7</a> Tint the HUD's glass black on macOS 26</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/9095b71">9095b71</a> Add a security policy</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/002942b">002942b</a> Say that Volume Control started under the name iTunes Volume Control</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/923e873">923e873</a> Link the archived iTunes Volume Control repository from the README</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/6fa4e89">6fa4e89</a> Updated screenshot</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/627f9ef">627f9ef</a> Fix the README adding that the app is free and when it started</li>
+<li><a href="https://github.com/alberti42/Volume-Control/commit/42df4f0">42df4f0</a> Release v2.7.0 (automatic appcast update)</li>
+</ul>
+<p><strong>Full diff:</strong> https://github.com/alberti42/Volume-Control/compare/v2.7.0...v2.7.1</p>
+            ]]></description>
+        </item>
+        <item>
             <title>2.7.0</title>
             <pubDate>Fri, 16 Oct 2026 06:17:29 +0000</pubDate>
             <sparkle:version>339</sparkle:version>
