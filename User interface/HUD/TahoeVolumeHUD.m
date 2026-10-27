@@ -51,6 +51,19 @@ static const CGFloat kTopMarginWhenUnanchored = 10.0;
 static const NSTimeInterval kFadeInDuration  = 0.25; // seconds
 static const NSTimeInterval kFadeOutDuration = 0.45; // seconds
 
+// With this user default set to YES, the HUD draws the glass of macOS 26 on any version,
+// for testing that code on macOS 27.
+static NSString * const kSimulateMacOS26HUDKey = @"SimulateMacOS26HUD";
+
+// Returns YES where the glass gets a black tint. On macOS 26.3, NSGlassEffectView with
+// _variant 9 draws a nearly white glass over a white page, where the system volume HUD's
+// glass is grey (issue #60). With a 35 % black tint it measures #C0C0C0 over white and
+// #333333 over black; the system HUD measures #BDBDBD and #3C3C3C.
+static BOOL usesMacOS26Glass(void) {
+    if ([NSUserDefaults.standardUserDefaults boolForKey:kSimulateMacOS26HUDKey]) return YES;
+    return NSProcessInfo.processInfo.operatingSystemVersion.majorVersion == 26;
+}
+
 // Returns the height of `screen`'s menu bar when it is shown, also while it is hidden.
 // ControlCenter places the system volume HUD with -[NSScreen _revealedMenuBarHeight]
 // (30 pt where NSStatusBar.thickness is 22 pt, on macOS 27.0.1). Without that private
@@ -335,9 +348,10 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
 
 - (void)installGlassInto:(NSView *)host cornerRadius:(CGFloat)radius {
     if (@available(macOS 26.0, *)) {
+        NSColor *tint = usesMacOS26Glass() ? [NSColor colorWithCalibratedWhite:0 alpha:0.35] : nil;
         LiquidGlassView *glass = [LiquidGlassView glassWithStyle:NSGlassEffectViewStyleRegular
                                                     cornerRadius:radius
-                                                       tintColor:nil];
+                                                       tintColor:tint];
         self.glass = glass;
         
         // Enable the new vibrant rim here.
@@ -359,7 +373,7 @@ static BOOL menuBarIsDrawnOnScreen(NSScreen *screen) {
         [glass setScrimStateIfAvailable:0];
         [glass setSubduedStateIfAvailable:0];
         
-        // Setting adaptive appearance to 0 is the key to keeping it dark.
+        // 0 automatic, 1 off, 2 on (from _adaptationDebugDescription, macOS 27.0.1).
         [glass setAdaptiveAppearanceIfAvailable:0];
         [glass setUseReducedShadowRadiusIfAvailable:YES];
         [glass setContentLensingIfAvailable:0];

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- On macOS 26, the volume HUD's glass turned nearly white over light backgrounds, so its white title and slider could not be read ([#60](https://github.com/alberti42/Volume-Control/issues/60)). The glass now has a black tint, which keeps it grey, as the system volume HUD is.
+
 ## [2.7.0] - 2026-10-16
 
 ### Added
