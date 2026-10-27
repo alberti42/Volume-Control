@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.7.1] - 2026-10-27
+
 ### Fixed
 
 - On macOS 26, the volume HUD's glass turned nearly white over light backgrounds, so its white title and slider could not be read ([#60](https://github.com/alberti42/Volume-Control/issues/60)). The glass now has a black tint, which keeps it grey, as the system volume HUD is.
@@ -179,7 +181,8 @@ Tagged but not published as a release; the fix shipped in 2.1.0.
 - Volume keys from the MacBook Pro Touch Bar are handled.
 - The system volume can be muted completely; 0 was not silent before.
 
-[Unreleased]: https://github.com/alberti42/Volume-Control/compare/v2.7.0...HEAD
+[Unreleased]: https://github.com/alberti42/Volume-Control/compare/v2.7.1...HEAD
+[2.7.1]: https://github.com/alberti42/Volume-Control/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/alberti42/Volume-Control/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/alberti42/Volume-Control/compare/v2.5.1...v2.6.0
 [2.5.1]: https://github.com/alberti42/Volume-Control/compare/v2.5.0...v2.5.1
