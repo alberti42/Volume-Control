@@ -23,6 +23,27 @@ On macOS 26 and later, the volume HUD looks like the system volume HUD, with the
 
 ---
 
+## Other apps by the same author
+
+Free and open source (GPL-3.0), signed and notarized. Both require macOS 26 or later.
+
+<table>
+<tr>
+<td width="50%" valign="top">
+<a href="https://github.com/alberti42/SyncGlass"><img src="https://raw.githubusercontent.com/alberti42/SyncGlass/main/Images/AppIcon.png" width="64" align="left" alt="SyncGlass's icon"></a>
+<a href="https://github.com/alberti42/SyncGlass"><b>SyncGlass</b></a><br>
+A menu-bar app for macOS that shows which files iCloud Drive is uploading and downloading.
+</td>
+<td width="50%" valign="top">
+<a href="https://github.com/alberti42/SpaceJumper"><img src="https://raw.githubusercontent.com/alberti42/SpaceJumper/main/Images/AppIcon.png" width="64" align="left" alt="SpaceJumper's icon"></a>
+<a href="https://github.com/alberti42/SpaceJumper"><b>SpaceJumper</b></a><br>
+A menu-bar app for macOS that sets how long the animations take when you switch Spaces and when the hidden menu bar and Dock appear, down to no animation at all. It also launches apps with keyboard shortcuts.
+</td>
+</tr>
+</table>
+
+---
+
 ## Table of Contents
 
 - [Features](#features)

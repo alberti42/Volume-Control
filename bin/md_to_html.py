@@ -5,8 +5,12 @@ md_to_html.py  INPUT_MD  OUTPUT_HTML
 Converts a GitHub-flavored Markdown file to an HTML fragment
 suitable for Sparkle release notes (no external dependencies).
 
-Handles: headings, bold, italic, inline code, links, bullet lists,
+Handles: headings, bold, italic, inline code, images, links, bullet lists,
          numbered lists, horizontal rules, and paragraphs.
+
+A block that starts with "<" at the beginning of a paragraph is raw HTML
+(for example a <table> with app icons): it is copied unchanged up to the
+next blank line, as GitHub does.
 """
 
 import re
@@ -32,6 +36,8 @@ def inline(text):
     text = re.sub(r"_(.*?)_", r"<em>\1</em>", text)
     # Inline code
     text = re.sub(r"`(.*?)`", r"<code>\1</code>", text)
+    # Images (before links, which would take the "[alt](src)" part)
+    text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img src="\2" alt="\1">', text)
     # Links
     text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', text)
     return text
@@ -41,6 +47,7 @@ html_lines = []
 in_ul = False
 in_ol = False
 in_p = False
+in_raw = False
 paragraph = []
 
 
@@ -64,6 +71,19 @@ def close_list():
 
 for line in lines:
     line = line.rstrip("\n")
+
+    # Raw HTML block: copied unchanged up to the next blank line
+    if in_raw:
+        if line.strip() == "":
+            in_raw = False
+        else:
+            html_lines.append(line)
+        continue
+    if not paragraph and line.lstrip().startswith("<"):
+        close_list()
+        in_raw = True
+        html_lines.append(line)
+        continue
 
     # Heading
     m = re.match(r"^(#{1,6})\s+(.*)", line)
